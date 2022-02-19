@@ -1,0 +1,25 @@
+{
+  "name": "test_code",
+  "version": "1.0.0",
+  "description": "test_code",
+  "main": "src/app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon src/app.js"
+  },
+  "author": "QuanPA",
+  "license": "ISC",
+  "keywords": [],
+  "dependencies": {
+    "dotenv": "^16.0.0"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.com/ThSKH_IT4735/nodejs_mqtt.git"
+  },
+  "bugs": {
+    "url": "https://gitlab.com/ThSKH_IT4735/nodejs_mqtt/issues"
+  },
+  "homepage": "https://gitlab.com/ThSKH_IT4735/nodejs_mqtt#readme"
+}
