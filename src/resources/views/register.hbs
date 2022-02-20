@@ -1,0 +1,88 @@
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header" style="font-weight: bold">
+            Register Form
+        </div>
+        <div class="card-body">
+            <form action="/auth/register" method="POST">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" class="form-control" id="username" name="username">
+                </div>
+                <div class="form-group">
+                    <label for="email">Email address</label>
+                    <input type="email" class="form-control" id="email" name="email" placeholder="sophie@example.com"
+                        required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" class="form-control" id="password" name="password" onkeyup="checkPass()" />
+                </div>
+                <div class="form-group">
+                    <label for="passwordConfirm">Confirm Password</label>
+                    <input type="password" class="form-control" id="passwordConfirm" name="passwordConfirm"
+                        onkeyup="checkPass()" />
+                </div>
+                <div id="error-nwl">Enter a password of at least 6 characters</div>
+                <button type="submit" class="btn btn-primary">Register User</button>
+            </form>
+        </div>
+    </div>
+    {{#if message}}
+    <h4 class="alert alert-danger mt-4">{{message}}</h4>
+    {{/if}}
+</div>
+<script>
+    //helper function for document.getElementById()
+    function getElm(id) {
+        return document.getElementById(id);
+    }
+
+    //helper function for setting background color
+    function setBGColor(id, value) {
+        getElm(id).style.backgroundColor = value;
+    }
+
+    //helper function for feedback message
+    function feedback(msg) {
+        getElm('error-nwl').innerHTML = msg;
+    }
+    function checkPass() {
+        console.log('Hello')
+        var neutralColor = '#fff'; // 'white';
+        var badColor = '#f66'; // 'red';
+        var goodColor = '#6f6'; // 'green';
+
+        var password1 = getElm('password').value;
+        var password2 = getElm('passwordConfirm').value;
+
+        //if password length is less than 6
+        if (password1.length < 6) {
+            feedback('Enter a password of at least 6 characters');
+            //we do not care about pass2 when pass1 is too short
+            setBGColor('passwordConfirm', neutralColor);
+            //if pass1 is blank, set neutral background
+            if (password1.length === 0) {
+                setBGColor('password', neutralColor);
+            } else {
+                setBGColor('password', badColor);
+            }
+            //else if passwords do not match
+        } else if (password2 !== password1) {
+            //we now know that pass1 is long enough
+            feedback('Confirm password');
+            setBGColor('password', goodColor);
+            //if pass2 is blank, set neutral background
+            if (password2.length === 0) {
+                setBGColor('passwordConfirm', neutralColor);
+            } else {
+                setBGColor('passwordConfirm', badColor);
+            }
+            //else all is well
+        } else {
+            feedback('Passwords match');
+            setBGColor('password', goodColor);
+            setBGColor('passwordConfirm', goodColor);
+        }
+    }
+</script>

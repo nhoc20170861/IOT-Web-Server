@@ -1,0 +1,101 @@
+{{#if start_quiz}}
+<!-- Show quiz interface when start_quiz = true -->
+<main>
+    <div class="quiz-container">
+
+        <div class="quiz-details-container">
+            <h1>Score : <span id="player-score"></span></h1>
+            <h1> Question : {{quiz.id_quest}}</span> / {{totalPage}}</h1>
+        </div>
+        <div class="quiz-question-container">
+            <h1>{{quiz.quest}}</h1>
+        </div>
+
+        {{#if Many_choice}}
+        {{!-- Show checkbox options --}}
+        <div class="options-container">
+            <form action="/dashboards/saveAnswer" method="POST">
+                <div class="ans">
+                    <div>
+                        <input type="checkbox" id="option-one" name="option" class="checkbox" value="optionA" />
+                        <label for="option-one" class="option">{{quiz.opA}}</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="option-two" name="option" class="checkbox" value="optionB" />
+                        <label for="option-two" class="option">{{quiz.opB}}</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="option-three" name="option" class="checkbox" value="optionC" />
+                        <label for="option-three" class="option">{{quiz.opC}}</label>
+                    </div>
+                </div>
+                {{!--Click button to save answer --}}
+                <div>
+                    <button type="submit" class="btn btn-primary">Save answer</button>
+                </div>
+            </form>
+        </div>
+        {{else}}
+        {{!-- Show radio options --}}
+        <div class="options-container">
+            <form action="/dashboards/saveAnswer" method="POST">
+                <div class="ans">
+                    <span>
+                        <input type="radio" id="option-one" name="option" class="radio" value="optionA" />
+                        <label for="option-one" class="option">{{quiz.opA}}</label>
+                    </span>
+
+                    <span>
+                        <input type="radio" id="option-two" name="option" class="radio" value="optionB" />
+                        <label for="option-two" class="option">{{quiz.opB}}</label>
+                    </span>
+
+                    <span>
+                        <input type="radio" id="option-three" name="option" class="radio" value="optionC" />
+                        <label for="option-three" class="option">{{quiz.opC}}</label>
+                    </span>
+                </div>
+                {{!--Click button to save answer --}}
+                <div>
+                    <button type="submit" class="btn btn-primary">Save answer</button>
+                </div>
+            </form>
+        </div>
+        {{/if}}
+        <div class="next-button-container">
+            <span>
+                <button type="submit" name="page" id="back" onclick="back()">Back</button>
+            </span>
+
+            <span>
+                <button type="submit" name="page" id="next" onclick="next({{totalPage}})">Next</button>
+            </span>
+            {{#if quiz.end_page}}
+            {{!--At end page, show submit button --}}
+            <span>
+                {{!-- click button "submit answer" to submit all answers --}}
+                <form action="/dashboards/submitAnswer" method="POsT">
+                    <button type="submit">Submit Answer</button>
+                </form>
+            </span>
+            {{/if}}
+        </div>
+    </div>
+    <div>
+        <p>Please Click "Save answer" before next question</p>
+    </div>
+</main>
+
+
+{{else}}
+{{!-- Show dashboards home if start_quiz != true --}}
+<div class="card">
+    <div class="card-header" style="font-weight: bold">
+        Click to start Quiz
+    </div>
+    <div class="card-body">
+        <button class="btn" type="submit" id="start" name="page" onclick="showquiz()">Start Quiz</button>
+    </div>
+</div>
+{{/if}}
+<script src="../../index.js">  </script>

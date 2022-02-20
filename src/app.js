@@ -1,14 +1,34 @@
 const mqtt = require("mqtt");
 const dotenv = require("dotenv");
 dotenv.config({ path: "src/.env" });
+const express = require('express');
+const { create } = require("express-handlebars");
+const path = require('path');
+
+const app = express();
+const port_server = process.env.PORT_SERVER;
+
+//Use static file
+app.use(express.static(path.join(__dirname, 'public')));
+
+// template engine with express-handlebars
+const hbs = create({
+    layoutsDir: `${__dirname}/resources/views/layouts`,
+    extname: `hbs`,
+    defaultLayout: 'main',
+    partialsDir: `${__dirname}/resources/views/partials`
+});
+app.engine('hbs', hbs.engine);
+app.set('view engine', 'hbs');
+app.set('views', path.join(__dirname, 'resources\\views'));
 
 // config mqtt broker
-const host = process.env.HOST;
-const port = process.env.PORT;
+const host_mqtt = process.env.HOST_MQTT;
+const port_mqtt = process.env.PORT_MQTT;
 const clientId = `mqtt_${Math.random().toString(16).slice(3)}`;
 
-// connect mqtt
-const connectUrl = `mqtt://${host}:${port}`;
+// connect to mqtt broker
+const connectUrl = `mqtt://${host_mqtt}:${port_mqtt}`;
 const client = mqtt.connect(connectUrl, {
     clientId,
     clean: true,
@@ -44,3 +64,11 @@ client.on("connect", () => {
         }
     );
 });
+// Function to listen on the port
+app.listen(port_server, () => {
+    console.log(`App listening at http://localhost:${port_server}`);
+});
+// local
+app.get('/', (req, res) => {
+    res.render("home");
+  })
