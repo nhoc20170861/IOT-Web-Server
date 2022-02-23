@@ -102,25 +102,25 @@ main {
     text-align: center;
     padding: 3px;
 }
-.options-container{
-  width: 80%;
-  height: 15rem;
-  align-items: center;
-  display: flex;
-  justify-content: space-around;
-  margin: 10px;
+.options-container {
+    width: 80%;
+    height: 15rem;
+    align-items: center;
+    display: flex;
+    justify-content: space-around;
+    margin: 10px;
 }
-.options-container form{
-  width: 100%;
-  height: 15rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 6px;
+.options-container form {
+    width: 100%;
+    height: 15rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 6px;
 }
 
-.options-container form div.ans{
+.options-container form div.ans {
     width: 80%;
     height: 12rem;
     display: flex;
@@ -129,11 +129,11 @@ main {
     justify-content: space-around;
 }
 .options-container form div.ans span {
-  width: 45%;
-  height: 3rem;
-  border: 2px solid darkgray;
-  border-radius: 20px;
-  overflow: hidden;
+    width: 45%;
+    height: 3rem;
+    border: 2px solid darkgray;
+    border-radius: 20px;
+    overflow: hidden;
 }
 
 span label {
@@ -196,8 +196,6 @@ input[type='checkbox']:checked ~ .option {
 .next-button-container button:hover {
     background-color: #8f5d5d;
 }
-
-
 
 .modal-content-container {
     height: 20rem;

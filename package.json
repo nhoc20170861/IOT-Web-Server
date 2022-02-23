@@ -5,6 +5,8 @@
   "main": "src/app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "beautiful": "prettier --single-quote --trailing-comma all --tab-width 4 --write src/**/*.{js,json,scss}",
+    "watch": "node-sass --watch src/resources/scss/app.scss src/public/css/app.css",
     "start": "nodemon src/app.js"
   },
   "author": "QuanPA",
@@ -14,7 +16,7 @@
     "dotenv": "^16.0.0",
     "express": "^4.17.3",
     "express-handlebars": "^6.0.2",
-    "pug": "^3.0.2"
+    "mqtt": "^4.3.6"
   },
   "repository": {
     "type": "git",
@@ -23,5 +25,8 @@
   "bugs": {
     "url": "https://gitlab.com/ThSKH_IT4735/nodejs_mqtt/issues"
   },
-  "homepage": "https://gitlab.com/ThSKH_IT4735/nodejs_mqtt#readme"
+  "homepage": "https://gitlab.com/ThSKH_IT4735/nodejs_mqtt#readme",
+  "devDependencies": {
+    "prettier": "2.5.1"
+  }
 }

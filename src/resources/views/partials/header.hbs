@@ -1,23 +1,29 @@
-{{#if change_header}}
-<form action="/auth/logout" method="POST">
-<nav>
-  <h4>Node Mysql</h4>
-  <ul>
-    <li class="text">{{message}}</li>
-    <li><button type="submit" class="btn btn-primary" value="logout" id="logout">Logout</button> </li>
-    {{!-- <li class="btn active" style="background-color: red;">Log out</a></li> --}}
-  </ul>
-</nav>
-</form>
-<img src="../../../image/quiz.png" alt="quizz" style="display: block; margin-left: auto; margin-right: auto;"
-  width="auto" height="100" />
-{{else}}
-<nav>
-  <h4>Node Mysql</h4>
-  <ul>
-    <li class="btn"><a href="/home">Home</a></li>
-    <li class="btn"><a href="/auth/login">Login</a></li>
-    <li class="btn"><a href="/auth/register">Register</a></li>
-  </ul>
-</nav>
-{{/if}}
+<header>
+    {{#if change_header}}
+        <form action="/auth/logout" method="POST">
+
+            <link rel="stylesheet" href="/css/style.css" />
+            <!-- Boxicons CDN Link -->
+            <link
+                href="https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css"
+                rel="stylesheet"
+            />
+        </form>
+    {{else}}
+        <link
+            rel="stylesheet"
+            href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+            integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+            crossorigin="anonymous"
+        />
+        <link rel="stylesheet" href="/css/app.css" />
+        <nav>
+            <h4>Nodejs Web</h4>
+            <ul>
+                <li class="btn"><a href="/home">Home</a></li>
+                <li class="btn"><a href="/auth/login">Login</a></li>
+                <li class="btn"><a href="/auth/register">Register</a></li>
+            </ul>
+        </nav>
+    {{/if}}
+</header>
