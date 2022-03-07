@@ -1,57 +1,57 @@
-<div class='container mt-4'>
-    <div class='card'>
-        <div class='card-header' style='font-weight: bold'>
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header" style="font-weight: bold">
             Register Form
         </div>
-        <div class='card-body'>
-            <form action='/auth/register' method='POST'>
-                <div class='form-group'>
-                    <label for='username'>Username</label>
+        <div class="card-body">
+            <form action="/auth/register" method="POST">
+                <div class="form-group">
+                    <label for="username">Username</label>
                     <input
-                        type='text'
-                        class='form-control'
-                        id='username'
-                        name='username'
+                        type="text"
+                        class="form-control"
+                        id="username"
+                        name="username"
                     />
                 </div>
-                <div class='form-group'>
-                    <label for='email'>Email address</label>
+                <div class="form-group">
+                    <label for="email">Email address</label>
                     <input
-                        type='email'
-                        class='form-control'
-                        id='email'
-                        name='email'
-                        placeholder='sophie@example.com'
+                        type="email"
+                        class="form-control"
+                        id="email"
+                        name="email"
+                        placeholder="sophie@example.com"
                         required
                     />
                 </div>
-                <div class='form-group'>
-                    <label for='password'>Password</label>
+                <div class="form-group">
+                    <label for="password">Password</label>
                     <input
-                        type='password'
-                        class='form-control'
-                        id='password'
-                        name='password'
-                        onkeyup='checkPass()'
+                        type="password"
+                        class="form-control"
+                        id="password"
+                        name="password"
+                        onkeyup="checkPass()"
                     />
                 </div>
-                <div class='form-group'>
-                    <label for='passwordConfirm'>Confirm Password</label>
+                <div class="form-group">
+                    <label for="passwordConfirm">Confirm Password</label>
                     <input
-                        type='password'
-                        class='form-control'
-                        id='passwordConfirm'
-                        name='passwordConfirm'
-                        onkeyup='checkPass()'
+                        type="password"
+                        class="form-control"
+                        id="passwordConfirm"
+                        name="passwordConfirm"
+                        onkeyup="checkPass()"
                     />
                 </div>
-                <div id='error-nwl'>Enter a password of at least 6 characters</div>
-                <button type='submit' class='btn btn-primary'>Register User</button>
+                <div id="error-nwl">Enter a password of at least 6 characters</div>
+                <button type="submit" class="btn btn-primary">Register User</button>
             </form>
         </div>
     </div>
     {{#if message}}
-        <h4 class='alert alert-danger mt-4'>{{message}}</h4>
+        <h4 class="alert alert-danger mt-4">{{message}}</h4>
     {{/if}}
 </div>
 <script>
