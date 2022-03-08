@@ -1,7 +1,7 @@
 const loginRouter = require('./login');
 const resgisterRouter = require('./register');
 const dashboardRouter = require('./dashboard');
-
+const changePasswordRouter = require('./changePassword');
 function route(app) {
     // Router to home page
     // ACtion --> Dispatcher ---> Function handler
@@ -9,13 +9,6 @@ function route(app) {
         res.render('home');
     });
 
-    // app.use(function (req, res, next) {
-    //     res.header(
-    //         'Access-Control-Allow-Headers',
-    //         'x-access-token, Origin, Content-Type, Accept',
-    //     );
-    //     next();
-    // });
 
     // Router to auth/ page
     app.use('/auth', loginRouter);
@@ -25,6 +18,9 @@ function route(app) {
 
     // Router to dashboard page
     app.use('/dashboards', dashboardRouter);
+    
+    // Router to changePassword page
+    app.use('/changePassword', changePasswordRouter);
 
     // Handling request 
     app.post("/request", (req, res) => {

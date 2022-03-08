@@ -5,6 +5,7 @@ const User = db.user;
 
 var jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const { redirect } = require('express/lib/response');
 
 // a variable to save a session
 var session;
@@ -162,58 +163,35 @@ class LoginController {
     // [POST] /auth/logout
     signout(req, res) {
         res.clearCookie('access_token');
-        res.clearCookie('refresh_token');
-        //req.session.destroy();
-        //return res.redirect('/home')
+        //res.clearCookie('refresh_token');
+        console.log(req.session.userId)
+        req.session.destroy();
+        return res.status(200).send(
+            {   result : 'redirect',
+                url: '/home'})
 
         // Get userId from access_token to prepare delete refreshtoken
-        let token = req.cookies.access_token;
-        jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
-            req.userId = decoded.id;
-        });
+        // let token = req.cookies.access_token;
+        // jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+        //     req.userId = decoded.id;
+        // });
+    
         // delete refreshtoken from db
-        RefreshToken.destroy({
-            where: {
-                userId: req.userId,
-            },
-        })
-            .then(() => {
-                //console.log(req.session.userId)
-                req.session.destroy();
-                return res.redirect('/home');
-            })
-            .catch((err) => {
-                res.status(500).send({ message: err.messagey });
-            });
+        // RefreshToken.destroy({
+        //     where: {
+        //         userId: req.userId,
+        //     },
+        // })
+        //     .then(() => {
+        //         //console.log(req.session.userId)
+        //         req.session.destroy();
+        //         return res.redirect('/home');
+        //     })
+        //     .catch((err) => {
+        //         res.status(500).send({ message: err.messagey });
+        //     });
     }
 
-    // // [POST] /login
-    // login(req, res) {
-    //     console.log(req.body);
-    //     const email = req.body.email;
-    //     const password = req.body.password;
-    //     var sql = 'SELECT * FROM users WHERE email = ? ';
-    //     con.query(sql, [email], async function (err, result) {
-    //         if (err) throw err;
-    //         //console.log(result);
-    //         if (result.length == 0) {
-    //             return res.render('login', {
-    //                 message: 'Account not exist',
-    //             });
-    //         } else if (bcrypt.compareSync(password, result[0].password)) {
-    //             req.session.user = result[0].name;
-    //             req.session.flag = 1;
-    //             //username = result[0].name;
-    //             console.log(req.session);
-    //             login_flag = true;
-    //             res.redirect('/login/quizz');
-    //         } else {
-    //             res.render('login', {
-    //                 message: 'Password is wrong',
-    //             });
-    //         }
-    //     });
-    // }
 }
 
 module.exports = new LoginController();
