@@ -1,8 +1,8 @@
 const db = require('../models');
 const Question = db.question;
-
+const weatherData = require('../../middleware/weather-utils')
 class DashboardController {
-    // [GET] /dashboards
+    // [GET] /dashboard
     getDashboard(req, res) {
         return res.render('dashboard', {
             change_header: true,
@@ -10,8 +10,14 @@ class DashboardController {
         });
     }
 
-    // [GET] /dashboards/showquiz
+    // [GET] /dashboard/showquiz
     showQuiz(req, res) {
+
+        if (!req.session.listAnswer) {
+            req.session.listAnswer = {};
+            req.session.result = {};
+        }
+
         // Khởi tạo số trang
         var currentPage = parseInt(req.query.page) || 1;
         var maxPage;
@@ -36,8 +42,7 @@ class DashboardController {
                 if (currentPage == maxPage) quiz.end_page = true;
                 else quiz.end_page = false;
 
-                return res.render('quizUser', {
-                    change_header: true,
+                return res.render('quiz/quizUser', {
                     message: 'Hi, ' + req.userName,
                     start_quiz: true,
                     Many_choice: question[index].Manychoice,
@@ -49,21 +54,28 @@ class DashboardController {
                 console.log('>> Error while finding question ', err);
             });
 
-         }
+    }
 
-    // [POST] /dashboards/saveanswer
+    // [POST] /dashboard/saveanswer
     saveAnswer(req, res) {
         const quest = req.session.id_quest;
 
         // Lưu câu trả lời của user vào  req.session.listAnswer
         req.session.listAnswer[quest] = req.body.option;
+
         console.log(req.session);
 
         // trả về trang câu hỏi hiện tại
-        res.redirect('/dashboards/showquiz?page=' + req.session.id_quest);
+        //res.redirect('/dashboard/showquiz?page=' + req.session.id_quest);
+        return res.status(200).send(
+            {
+                result: 'redirect',
+                id_quest: req.session.id_quest,
+                url: '/dashboard/showquiz?page='
+            })
     }
 
-    // [POST] /dashboards/submitAnswer
+    // [POST] /dashboard/submitAnswer
     submitAnswer(req, res) {
         let listAnswer = req.session.listAnswer;
         let listResult = {};
@@ -78,18 +90,26 @@ class DashboardController {
                     let id_quest = i + 1;
                     // câu hỏi có nhiều đáp án
                     if (question[i].dataValues.Manychoice == 1) {
+                        console.log(listAnswer[id_quest]);
                         // kiểm tra xem user có chọn nhiều đáp án không?
                         if (typeof listAnswer[id_quest] == 'object') {
-                            console.log(listAnswer[id_quest]);
-
                             if (
                                 question[i].dataValues.correctOption ==
                                 listAnswer[id_quest].join(',')
                             ) {
                                 listResult.correctAns++;
                                 listResult[id_quest] = true;
+                            } else {
+                                listResult.wrongAns++;
+                                listResult[id_quest] = false;
                             }
-                        } else {
+
+                        } else if (question[i].dataValues.correctOption ==
+                            listAnswer[id_quest]) {
+                            listResult.correctAns++;
+                            listResult[id_quest] = true;
+                        }
+                        else {
                             listResult.wrongAns++;
                             listResult[id_quest] = false;
                         }
@@ -115,12 +135,12 @@ class DashboardController {
                 ).toFixed(2);
                 req.session.result = listResult;
                 console.log(req.session);
-                //return res.status(200).send('' + JSON.stringify({listAnswer, listResult}));
-                return res.render('result', {
-                    change_header: true,
-                    totalPage: question.length,
-                    listResult,
-                });
+                return res.status(200).send('' + JSON.stringify({ listAnswer, listResult }));
+                // return res.render('result', {
+                //     change_header: true,
+                //     totalPage: question.length,
+                //     listResult,
+                // });
             })
             .catch((err) => {
                 console.log('>> Error while finding question ', err);
@@ -130,33 +150,89 @@ class DashboardController {
 
 module.exports = new DashboardController();
 
+module.exports.getWeather = (req, res) => {
+
+    // [GET] /weather?address=lahore
+    const address = req.query.address;
+    if (!address) {
+        return res.send({
+            error: "You must enter address in search text box"
+        })
+    }
+
+    weatherData(address, (error, { temperature, humidity, description, cityName } = {}) => {
+        if (error) {
+            return res.send({
+                error
+            })
+        }
+        console.log(temperature, humidity, description, cityName);
+        res.send({
+            temperature,
+            humidity,
+            description,
+            cityName
+        })
+    })
+
+}
+
 // Function controller for Admin
 module.exports.show_admindashBoard = (req, res) => {
     // [GET] /dashboards/admin/quiz
-    return res.render('quizAdmin');
+    return res.render('quiz/quizAdmin');
 };
-
+module.exports.resetQuestion = (req, res) => {
+    //console.log(req.body);
+    // [POST] /dashboard/admin/resetquestion
+    if (req.body.command === 'truncate') {
+        Question.destroy({ truncate: true, cascade: false })
+            .then(() => {
+                return res.send({ message: "Reset question table success" });
+            })
+            .catch((err) => {
+                return res.status(500).send({ message: err.message });
+            })
+    }
+};
 module.exports.createQuestion = (req, res) => {
     console.log(req.body);
-    // [POST] /dashboards/admin/createquestion
-    Question.create({
-        title: req.body.question,
-        optionA: req.body.optionA,
-        optionB: req.body.optionB,
-        optionC: req.body.optionC,
-        correctOption: req.body.correctOption,
-        Manychoice: req.body.Manychoice,
-    })
-        .then((question) => {
-            console.log(
-                '>> Created question: ' + JSON.stringify(question, null, 4),
-            );
-            return res.render('quizAdmin', {
-                message: 'Create success',
-            });
+    // [POST] /dashboard/admin/createquestion
+    if (!req.body.Manychoice) {
+        req.body.Manychoice = 0;
+    }
+    if(typeof req.body.correctOption === "object")
+    {
+        req.body.correctOption = req.body.correctOption.join(",");
+    }
+    const { title, optionA, optionB, optionC, correctOption, Manychoice } = req.body;
+
+    console.log(correctOption);
+    if (!title || !optionA || !optionB || !optionC || !correctOption) {
+        return res.send({
+            message: 'Create not success',
         })
-        .catch((err) => {
-            console.log('>> Error while creating question: ', err);
-            res.status(500).send({ message: err.message });
-        });
+    }
+    else {
+        Question.create({
+            title,
+            optionA,
+            optionB,
+            optionC,
+            correctOption,
+            Manychoice
+        })
+            .then((question) => {
+                console.log(
+                    '>> Created question: ' + JSON.stringify(question, null, 4),
+                );
+                return res.send({
+                    message: 'Create success question id= ' + question.id,
+                })
+            })
+            .catch((err) => {
+                console.log('>> Error while creating question: ', err);
+                res.status(500).send({ message: err.message });
+            });
+    }
 };

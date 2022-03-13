@@ -78,28 +78,29 @@
             <i class="bx bx-menu sidebarBtn"></i>
             <span class="dashboard">Dashboard</span>
         </div>
-
+        {{! <div class ="title">
+           Tracking Air Qualification
+        </div> }}
         <div class="profile-details">
             <img src="images/profile.jpg" alt="" />
             <span class="admin_name">{{user_name}}</span>
-            <i class="bx bx-chevron-down"></i>
             <div class="dropdown">
-                <button onclick="myFunction()" class="dropbtn">Dropdown</button>
+                <button onclick="myFunction()" class="dropbtn">V</button>
                 <div id="myDropdown" class="dropdown-content">
                     <a href="/home">Home</a>
                     <label id="logout">Sign out</label>
                     <a href="/changePassword">Change Password</a>
+                    <a href="/dashboard/admin/quiz">Admin</a>
                 </div>
             </div>
         </div>
     </nav>
-
     <div class="home-content">
         <div class="overview-boxes">
             <div class="box">
                 <div class="right-side">
-                    <div class="box-topic">Total Order</div>
-                    <div class="number">40,876</div>
+                    <div class="box-topic">Battery Capacity</div>
+                    <div class="number">0</div>
                     <div class="indicator">
                         <i class="bx bx-up-arrow-alt"></i>
                         <span class="text">Up from yesterday</span>
@@ -109,8 +110,8 @@
             </div>
             <div class="box">
                 <div class="right-side">
-                    <div class="box-topic">Total Sales</div>
-                    <div class="number">38,876</div>
+                    <div class="box-topic">PM2.5</div>
+                    <div class="number">0</div>
                     <div class="indicator">
                         <i class="bx bx-up-arrow-alt"></i>
                         <span class="text">Up from yesterday</span>
@@ -121,7 +122,7 @@
             <div class="box">
                 <div class="right-side">
                     <div class="box-topic">Temperature</div>
-                    <div class="number" id="humi"></div>
+                    <div class="number" id="humi">0</div>
                     <div class="indicator">
                         <i class="bx bx-up-arrow-alt"></i>
                         <span class="text" id="humi_log">Up from yesterday</span>
@@ -135,14 +136,54 @@
                     <div class="number" id="humi">0</div>
                     <div class="indicator">
                         <i class="bx bx-up-arrow-alt"></i>
-                        <span class="text" id="humi_log">...</span>
+                        <span class="text" id="humi_log">Up from yesterday</span>
                     </div>
                 </div>
                 <i class="bx bx-cart cart three"></i>
             </div>
+        </div>
 
+        <div class="sales-boxes">
+            <div class="recent-sales box">
+
+            </div>
+            <div class="top-sales box">
+                <div class="title">Weather forecast</div>
+                <link rel="stylesheet" href="/css/dashboard/weather-box.css" />
+
+                <div class="main-content">
+                    <article class="widget">
+
+                        <div class="search-box">
+                            <form id="weatherLocation"><input
+                                    placeholder="location..."
+                                    type="text"
+                                />
+                                <button>Seach</button>
+
+                            </form>
+                        </div>
+                        <div class="weatherIcon">
+                            <i class="wi wi-day-cloudy"></i>
+                        </div>
+                        <div class="weatherInfo">
+                            <div class="weatherData">
+                                <div class="temperature"><span></span></div>
+                                <div class="humidity"><span></span></div>
+                            </div>
+                            <div class="description">
+                                <div class="weatherCondition"></div>
+                                <div class="place"></div>
+                            </div>
+                        </div>
+                        <div class="date"></div>
+                    </article>
+                </div>
+            </div>
         </div>
     </div>
 </section>
 <script src="socket.io/socket.io.js"></script>
-<script src="../../script/dashboard.js"> </script>
+<script src="https://code.iconify.design/2/2.1.2/iconify.min.js"></script>
+<script src="../../script/dashboard.js"></script>
+<script src="../../script/weather.js"></script>

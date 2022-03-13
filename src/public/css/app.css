@@ -1,7 +1,7 @@
 nav {
   background-color: purple;
   color: white;
-  padding: 20px 60px 10px 60px;
+  padding: 20px 30px 10px 30px;
   display: flex;
   justify-content: space-between; }
 
@@ -102,7 +102,7 @@ main {
   justify-content: space-around;
   margin: 10px; }
 
-.options-container form {
+.options-container .form-ans {
   width: 80%;
   height: 15rem;
   display: flex;
@@ -111,7 +111,7 @@ main {
   align-items: center;
   padding: 6px; }
 
-.options-container form div.ans {
+.options-container .form-ans .ans {
   width: 100%;
   height: 12rem;
   display: flex;
@@ -119,7 +119,7 @@ main {
   align-items: center;
   justify-content: space-around; }
 
-.options-container form div.ans span {
+  .form-ans .ans span {
   width: 45%;
   height: 3rem;
   border: 2px solid darkgray;

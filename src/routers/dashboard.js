@@ -3,8 +3,11 @@ const router = express.Router();
 const dashboardController = require('../app/controllers/DashboardController');
 const { authJwt } = require('../middleware');
 
-// Show quiz interface for user role
+// Show dashboard interface for user role
 router.get('/', [authJwt.verifyToken], dashboardController.getDashboard);
+router.post('/weather/show', dashboardController.getWeather);
+
+
 router.get('/showquiz', [authJwt.verifyToken], dashboardController.showQuiz);
 router.post('/saveAnswer', dashboardController.saveAnswer);
 router.post('/submitAnswer', dashboardController.submitAnswer);
@@ -17,4 +20,5 @@ router.get(
 );
 
 router.post('/admin/createquestion', dashboardController.createQuestion);
+router.post('/admin/resetquestion', dashboardController.resetQuestion);
 module.exports = router;

@@ -1,10 +1,13 @@
 .dropbtn {
-    background-color: #3498db;
+    background-color: #93a9b8;
     color: white;
-    padding: 16px;
-    font-size: 16px;
+    padding: 10px;
+    font-size: 12px;
     border: none;
     cursor: pointer;
+    border: 1   px solid #ccc;
+    border-radius: 8px;
+
 }
 
 .dropbtn:hover,
@@ -23,6 +26,7 @@
     background-color: #f1f1f1;
     min-width: 160px;
     overflow: auto;
+    right: 0;
     box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
     z-index: 1;
 }

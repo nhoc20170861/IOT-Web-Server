@@ -17,11 +17,11 @@ function route(app) {
     app.use('/auth/register', resgisterRouter);
 
     // Router to dashboard page
-    app.use('/dashboards', dashboardRouter);
+    app.use('/dashboard', dashboardRouter);
     
     // Router to changePassword page
     app.use('/changePassword', changePasswordRouter);
-
+    
     // Handling request 
     app.post("/request", (req, res) => {
         res.json([{
@@ -29,5 +29,6 @@ function route(app) {
             designation_recieved: req.body.designation
         }])
     })
+
 }
 module.exports = route;

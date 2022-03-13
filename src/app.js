@@ -61,7 +61,7 @@ var session = require('express-session');
 var cookieParser = require('cookie-parser');
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser()); // cookie parser middleware
 
 // Routes init

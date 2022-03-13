@@ -46,12 +46,16 @@
                     />
                 </div>
                 <div id="error-nwl">Enter a password of at least 6 characters</div>
+                <input type="checkbox" id="roles" name="roles" value = "admin" /> 
+                <label>Register with admin</label><br>
                 <button type="submit" class="btn btn-primary">Register User</button>
             </form>
+    
         </div>
     </div>
     {{#if message}}
         <h4 class="alert alert-danger mt-4">{{message}}</h4>
     {{/if}}
 </div>
+
 <script src="../../script/register.js"> </script>
