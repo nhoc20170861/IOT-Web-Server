@@ -90,8 +90,6 @@ io.on("connection", function (socket) {
     });
     setInterval(async function () {
         if (flag == true) {
-            let now = new Date(Date.now());
-            data.time = now.toLocaleTimeString();
             await socket.broadcast.emit("Server-sent-data", data);
             console.log(data)
             flag = false;
@@ -131,8 +129,11 @@ client.on('connect', () => {
 // console.log message received from mqtt broker
 client.on('message', (topic_sub, payload) => {
     //flag = true;
-    data.value = payload.toString();
     console.log('Received Message:', topic_sub, payload.toString());
+    let now = new Date(Date.now());
+    data.time = now.toLocaleTimeString();
+    data.value = payload.toString();
+
     const data_sensor = JSON.parse(data.value);
     console.log(data_sensor);
     DataSensor.create({
