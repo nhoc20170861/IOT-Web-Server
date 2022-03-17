@@ -4,9 +4,11 @@ const path = require('path');
 dotenv.config({ path: path.join(__dirname, '.env') });
 const express = require('express');
 var session = require('express-session');
+
 // connect db mysql
 const db = require('./app/models');
 const Role = db.role;
+const DataSensor = db.data_sensor
 db.sequelize.sync();
 //force: true will drop the table if it already exists
 // db.sequelize.sync({force: true}).then(() => {
@@ -123,20 +125,29 @@ client.on('connect', () => {
 
 // console.log message received from mqtt broker
 client.on('message', (topic_sub, payload) => {
-    flag = true;
+    //flag = true;
     data.value = payload.toString();
     console.log('Received Message:', topic_sub, payload.toString());
+    const data_sensor = JSON.parse(data.value);
+    console.log(data_sensor);
+    DataSensor.create({
+        humidity: data_sensor.humi,
+        temperature: data_sensor.temp,
+        pm2_5: data_sensor.pm2_5,
+        battery: data_sensor.bat,
+    });
 });
 
-client.on('connect',() => {
+client.on('connect', () => {
     client.publish(
-    topic_pub,
-    'nodejs mqtt test',
-    { qos: 2, retain: false },
-    (error) => {
-        if (error) {
-            console.error(error);
-        }
-    },
-)});
+        topic_pub,
+        'nodejs mqtt test',
+        { qos: 2, retain: false },
+        (error) => {
+            if (error) {
+                console.error(error);
+            }
+        },
+    )
+});
 
