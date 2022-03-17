@@ -3,16 +3,16 @@ module.exports = (sequelize, Sequelize) => {
     const DataSensor = sequelize.define('data_sensors', {
     
         humidity: {
-            type: Sequelize.INTEGER,
+            type: Sequelize.FLOAT,
         },
         temperature: {
-            type: Sequelize.DECIMAL,
+            type: Sequelize.FLOAT,
         },
         pm2_5: {
-            type: Sequelize.DECIMAL,
+            type: Sequelize.FLOAT,
         },
         battery: {
-            type: Sequelize.INTEGER,
+            type: Sequelize.FLOAT,
         },
 
     });
