@@ -149,6 +149,9 @@ class DashboardController {
 }
 
 module.exports = new DashboardController();
+module.exports.getProduct = (req, res) => {
+    return res.status(200).send({ result: "product.html"});
+}
 
 module.exports.getWeather = (req, res) => {
 

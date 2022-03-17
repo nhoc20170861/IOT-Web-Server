@@ -68,6 +68,11 @@ app.use(cookieParser()); // cookie parser middleware
 const route = require('./routers');
 route(app);
 
+app.post("/dashboard/product", function(req, res){
+    res.sendFile(__dirname + '/resources/views//product.html');
+
+})
+
 
 
 // initialize server and socket.io

@@ -11,35 +11,20 @@
             </a>
         </li>
         <li>
-            <a href="#">
+            <a href="#product" id="product">
                 <i class="bx bx-box"></i>
                 <span class="links_name">Product</span>
             </a>
         </li>
-        <li>
-            <a href="#">
-                <i class="bx bx-list-ul"></i>
-                <span class="links_name">Order list</span>
-            </a>
-        </li>
+
         <li>
             <a href="#">
                 <i class="bx bx-pie-chart-alt-2"></i>
                 <span class="links_name">Analytics</span>
             </a>
         </li>
-        <li>
-            <a href="#">
-                <i class="bx bx-coin-stack"></i>
-                <span class="links_name">Stock</span>
-            </a>
-        </li>
-        <li>
-            <a href="#">
-                <i class="bx bx-book-alt"></i>
-                <span class="links_name">Total order</span>
-            </a>
-        </li>
+        
+       
         <li>
             <a href="#">
                 <i class="bx bx-user"></i>
@@ -49,13 +34,7 @@
         <li>
             <a href="#">
                 <i class="bx bx-message"></i>
-                <span class="links_name">Messages</span>
-            </a>
-        </li>
-        <li>
-            <a href="#">
-                <i class="bx bx-heart"></i>
-                <span class="links_name">Favrorites</span>
+                <span class="links_name">Info</span>
             </a>
         </li>
         <li>
@@ -100,46 +79,50 @@
             <div class="box">
                 <div class="right-side">
                     <div class="box-topic">Battery Capacity</div>
-                    <div class="number">0</div>
+                    <div class="number" id="bat">0<span> %</span></div>
                     <div class="indicator">
                         <i class="bx bx-up-arrow-alt"></i>
                         <span class="text">Up from yesterday</span>
                     </div>
                 </div>
-                <i class="bx bx-cart-alt cart"></i>
+
+                <i class="iconify data battery" data-icon="emojione:battery"></i>
             </div>
             <div class="box">
                 <div class="right-side">
                     <div class="box-topic">PM2.5</div>
-                    <div class="number">0</div>
+                    <div class="number" id="pm2_5">0 <span> &#181;m/m3</span></div>
                     <div class="indicator">
                         <i class="bx bx-up-arrow-alt"></i>
                         <span class="text">Up from yesterday</span>
                     </div>
                 </div>
-                <i class="bx bxs-cart-add cart two"></i>
+                <img  class="iconify data pm2_5"  src="images/pm2_5.icon.png" alt="" />
+               
             </div>
             <div class="box">
                 <div class="right-side">
                     <div class="box-topic">Temperature</div>
-                    <div class="number" id="humi">0</div>
+                    <div class="number" id="temp">0 <span>  &#176;</span></div>
                     <div class="indicator">
                         <i class="bx bx-up-arrow-alt"></i>
-                        <span class="text" id="humi_log">Up from yesterday</span>
+                        <span class="text" id="temp_log">Up from yesterday</span>
                     </div>
                 </div>
-                <i class="bx bx-cart cart three"></i>
+                <i class="iconify data temperature" data-icon="fluent:temperature-24-filled"></i>
             </div>
             <div class="box">
                 <div class="right-side">
                     <div class="box-topic">Humidity</div>
-                    <div class="number" id="humi">0</div>
+                    <div class="number" id="humi">0<span> %</span></div>
                     <div class="indicator">
+                        
                         <i class="bx bx-up-arrow-alt"></i>
                         <span class="text" id="humi_log">Up from yesterday</span>
                     </div>
                 </div>
-                <i class="bx bx-cart cart three"></i>
+                <i class="iconify data humidity" data-icon="iwwa:humidity"></i>
+ 
             </div>
         </div>
 

@@ -181,6 +181,9 @@ nav .profile-details i{
   margin-top: -6px;
   font-weight: 500;
 }
+#pm2_5 span{
+  font-size: 15px;
+}
 .home-content .box .indicator{
   display: flex;
   align-items: center;
@@ -202,30 +205,34 @@ nav .profile-details i{
 .home-content .box .indicator .text{
   font-size: 12px;
 }
-.home-content .box .cart{
+
+.home-content .box .data{
   display: inline-block;
   font-size: 32px;
-  height: 50px;
-  width: 50px;
-  background: #cce5ff;
+  height: 60px;
+  width: 50px; 
   line-height: 50px;
   text-align: center;
-  color: #66b0ff;
   border-radius: 12px;
   margin: -15px 0 0 6px;
 }
-.home-content .box .cart.two{
-   color: #2BD47D;
-   background: #C0F2D8;
+.home-content .box .pm2_5{
+   background: #c0f2cc;
  }
-.home-content .box .cart.three{
+.home-content .box .data.battery{
    color: #ffc233;
    background: #ffe8b3;
  }
-.home-content .box .cart.four{
+.home-content .box .data.temperature{
    color: #e05260;
    background: #f7d4d7;
  }
+
+ .home-content .box .data.humidity{
+  color: #52a0e0;
+  font-size: 100px;
+  background: #cce5ff;
+}
 .home-content .total-order{
   font-size: 20px;
   font-weight: 500;

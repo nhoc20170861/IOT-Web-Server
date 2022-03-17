@@ -6,7 +6,7 @@ const { authJwt } = require('../middleware');
 // Show dashboard interface for user role
 router.get('/', [authJwt.verifyToken], dashboardController.getDashboard);
 router.post('/weather/show', dashboardController.getWeather);
-
+//router.post('/product', dashboardController.getProduct);
 
 router.get('/showquiz', [authJwt.verifyToken], dashboardController.showQuiz);
 router.post('/saveAnswer', dashboardController.saveAnswer);
