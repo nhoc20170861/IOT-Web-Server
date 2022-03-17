@@ -25,6 +25,7 @@ db.sequelize = sequelize;
 db.user = require('../models/user.model.js')(sequelize, Sequelize);
 db.role = require('../models/role.model.js')(sequelize, Sequelize);
 db.question = require('../models/question.model.js')(sequelize, Sequelize);
+db.data_sensor= require('../models/data_sensor.model.js')(sequelize, Sequelize);
 
 db.role.belongsToMany(db.user, {
     through: 'user_roles',
