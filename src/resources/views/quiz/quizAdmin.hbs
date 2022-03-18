@@ -1,128 +1,125 @@
 <div class='container mt-4'>
     <div class='card'>
-        <div class='card-header' style='font-weight: bold'>
-            Create Question
-        </div>
+        <div class='card-header' id="addQuestion" style='font-weight: bold'>   
+             <button class='btn btn-primary' id="addQuestion">Add question</button>
+        </div>    
         <div class='card-body'>
-            <form id="myForm">
-                <div class='form-group'>
+            <form id="myForm" class="hidden">
+                <div class='form-group' >
                     <label for='title'>Question</label>
-                    <input
-                        type='text'
-                        class='form-control'
-                        id='title'
-                        name='title'
-                    />
+                    <input type='text' class='form-control' id='title' name='title' />
                 </div>
                 <div class='form-group'>
                     <label for='optionA'>optionA</label>
-                    <input
-                        type='text'
-                        class='form-control'
-                        id='optionA'
-                        name='optionA'
-                    />
+                    <input type='text' class='form-control' id='optionA' name='optionA' />
                 </div>
                 <div class='form-group'>
                     <label for='optionB'>optionB</label>
-                    <input
-                        type='text'
-                        class='form-control'
-                        id='optionB'
-                        name='optionB'
-                    />
+                    <input type='text' class='form-control' id='optionB' name='optionB' />
                 </div>
                 <div class='form-group'>
                     <label for='optionC'>optionC</label>
-                    <input
-                        type='text'
-                        class='form-control'
-                        id='optionC'
-                        name='optionC'
-                    />
+                    <input type='text' class='form-control' id='optionC' name='optionC' />
                 </div>
-                {{!-- <div class='form-group'>
-                    <label for='correctOption'>correctOption</label>
-                    <input
-                        type='text'
-                        class='form-control'
-                        id='correctOption'
-                        name='correctOption'
-                    />
-                </div> --}}
-                <label>Select answer:&emsp;</label> 
-                <input type="checkbox" id="option-one" name="correctOption"  value="optionA" /> 
-                <label> A  &emsp;</label>
-                <input type="checkbox" id="option-two" name="correctOption"  value="optionB" />
-                <label> B  &emsp;</label> 
-                <input type="checkbox" id="option-three" name="correctOption"  value="optionC" />
-                <label> C  &emsp;</label> 
-                <input type="checkbox" id="Manychoice" name="Manychoice" value = 1 /> 
+                <label>Select answer:&emsp;</label>
+                <input type="checkbox" id="option-one" name="correctOption" value="optionA" />
+                <label> A &emsp;</label>
+                <input type="checkbox" id="option-two" name="correctOption" value="optionB" />
+                <label> B &emsp;</label>
+                <input type="checkbox" id="option-three" name="correctOption" value="optionC" />
+                <label> C &emsp;</label>
+                <input type="checkbox" id="Manychoice" name="Manychoice" value=1 />
                 <label>Many choice</label><br>
-                
+
                 <button type='submit' class='btn btn-primary' id="createQuiz">Submit</button>
             </form>
             <br>
-            <span><button class='btn btn-primary' id="showquiz" onclick="showquiz()">View quiz</button>
-            <span><button class='btn btn-primary' id="resetQuiz">Reset quiz</button></span>
+            
         </div>
+        <span><button class='btn btn-primary' id="showquiz" onclick="showquiz()">View quiz</button>
+        <span><button class='btn btn-primary' id="resetQuiz">Reset quiz</button></span>
     </div>
-    <h5 class='alert alert-danger mt-4' id ="alert"></h5>
-
+    <br>
+    <button class='btn btn-primary' id="resetData">Reset DataSensor Table</button>
+    <h5 class='alert alert-danger mt-4' id="alert"></h5>
 </div>
+<style>
+.hidden{
+    display: none;
+}
+</style>
+
 <script>
     // click button start to show quiz at ?page=1
-function showquiz() {
-    const data = new URLSearchParams();
-    data.append('page', '1');
-    const url = '/dashboard/showquiz?' + data.toString();
-    location.href = url;
-}
-$(document).ready(function () {
-    $("#resetQuiz").click(function () {
-        $.post("/dashboard/admin/resetquestion",
-        {
-            command: "truncate"
-        },     
-        function (response) {
-        console.log(response);
-        })
-    });
-    $("#myForm").on("submit", function (e) {
-    var dataString = $(this).serialize();
-    console.log(dataString);
-    $.ajax({
-      type: "POST",
-      url: "/dashboard/admin/createquestion",
-      data: dataString,
-      success: function (response) {
-        // Display message back to the user here
-        $("#alert").text(response.message);  
-        //const url = response.url + response.id_quest.toString();
-      }
-    });
-    e.preventDefault();
-    });
-    /*var Manychoice = 0;
-    $("#Manychoice").click(function(){
-            Manychoice = 1;
-    }); 
-    var values = {};
-    $("#createQuiz").click(function () {
-      
-        $.post("/dashboard/admin/createquestion",
-        {
-            title: $("#title").val(),
-            optionA: $("#optionA").val(),
-            optionB: $("#optionB").val(),
-            optionC: $("#optionC").val(),
-            correctOption: $("#correctOption").val(),
-            Manychoice: Manychoice || 0
-        },     
-        function (response) {
-            $("#alert").text(response.message);
-        }) 
-    });*/
+    function showquiz() {
+        const data = new URLSearchParams();
+        data.append('page', '1');
+        const url = '/dashboard/showquiz?' + data.toString();
+        location.href = url;
+    }
+    $(document).ready(function () {
 
-})
+        $("#addQuestion").click(function () {          
+        
+           if($("#myForm").hasClass('hidden')){
+                $("#myForm").removeClass('hidden');
+           }
+           else
+                $("#myForm").addClass('hidden');
+        });
+        $("#resetData").click(function () {       
+           $.post("/dashboard/admin/resetDataSensor",
+                {
+                    command: "truncate"
+                },
+                function (response) {
+                    console.log(response);
+                })
+        });
+        $("#resetQuiz").click(function () {
+            $.post("/dashboard/admin/resetquestion",
+                {
+                    command: "truncate"
+                },
+                function (response) {
+                    console.log(response);
+                })
+        });
+        $("#myForm").on("submit", function (e) {
+            var dataString = $(this).serialize();
+            console.log(dataString);
+            $.ajax({
+                type: "POST",
+                url: "/dashboard/admin/createquestion",
+                data: dataString,
+                success: function (response) {
+                    // Display message back to the user here
+                    $("#alert").text(response.message);
+                    //const url = response.url + response.id_quest.toString();
+                }
+            });
+            e.preventDefault();
+        });
+        /*var Manychoice = 0;
+        $("#Manychoice").click(function(){
+                Manychoice = 1;
+        }); 
+        var values = {};
+        $("#createQuiz").click(function () {
+          
+            $.post("/dashboard/admin/createquestion",
+            {
+                title: $("#title").val(),
+                optionA: $("#optionA").val(),
+                optionB: $("#optionB").val(),
+                optionC: $("#optionC").val(),
+                correctOption: $("#correctOption").val(),
+                Manychoice: Manychoice || 0
+            },     
+            function (response) {
+                $("#alert").text(response.message);
+            }) 
+        });*/
+
+    })
 </script>

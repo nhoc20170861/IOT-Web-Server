@@ -1,5 +1,6 @@
 const db = require('../models');
 const Question = db.question;
+const DataSensor = db.data_sensor;
 const weatherData = require('../../middleware/weather-utils')
 class DashboardController {
     // [GET] /dashboard
@@ -51,7 +52,7 @@ class DashboardController {
                 });
             })
             .catch((err) => {
-                console.log('>> Error while finding question ', err);
+                res.status(500).send("Quiz are not available");
             });
 
     }
@@ -191,7 +192,20 @@ module.exports.resetQuestion = (req, res) => {
     if (req.body.command === 'truncate') {
         Question.destroy({ truncate: true, cascade: false })
             .then(() => {
-                return res.send({ message: "Reset question table success" });
+                return res.send({ message: "Reset questions table success" });
+            })
+            .catch((err) => {
+                return res.status(500).send({ message: err.message });
+            })
+    }
+};
+module.exports.resetDataSensor = (req, res) => {
+    //console.log(req.body);
+    // [POST] /dashboard/admin/resetDataSensor
+    if (req.body.command === 'truncate') {
+        DataSensor.destroy({ truncate: true, cascade: false })
+            .then(() => {
+                return res.send({ message: "Reset data_sensors table success" });
             })
             .catch((err) => {
                 return res.status(500).send({ message: err.message });

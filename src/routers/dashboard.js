@@ -21,4 +21,5 @@ router.get(
 
 router.post('/admin/createquestion', dashboardController.createQuestion);
 router.post('/admin/resetquestion', dashboardController.resetQuestion);
+router.post('/admin/resetDataSensor', dashboardController.resetDataSensor); // truncate tabel data_sensor in mysql 
 module.exports = router;
