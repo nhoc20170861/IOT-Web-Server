@@ -1,5 +1,5 @@
 function replaceClass(elem, oldClass, newClass) {
-    
+
     if (elem.hasClass(oldClass)) {
         elem.removeClass(oldClass);
     }
@@ -14,7 +14,7 @@ function myFunction() {
 window.onclick = function (event) {
     if (!event.target.matches('.dropbtn')) {
         let dropdowns = document.getElementsByClassName("dropdown-content");
-        
+
         for (let i = 0; i < dropdowns.length; i++) {
             var openDropdown = dropdowns[i];
             if (openDropdown.classList.contains('show')) {
@@ -32,11 +32,11 @@ $(document).ready(function () {
     let sidebar = $('.sidebar');
     sidebarBtn.click(function () {
         sidebar.toggleClass('active');
-        if(sidebar.hasClass('active')){
-            replaceClass(sidebarBtn,'bx-menu', 'bx-menu-alt-right');
+        if (sidebar.hasClass('active')) {
+            replaceClass(sidebarBtn, 'bx-menu', 'bx-menu-alt-right');
         }
         else {
-            replaceClass(sidebarBtn,'bx-menu-alt-right', 'bx-menu');
+            replaceClass(sidebarBtn, 'bx-menu-alt-right', 'bx-menu');
         }
 
     });
@@ -61,15 +61,15 @@ $(document).ready(function () {
             });
     });
 
-    $("#product").click(function () { 
+    $("#product").click(function () {
         $.post("/dashboard/product",
-        function (response) {
-       
-            $(".home-section .home-content").html(response);      
-            console.log(response);
+            function (response) {
 
-        })
-    });   
+                $(".home-section .home-content").html(response);
+                console.log(response);
+
+            })
+    });
 
     // setInterval(async () => {
     //     await socket.emit("Client-sent-data", "Hello world");
@@ -83,11 +83,16 @@ $(document).ready(function () {
     //     console.log(now.toUTCString());
     // }, 5000);
     socket.on("Server-sent-data", function (data) {
-        receive_data.time = data.time;
-        receive_data.value = JSON.parse(data.value);
-        $("#humi").text(receive_data.value.humi);
-        $("#humi_log").text(receive_data.time);    
-        console.log(receive_data.value);
+        if (data.value != 0)  {
+            $("#humi").text(data.value.humi + " %");
+            $("#humi_log").text(data.time);
+            $("#temp").text(data.value.temp + " " + String.fromCharCode(176));
+            $("#temp_log").text(data.time);
+            $("#pm2_5").text(data.value.pm2_5);
+            $("#pm2_5_log").text(data.time);
+            $("#bat").text(data.value.bat);
+            $("#bat_log").text(data.time);
+        }
     });
 
 });

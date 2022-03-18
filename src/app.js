@@ -4,7 +4,7 @@ const path = require('path');
 dotenv.config({ path: path.join(__dirname, '.env') });
 const express = require('express');
 var session = require('express-session');
-
+var Pusher = require('pusher');
 // connect db mysql
 const db = require('./app/models');
 const Role = db.role;
@@ -19,7 +19,7 @@ db.sequelize.sync();
 function initial() {
     Role.create({
         id: 1,
-        name: 'user',
+        name: 'user',   
     });
 
     Role.create({
@@ -89,12 +89,12 @@ io.on("connection", function (socket) {
     socket.on("disconnect", function () {
     });
     setInterval(async function () {
-        if (flag == true) {
+       //if (flag == true) {
             await socket.broadcast.emit("Server-sent-data", data);
             console.log(data)
-            flag = false;
-        }
-    }, 2000);
+       //     flag = false;
+       // }
+    }, 5000);
     //server listen data from client
     // socket.on("Client-sent-data", function () {
     //     // after listning data, server emit this data to another client
@@ -112,8 +112,8 @@ const topic_sub = 'nhoc20170861/data';
 
 // variable data stored
 var data = {
-    value: undefined,
-    time: undefined
+    value: 0,
+    time: ""
 };
 var flag = false;
 
@@ -127,20 +127,24 @@ client.on('connect', () => {
 });
 
 // console.log message received from mqtt broker
+var count = 0;
 client.on('message', (topic_sub, payload) => {
-    //flag = true;
+    flag = true;
     console.log('Received Message:', topic_sub, payload.toString());
     let now = new Date(Date.now());
+    const data_sensor = JSON.parse(payload.toString());
     data.time = now.toLocaleTimeString();
-    data.value = payload.toString();
-
-    const data_sensor = JSON.parse(data.value);
+    data.value = data_sensor;
+    console.log(data)
     console.log(data_sensor);
     DataSensor.create({
         humidity: data_sensor.humi,
         temperature: data_sensor.temp,
         pm2_5: data_sensor.pm2_5,
         battery: data_sensor.bat,
+    }).then((data_sensor) =>{
+        count = data_sensor.id;
+        console.log(count);
     });
 });
 
@@ -156,4 +160,64 @@ client.on('connect', () => {
         },
     )
 });
+var londonTempData = {
+    city: 'London',
+    unit: 'celsius',
+    dataPoints: [
+      {
+        time: 1130,
+        temperature: 12 
+      },
+      {
+        time: 1200,
+        temperature: 13 
+      },
+      {
+        time: 1230,
+        temperature: 15 
+      },
+      {
+        time: 1300,
+        temperature: 14 
+      },
+      {
+        time: 1330,
+        temperature: 15 
+      },
+      {
+        time: 1406,
+        temperature: 12 
+      },
+    ]
+  }
 
+app.get('/getTemperature', function(req,res){
+  res.send(londonTempData);
+});
+
+const pusher = new Pusher({
+  appId: "1361115",
+  key: "97de8deb68d2953718df",
+  secret: "3d164b6ac64e193c8936",
+  cluster: "ap1",
+  useTLS: true
+});
+
+app.get('/addTemperature', function(req,res){
+  var temp = parseInt(req.query.temperature);
+  var time = parseInt(req.query.time);
+  if(temp && time && !isNaN(temp) && !isNaN(time)){
+    var newDataPoint = {
+      temperature: temp,
+      time: time
+    };
+    londonTempData.dataPoints.shift();  // remove first element
+    londonTempData.dataPoints.push(newDataPoint);
+    pusher.trigger('london-temp-chart', 'new-temperature', {
+      dataPoint: newDataPoint
+    });
+    res.send({success:true});
+  }else{
+    res.send({success:false, errorMessage: 'Invalid Query Paramaters, required - temperature & time.'});
+  }
+});
