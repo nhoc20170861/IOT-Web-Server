@@ -91,7 +91,7 @@ io.on("connection", function (socket) {
     setInterval(async function () {
         //if (flag == true) {
         await socket.broadcast.emit("Server-sent-data", data);
-        //console.log(data)
+        console.log(data)
         //     flag = false;
         // }
     }, 5000);
@@ -115,6 +115,7 @@ var data = {
     value: 0,
     time: ""
 };
+var currentTime = "";
 var flag = false;
 
 
@@ -129,7 +130,7 @@ client.on('connect', () => {
 // console.log message received from mqtt broker
 var count = 0;
 const month = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-const day = ["Mon", "Tue", "Wed", "Thu", "Fir", "Sat", "Sun"]
+const day = ["Sun","Mon", "Tue", "Wed", "Thu", "Fir", "Sat"]
 client.on('message', (topic_sub, payload) => {
     flag = true;
     console.log('Received Message:', topic_sub, payload.toString());
@@ -137,7 +138,8 @@ client.on('message', (topic_sub, payload) => {
     const data_sensor = JSON.parse(payload.toString());
     var formatted = day[now.getDay()] + " " + now.getDate() + ", " + month[now.getMonth()]
         + "  " + now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
-    currentTime = now.toLocaleString();
+    currentTime = now.getDate() + ", " + month[now.getMonth()]
+    + " " + now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
     data.time = formatted;
     data.value = data_sensor;
     console.log(data)
@@ -187,19 +189,25 @@ var SensorData = {
  }
 
 app.get('/getDataSensor', function (req, res) {
-    DataSensor.findOne({
-        where: {
-            id: count,
-        }
-    })
-        .then((data_sensor) => {
-            
-            SensorData.dataPoints[0].time = currentTime;
-            SensorData.dataPoints[0].value = data_sensor.dataValues.pm2_5;
+    // DataSensor.findOne({
+    //     where: {
+    //         id: count,
+    //     }
+    // })
+    //     .then((data_sensor) => {
+    //         let DataPointFrist = {
+    //             time: currentTime,
+    //             value: data_sensor.dataValues.pm2_5
+                
+    //         };
+            //SensorData.dataPoints[0].time = currentTime;
+            //SensorData.dataPoints[0].value = data_sensor.dataValues.pm2_5;
+            //SensorData.dataPoints.pop();
+            //SensorData.dataPoints.push(DataPointFrist);
             console.log(SensorData);
-            console.log(data_sensor.dataValues);
+            //console.log(data_sensor.dataValues);
             res.send(SensorData);
-        });
+        // });
     
 });
 
@@ -212,25 +220,26 @@ const pusher = new Pusher({
 });
 
 app.get('/addDataSensor', function (req, res) {
-    //var temp = parseInt(req.query.temperature);
-    //var time = parseInt(req.query.time);
-    //if (temp && time && !isNaN(temp) && !isNaN(time)) {}
     DataSensor.findOne({
         where: {
             id: count,
         }
     })
     .then((data_sensor) => { 
-        let now = new Date(Date.now());
-        let currentTime = now.toLocaleString();        
-        var newDataPoint = {
+        //let now = new Date(Date.now());
+        //let currentTime = now.toLocaleString();        
+        let newDataPoint = {
             time: currentTime,
             value: data_sensor.dataValues.pm2_5
             
         };
-        SensorData.dataPoints.shift();  // remove first element
+        // remove first element
+        if(SensorData.dataPoints.length > 15)
+        {
+                SensorData.dataPoints.shift();
+        }
         SensorData.dataPoints.push(newDataPoint);
-        console.log(SensorData);   
+        //console.log(SensorData);   
         pusher.trigger('london-temp-chart', 'new-temperature', {
             dataPoint: newDataPoint
         });

@@ -79,21 +79,9 @@ $(document).ready(function () {
     //     $("#humi").text(humi);
     //     var now = new Date(Date.now());
     //     //var formatted = now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
-    //     $("#humi_log").text(now.toLocaleTimeString());
+    //     $("#time_log").text(now.toLocaleTimeString());
     //     console.log(now.toUTCString());
     // }, 5000);
-    socket.on("Server-sent-data", function (data) {
-        if (data.value != 0)  {
-            $("#humi").text(data.value.humi + " %");
-            $("#humi_log").text(data.time);
-            $("#temp").text(data.value.temp + " " + String.fromCharCode(176));
-            $("#temp_log").text(data.time);
-            $("#pm2_5").text(data.value.pm2_5);
-            $("#pm2_5_log").text(data.time);
-            $("#bat").text(data.value.bat + " %");
-            $("#bat_log").text(data.time);
-        }
-    });
 
 });
 

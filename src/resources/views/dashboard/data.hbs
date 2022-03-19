@@ -7,9 +7,9 @@
             <i class="bx bx-menu sidebarBtn"></i>
             <span class="dashboard">Dashboard</span>
         </div>
-        {{! <div class="title">
+        <div class="title">
             Tracking Air Qualification
-        </div> }}
+        </div> 
         <div class="profile-details">
             <img src="../images/profile.jpg" alt="" />
             <span class="admin_name">{{user_name}}</span>
@@ -27,7 +27,7 @@
         <div class="overview-boxes">
             <div class="box">
                 <div class="right-side">
-                    <div class="box-topic">Battery Capacity</div>
+                    <div class="box-topic">Battery</div>
                     <div class="number" id="bat">0</div>
 
                     <div class="indicator">
@@ -265,6 +265,24 @@
         }*/
         /* TEMP CODE ENDS */
     })();
+</script>
+<script> 
+    $(document).ready(function(){
+
+ socket.on("Server-sent-data", function (data) {
+        if (data.value != 0)  {
+            $("#humi").text(data.value.humi + " %");
+            $("#humi_log").text(data.time);
+            $("#temp").text(data.value.temp + " " + String.fromCharCode(176));
+            $("#temp_log").text(data.time);
+            $("#pm2_5").text(data.value.pm2_5);
+            $("#pm2_5_log").text(data.time);
+            $("#bat").text(data.value.bat + " %");
+            $("#bat_log").text(data.time);
+        }
+     })
+    }) 
+      
 </script>
 <script src="https://code.iconify.design/2/2.1.2/iconify.min.js"></script>
 <script src="../script/weather.js"></script>
