@@ -148,6 +148,13 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://js.pusher.com/4.0/pusher.min.js"></script>
 <script>
+    $(document).ready(function(){
+        if(!$("#data").hasClass('active')){
+            $("#data").addClass('active');
+        }
+    })
+</script>
+<script>
     // Using IIFE for Implementing Module Pattern to keep the Local Space for the JS Variables
     (function () {
         // Enable pusher logging - don't include this in production

@@ -50,7 +50,7 @@
   transition: all 0.4s ease;
 }
 .sidebar .nav-links li a.active{
-  background: #081D45;
+  background: #110845;
 }
 .sidebar .nav-links li a:hover{
   background: #081D45;
