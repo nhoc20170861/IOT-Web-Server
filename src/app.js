@@ -231,7 +231,7 @@ app.get('/addDataSensor', function (req, res) {
         SensorData.dataPoints.shift();  // remove first element
         SensorData.dataPoints.push(newDataPoint);
         console.log(SensorData);   
-        pusher.trigger('pm7003-pm2_5-chart', 'new-pm2_5', {
+        pusher.trigger('london-temp-chart', 'new-temperature', {
             dataPoint: newDataPoint
         });
         res.send({ success: true });

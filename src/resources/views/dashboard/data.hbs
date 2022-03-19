@@ -145,6 +145,7 @@
         </div>
     </div>
 </section>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://js.pusher.com/4.0/pusher.min.js"></script>
 <script>
     // Using IIFE for Implementing Module Pattern to keep the Local Space for the JS Variables
@@ -231,8 +232,8 @@
             renderWeatherChart(chartConfig)
         }
 
-        channel = pusher.subscribe('pm7003-pm2_5-chart');
-        channel.bind('new-pm2_5', function (data) {
+        channel = pusher.subscribe('london-temp-chart');
+        channel.bind('new-temperature', function (data) {
             var newTempData = data.dataPoint;
             console.log(newTempData);
             if (weatherChartRef.data.labels.length > 15) {
