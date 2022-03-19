@@ -56,20 +56,20 @@ $(document).ready(function () {
             function (response) {
                 if (response.result == 'redirect') {
                     alert("You will be redirected to home")
-                    window.location.href = response.url;
+                    location.href = response.url;
                 }
             });
     });
 
-    $("#product").click(function () {
-        $.post("/dashboard/product",
-            function (response) {
+    // $("#product").click(function () {
+    //     $.post("/dashboard/product",
+    //         function (response) {
 
-                $(".home-section .home-content").html(response);
-                console.log(response);
+    //             $(".home-section .home-content").html(response);
+    //             console.log(response);
 
-            })
-    });
+    //         })
+    // });
 
     // setInterval(async () => {
     //     await socket.emit("Client-sent-data", "Hello world");
@@ -90,7 +90,7 @@ $(document).ready(function () {
             $("#temp_log").text(data.time);
             $("#pm2_5").text(data.value.pm2_5);
             $("#pm2_5_log").text(data.time);
-            $("#bat").text(data.value.bat);
+            $("#bat").text(data.value.bat + " %");
             $("#bat_log").text(data.time);
         }
     });

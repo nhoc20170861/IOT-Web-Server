@@ -1,0 +1,35 @@
+.overview-boxes .box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: calc(100% / 2 - 15px);
+    background: #fff;
+    padding: 15px 14px;
+    border-radius: 12px;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+.overview-boxes .box2 {
+    display: flex;
+    align-items: left;
+    justify-content: left;
+    width: calc(100%);
+    background: #fff;
+    padding: 15px 14px;
+    margin-bottom: 20px;
+}
+.overview-boxes .box3 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: calc(100% - 15px);
+    background: #fff;
+    padding: 15px 14px;
+    margin-bottom: 20px;
+}
+.overview-boxes .box3 img {
+    height: 150px;
+    width: 150px;
+    border-radius: 6px;
+    object-fit: cover;
+}

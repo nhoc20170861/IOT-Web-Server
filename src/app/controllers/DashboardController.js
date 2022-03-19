@@ -3,13 +3,42 @@ const Question = db.question;
 const DataSensor = db.data_sensor;
 const weatherData = require('../../middleware/weather-utils')
 class DashboardController {
-    // [GET] /dashboard
-    getDashboard(req, res) {
-        return res.render('dashboard', {
+    // [GET] /dashboard/data
+    getData(req, res) {
+        return res.render('dashboard/data', {
             change_header: true,
             user_name: req.userName,
         });
     }
+    getProduct(req, res) {
+        return res.render('dashboard/product', {
+            change_header: true,
+            user_name: req.userName,
+        });
+    }
+    // [GET] /dashboard/knowledge
+    getKnowledge(req, res) {
+        return res.render('dashboard/knowledge', {
+            change_header: true,
+            user_name: req.userName,
+        });
+    }
+     // [GET] /dashboard/controller
+    getController(req, res) {
+        return res.render('dashboard/controller', {
+            change_header: true,
+            user_name: req.userName,
+        });
+    }
+    // [GET] /dashboard/team
+    getTeam(req, res) {
+        return res.render('dashboard/team', {
+            change_header: true,
+            user_name: req.userName,
+        });
+    }
+
+
 
     // [GET] /dashboard/showquiz
     showQuiz(req, res) {
@@ -52,7 +81,7 @@ class DashboardController {
                 });
             })
             .catch((err) => {
-                res.status(500).send("Quiz are not available");
+                res.status(500).send({message: "Quiz are not available"});
             });
 
     }
@@ -150,9 +179,8 @@ class DashboardController {
 }
 
 module.exports = new DashboardController();
-module.exports.getProduct = (req, res) => {
-    return res.status(200).send({ result: "product.html"});
-}
+
+
 
 module.exports.getWeather = (req, res) => {
 

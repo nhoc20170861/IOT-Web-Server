@@ -1,0 +1,53 @@
+{{> dashboard_slidebar}}
+<section class="home-section">
+    <nav>
+        <div class="sidebar-button">
+            <i class="bx bx-menu sidebarBtn"></i>
+            <span class="dashboard">Dashboard</span>
+        </div>
+        {{! <div class="title">
+            Tracking Air Qualification
+        </div> }}
+        <div class="profile-details">
+            <img src="../images/profile.jpg" alt="" />
+            <span class="admin_name">{{user_name}}</span>
+            <div class="dropdown">
+                <button onclick="myFunction()" class="dropbtn">V</button>
+                <div id="myDropdown" class="dropdown-content">
+                    <a href="/home">Home</a>
+                    <a href="/changePassword">Change Password</a>
+                    <a href="/dashboard/admin/quiz">Admin</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    
+    <div class="home-content">
+        <div class="overview-boxes">
+            <div class="sales-boxes"></div>
+        <div class="recent-sales box">
+          
+          <div class="title">Hình ảnh sản phẩm</div>
+          <div class="box-4">
+            <img src="../images/product/eco1.png" alt="" width="200" height="200" class="myimage">
+            <img src="../images/product/eco2.png" alt="" width="200" height="200" class="myimage">
+            <img src="../images/product/eco3.png" alt="" width="200" height="200" class="myimage">
+            <img src="../images/product/eco4.png" alt="" width="200" height="200" class="myimage">
+          </div>
+        </div>
+        <div class="top-sales box">
+          <div class="title">Product Information</div>
+          <ul class="top-sales-details">
+             <p>Processer: ESP32</p>
+             </br>
+             <p>Temp & Humi Sensor: ATH10</p>
+             </br>
+             <p>PM2.5 Sensor: PMS7003 </p>
+             </br>
+              
+          </ul>
+        </div>
+    </div>
+
+</section>

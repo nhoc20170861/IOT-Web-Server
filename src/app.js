@@ -19,7 +19,7 @@ db.sequelize.sync();
 function initial() {
     Role.create({
         id: 1,
-        name: 'user',   
+        name: 'user',
     });
 
     Role.create({
@@ -70,10 +70,10 @@ app.use(cookieParser()); // cookie parser middleware
 const route = require('./routers');
 route(app);
 
-app.post("/dashboard/product", function(req, res){
-    res.sendFile(__dirname + '/resources/views//product.html');
+// app.post("/dashboard/product", function(req, res){
+//     res.sendFile(__dirname + '/resources/views//product.html');
 
-})
+// })
 
 
 
@@ -89,11 +89,11 @@ io.on("connection", function (socket) {
     socket.on("disconnect", function () {
     });
     setInterval(async function () {
-       //if (flag == true) {
-            await socket.broadcast.emit("Server-sent-data", data);
-            console.log(data)
-       //     flag = false;
-       // }
+        //if (flag == true) {
+        await socket.broadcast.emit("Server-sent-data", data);
+        //console.log(data)
+        //     flag = false;
+        // }
     }, 5000);
     //server listen data from client
     // socket.on("Client-sent-data", function () {
@@ -128,23 +128,27 @@ client.on('connect', () => {
 
 // console.log message received from mqtt broker
 var count = 0;
+const month = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const day = ["Mon", "Tue", "Wed", "Thu", "Fir", "Sat", "Sun"]
 client.on('message', (topic_sub, payload) => {
     flag = true;
     console.log('Received Message:', topic_sub, payload.toString());
     let now = new Date(Date.now());
     const data_sensor = JSON.parse(payload.toString());
-    data.time = now.toLocaleTimeString();
+    var formatted = day[now.getDay()] + " " + now.getDate() + ", " + month[now.getMonth()]
+        + "  " + now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
+    currentTime = now.toLocaleString();
+    data.time = formatted;
     data.value = data_sensor;
     console.log(data)
-    console.log(data_sensor);
     DataSensor.create({
         humidity: data_sensor.humi,
         temperature: data_sensor.temp,
         pm2_5: data_sensor.pm2_5,
         battery: data_sensor.bat,
-    }).then((data_sensor) =>{
+    }).then((data_sensor) => {
         count = data_sensor.id;
-        console.log(count);
+        console.log(data_sensor.id);
     });
 });
 
@@ -160,64 +164,79 @@ client.on('connect', () => {
         },
     )
 });
-var londonTempData = {
-    city: 'London',
-    unit: 'celsius',
-    dataPoints: [
-      {
-        time: 1130,
-        temperature: 12 
-      },
-      {
-        time: 1200,
-        temperature: 13 
-      },
-      {
-        time: 1230,
-        temperature: 15 
-      },
-      {
-        time: 1300,
-        temperature: 14 
-      },
-      {
-        time: 1330,
-        temperature: 15 
-      },
-      {
-        time: 1406,
-        temperature: 12 
-      },
-    ]
-  }
+// var londonTempData = {
+//     city: 'London',
+//     unit: 'celsius',
+//     dataPoints: [
+//         {
+//             time: "12:30",
+//             temperature: 12
+//         },
+//     ]
+// }
 
-app.get('/getTemperature', function(req,res){
-  res.send(londonTempData);
+var SensorData = {
+     device: 'pm7003',
+     unit: 'ppm',
+     dataPoints: [
+         {
+             time: "",
+             value: 0
+         },
+     ]
+ }
+
+app.get('/getTemperature', function (req, res) {
+    DataSensor.findOne({
+        where: {
+            id: count,
+        }
+    })
+        .then((data_sensor) => {
+            
+            SensorData.dataPoints[0].time = currentTime;
+            SensorData.dataPoints[0].value = data_sensor.dataValues.pm2_5;
+            console.log(SensorData);
+            console.log(data_sensor.dataValues);
+            res.send(SensorData);
+        });
+    
 });
 
 const pusher = new Pusher({
-  appId: "1361115",
-  key: "97de8deb68d2953718df",
-  secret: "3d164b6ac64e193c8936",
-  cluster: "ap1",
-  useTLS: true
+    appId: "1361115",
+    key: "97de8deb68d2953718df",
+    secret: "3d164b6ac64e193c8936",
+    cluster: "ap1",
+    useTLS: true
 });
 
-app.get('/addTemperature', function(req,res){
-  var temp = parseInt(req.query.temperature);
-  var time = parseInt(req.query.time);
-  if(temp && time && !isNaN(temp) && !isNaN(time)){
-    var newDataPoint = {
-      temperature: temp,
-      time: time
-    };
-    londonTempData.dataPoints.shift();  // remove first element
-    londonTempData.dataPoints.push(newDataPoint);
-    pusher.trigger('london-temp-chart', 'new-temperature', {
-      dataPoint: newDataPoint
-    });
-    res.send({success:true});
-  }else{
-    res.send({success:false, errorMessage: 'Invalid Query Paramaters, required - temperature & time.'});
-  }
+app.get('/addTemperature', function (req, res) {
+    //var temp = parseInt(req.query.temperature);
+    //var time = parseInt(req.query.time);
+    //if (temp && time && !isNaN(temp) && !isNaN(time)) {}
+    DataSensor.findOne({
+        where: {
+            id: count,
+        }
+    })
+    .then((data_sensor) => { 
+        let now = new Date(Date.now());
+        let currentTime = now.toLocaleString();        
+        var newDataPoint = {
+            time: currentTime,
+            value: data_sensor.dataValues.pm2_5
+            
+        };
+        SensorData.dataPoints.shift();  // remove first element
+        SensorData.dataPoints.push(newDataPoint);
+        console.log(SensorData);   
+        pusher.trigger('london-temp-chart', 'new-temperature', {
+            dataPoint: newDataPoint
+        });
+        res.send({ success: true });
+    }) 
+    .catch(()=>{
+        res.send({ success: false, errorMessage: 'Invalid Query Paramaters, required - temperature & time.' });
+    })
 });

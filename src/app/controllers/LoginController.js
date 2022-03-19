@@ -24,7 +24,7 @@ class LoginController {
                         return res.render('login', {
                             message: 'Unauthorized! Login again',
                         });
-                    } else return res.redirect('/dashboard');
+                    } else return res.redirect('/dashboard/data');
                 },
             );
         }
@@ -135,7 +135,7 @@ class LoginController {
                         httpOnly: true,
                         sameSite: 'lax',
                     });
-                    return res.redirect('/dashboard');
+                    return res.redirect('/dashboard/data');
                     // res.cookie('refresh_token', refreshToken, {
                     //     maxAge: 24 * 3600 * 1000, //expire after 24h
                     //     secure: true,

@@ -18,7 +18,7 @@ function route(app) {
 
     // Router to dashboard page
     app.use('/dashboard', dashboardRouter);
-    
+
     // Router to changePassword page
     app.use('/changePassword', changePasswordRouter);
     

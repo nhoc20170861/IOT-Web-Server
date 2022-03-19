@@ -73,7 +73,8 @@
                     command: "truncate"
                 },
                 function (response) {
-                    console.log(response);
+                    //console.log(response);
+                    $("#alert").text(response.message);
                 })
         });
         $("#resetQuiz").click(function () {
@@ -82,7 +83,8 @@
                     command: "truncate"
                 },
                 function (response) {
-                    console.log(response);
+                   //console.log(response);
+                    $("#alert").text(response.message);
                 })
         });
         $("#myForm").on("submit", function (e) {

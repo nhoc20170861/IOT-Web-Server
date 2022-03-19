@@ -4,7 +4,11 @@ const dashboardController = require('../app/controllers/DashboardController');
 const { authJwt } = require('../middleware');
 
 // Show dashboard interface for user role
-router.get('/', [authJwt.verifyToken], dashboardController.getDashboard);
+router.get('/data', [authJwt.verifyToken], dashboardController.getData);
+router.get('/product', [authJwt.verifyToken], dashboardController.getProduct);
+router.get('/knowledge', [authJwt.verifyToken], dashboardController.getKnowledge);
+router.get('/team', [authJwt.verifyToken], dashboardController.getTeam);
+router.get('/controller', [authJwt.verifyToken], dashboardController.getController);
 router.post('/weather/show', dashboardController.getWeather);
 //router.post('/product', dashboardController.getProduct);
 
