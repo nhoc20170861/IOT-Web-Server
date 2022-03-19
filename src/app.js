@@ -186,7 +186,7 @@ var SensorData = {
      ]
  }
 
-app.get('/getTemperature', function (req, res) {
+app.get('/getDataSensor', function (req, res) {
     DataSensor.findOne({
         where: {
             id: count,
@@ -211,7 +211,7 @@ const pusher = new Pusher({
     useTLS: true
 });
 
-app.get('/addTemperature', function (req, res) {
+app.get('/addDataSensor', function (req, res) {
     //var temp = parseInt(req.query.temperature);
     //var time = parseInt(req.query.time);
     //if (temp && time && !isNaN(temp) && !isNaN(time)) {}
@@ -231,7 +231,7 @@ app.get('/addTemperature', function (req, res) {
         SensorData.dataPoints.shift();  // remove first element
         SensorData.dataPoints.push(newDataPoint);
         console.log(SensorData);   
-        pusher.trigger('london-temp-chart', 'new-temperature', {
+        pusher.trigger('pm7003-pm2_5-chart', 'new-pm2_5', {
             dataPoint: newDataPoint
         });
         res.send({ success: true });
