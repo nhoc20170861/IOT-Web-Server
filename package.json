@@ -36,6 +36,5 @@
   },
   "homepage": "https://gitlab.com/ThSKH_IT4735/nodejs_mqtt#readme",
   "devDependencies": {
-    "prettier": "2.5.1"
   }
 }
