@@ -5,6 +5,7 @@ dotenv.config({ path: path.join(__dirname, '.env') });
 const express = require('express');
 var session = require('express-session');
 var Pusher = require('pusher');
+var cors = require('cors')
 // connect db mysql
 const db = require('./app/models');
 const Role = db.role;
@@ -32,9 +33,18 @@ function initial() {
         name: 'admin',
     });
 }
-
+const corsOptions = {
+    credentials: true,
+    ///..other options
+};
 const app = express();
 const port_server = process.env.PORT_SERVER;
+app.use(cors(corsOptions));
+app.use(function (req, res, next) {
+    res.header("Access-Control-Allow-Origin", "http://192.168.1.4:3000");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
 app.use(
     session({
         resave: false,
@@ -59,7 +69,6 @@ app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, 'resources\\views'));
 
 // parsing the incoming data
-var session = require('express-session');
 var cookieParser = require('cookie-parser');
 
 app.use(express.json());
@@ -130,7 +139,7 @@ client.on('connect', () => {
 // console.log message received from mqtt broker
 var count = 0;
 const month = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-const day = ["Sun","Mon", "Tue", "Wed", "Thu", "Fir", "Sat"]
+const day = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fir", "Sat"]
 client.on('message', (topic_sub, payload) => {
     flag = true;
     console.log('Received Message:', topic_sub, payload.toString());
@@ -139,7 +148,7 @@ client.on('message', (topic_sub, payload) => {
     var formatted = day[now.getDay()] + " " + now.getDate() + ", " + month[now.getMonth()]
         + "  " + now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
     currentTime = now.getDate() + ", " + month[now.getMonth()]
-    + " " + now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
+        + " " + now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
     data.time = formatted;
     data.value = data_sensor;
     console.log(data)
@@ -178,15 +187,15 @@ client.on('connect', () => {
 // }
 
 var SensorData = {
-     device: 'pm7003',
-     unit: 'ppm',
-     dataPoints: [
-         {
-             time: "",
-             value: 0
-         },
-     ]
- }
+    device: 'pm7003',
+    unit: 'ppm',
+    dataPoints: [
+        {
+            time: "",
+            value: 0
+        },
+    ]
+}
 
 app.get('/getDataSensor', function (req, res) {
     // DataSensor.findOne({
@@ -198,17 +207,17 @@ app.get('/getDataSensor', function (req, res) {
     //         let DataPointFrist = {
     //             time: currentTime,
     //             value: data_sensor.dataValues.pm2_5
-                
+
     //         };
-            //SensorData.dataPoints[0].time = currentTime;
-            //SensorData.dataPoints[0].value = data_sensor.dataValues.pm2_5;
-            //SensorData.dataPoints.pop();
-            //SensorData.dataPoints.push(DataPointFrist);
-            console.log(SensorData);
-            //console.log(data_sensor.dataValues);
-            res.send(SensorData);
-        // });
-    
+    //SensorData.dataPoints[0].time = currentTime;
+    //SensorData.dataPoints[0].value = data_sensor.dataValues.pm2_5;
+    //SensorData.dataPoints.pop();
+    //SensorData.dataPoints.push(DataPointFrist);
+    console.log(SensorData);
+    //console.log(data_sensor.dataValues);
+    res.send(SensorData);
+    // });
+
 });
 
 const pusher = new Pusher({
@@ -225,27 +234,26 @@ app.get('/addDataSensor', function (req, res) {
             id: count,
         }
     })
-    .then((data_sensor) => { 
-        //let now = new Date(Date.now());
-        //let currentTime = now.toLocaleString();        
-        let newDataPoint = {
-            time: currentTime,
-            value: data_sensor.dataValues.pm2_5
-            
-        };
-        // remove first element
-        if(SensorData.dataPoints.length > 15)
-        {
+        .then((data_sensor) => {
+            //let now = new Date(Date.now());
+            //let currentTime = now.toLocaleString();        
+            let newDataPoint = {
+                time: currentTime,
+                value: data_sensor.dataValues.pm2_5
+
+            };
+            // remove first element
+            if (SensorData.dataPoints.length > 15) {
                 SensorData.dataPoints.shift();
-        }
-        SensorData.dataPoints.push(newDataPoint);
-        //console.log(SensorData);   
-        pusher.trigger('london-temp-chart', 'new-temperature', {
-            dataPoint: newDataPoint
-        });
-        res.send({ success: true });
-    }) 
-    .catch(()=>{
-        res.send({ success: false, errorMessage: 'Invalid Query Paramaters, required - temperature & time.' });
-    })
+            }
+            SensorData.dataPoints.push(newDataPoint);
+            //console.log(SensorData);   
+            pusher.trigger('london-temp-chart', 'new-temperature', {
+                dataPoint: newDataPoint
+            });
+            res.send({ success: true });
+        })
+        .catch(() => {
+            res.send({ success: false, errorMessage: 'Invalid Query Paramaters, required - temperature & time.' });
+        })
 });

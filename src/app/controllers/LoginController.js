@@ -12,7 +12,7 @@ var session;
 class LoginController {
     // [GET] /auth/login
     index(req, res) {
-        let token = req.cookies.access_token;
+        let token = req.cookies.token;
         if (!token) {
             return res.render('login');
         } else {
@@ -76,7 +76,7 @@ class LoginController {
         })
             .then((user) => {
                 if (!user) {
-                    return res.render('login', {
+                    return res.send({
                         message: 'User Not found!',
                     });
                 }
@@ -87,7 +87,7 @@ class LoginController {
                 );
 
                 if (!passwordIsValid) {
-                    return res.render('login', {
+                    return res.send({
                         message: 'Password is wrong',
                     });
                 }
@@ -128,14 +128,19 @@ class LoginController {
                         authorities.push('ROLE_' + roles[i].name.toUpperCase());
                     }
                     console.log(authorities);
-                    res.cookie('access_token', accessToken, {
-                        /*add several attributes to make this cookie more secure.*/
-                        maxAge: 3600 * 1000, //expire after 1h
-                        secure: true,
-                        httpOnly: true,
-                        sameSite: 'lax',
-                    });
-                    return res.redirect('/dashboard/data');
+                    res.status(200).send({
+                        token : accessToken,
+                        url: "/dashboard/data",
+                    })
+                    // res.cookie('access_token', accessToken, {
+                    //     /*add several attributes to make this cookie more secure.*/
+                    //     maxAge: 3600 * 1000, //expire after 1h
+                    //     secure: true,
+                    //     httpOnly: true,
+                    //     sameSite: 'lax',
+                    //     domain : "192.168.1.4"
+                    // });
+                    // return res.redirect('/dashboard/data');
                     // res.cookie('refresh_token', refreshToken, {
                     //     maxAge: 24 * 3600 * 1000, //expire after 24h
                     //     secure: true,

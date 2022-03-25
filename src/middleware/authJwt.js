@@ -4,7 +4,7 @@ const User = db.user;
 
 verifyToken = (req, res, next) => {
     
-    let access_token = req.cookies.access_token;
+    let access_token = req.cookies.token;
     if (!access_token) {
         return res.status(403).send({
             message: 'No token provided!',
