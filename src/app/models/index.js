@@ -25,7 +25,7 @@ db.sequelize = sequelize;
 db.user = require('../models/user.model.js')(sequelize, Sequelize);
 db.role = require('../models/role.model.js')(sequelize, Sequelize);
 db.question = require('../models/question.model.js')(sequelize, Sequelize);
-db.data_sensor= require('../models/data_sensor.model.js')(sequelize, Sequelize);
+
 
 db.role.belongsToMany(db.user, {
     through: 'user_roles',
@@ -39,6 +39,15 @@ db.user.belongsToMany(db.role, {
     otherKey: 'roleId',
 });
 
+
+// create data_sensor table relative with device table follow key: deviceId
+db.device =  require('../models/device.model.js')(sequelize, Sequelize);
+db.data_sensor = require('../models/data_sensor.model.js')(sequelize, Sequelize);
+db.device.hasOne(db.data_sensor);
+db.data_sensor.belongsTo(db.device, {
+    foreignKey: 'deviceId',
+    as: 'devices',
+});
 
 
 db.ROLES = ['user', 'admin', 'moderator'];

@@ -1,7 +1,8 @@
 <div class='container mt-4'>
     <div class='card'>
-        <div class='card-header' id="addQuestion" style='font-weight: bold'>   
-             <button class='btn btn-primary' id="addQuestion">Add question</button>
+        <div class='card-header' id="addQuestion" style='font-weight: bold'>
+            <label>Add Question</label> 
+             {{!-- <button class='btn btn-primary' id="addQuestion">Add question</button> --}}
         </div>    
         <div class='card-body'>
             <form id="myForm" class="hidden">
@@ -37,7 +38,24 @@
             
         </div>
         <span><button class='btn btn-primary' id="showquiz" onclick="showquiz()">View quiz</button>
-        <span><button class='btn btn-primary' id="resetQuiz">Reset quiz</button></span>
+        <button class='btn btn-primary' id="resetQuiz">Reset quiz</button></span>
+        
+        <div class='card-header' id="addDevice" style='font-weight: bold; '>   
+            <label>Add Device</label> 
+        </div>
+        <div class='card-body'>
+            <form id="myForm2" class="hidden">
+                <div class='form-group' >
+                    <label for='name_device'>Name Device</label>
+                    <input type='text' class='form-control' id='name_device' name='name_device' />
+                    {{!-- <label for='id_device'>Id Device</label>
+                    <input type='number' class='form-control' id='id_device' name='id_device' /> --}}
+                <button type='submit' class='btn btn-primary' id="createDevice">Submit</button>
+            </form>
+            <br>
+            
+        </div>
+    
     </div>
     <br>
     <button class='btn btn-primary' id="resetData">Reset DataSensor Table</button>
@@ -67,6 +85,16 @@
            else
                 $("#myForm").addClass('hidden');
         });
+
+        $("#addDevice").click(function () {          
+        
+           if($("#myForm2").hasClass('hidden')){
+                $("#myForm2").removeClass('hidden');
+           }
+           else
+                $("#myForm2").addClass('hidden');
+        });
+
         $("#resetData").click(function () {       
            $.post("/dashboard/admin/resetDataSensor",
                 {
@@ -93,6 +121,22 @@
             $.ajax({
                 type: "POST",
                 url: "/dashboard/admin/createquestion",
+                data: dataString,
+                success: function (response) {
+                    // Display message back to the user here
+                    $("#alert").text(response.message);
+                    //const url = response.url + response.id_quest.toString();
+                }
+            });
+            e.preventDefault();
+        });
+
+        $("#myForm2").on("submit", function (e) {
+            var dataString = $(this).serialize();
+            console.log(dataString);
+            $.ajax({
+                type: "POST",
+                url: "/dashboard/admin/createdevice",
                 data: dataString,
                 success: function (response) {
                     // Display message back to the user here
