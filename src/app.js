@@ -59,7 +59,6 @@ app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, 'resources\\views'));
 
 // parsing the incoming data
-var session = require('express-session');
 var cookieParser = require('cookie-parser');
 
 app.use(express.json());

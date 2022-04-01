@@ -5,7 +5,7 @@ const User = db.user;
 
 var jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const { redirect } = require('express/lib/response');
+
 
 // a variable to save a session
 var session;
@@ -101,7 +101,7 @@ class LoginController {
                     },
                     process.env.ACCESS_TOKEN_SECRET,
                     {
-                        expiresIn: 3600, // //expire after 1h
+                        expiresIn: 3600 * 24, // //expire after 1h
                     },
                 );
 
@@ -128,14 +128,15 @@ class LoginController {
                         authorities.push('ROLE_' + roles[i].name.toUpperCase());
                     }
                     console.log(authorities);
-                    res.cookie('access_token', accessToken, {
-                        /*add several attributes to make this cookie more secure.*/
-                        maxAge: 3600 * 1000, //expire after 1h
-                        secure: true,
-                        httpOnly: true,
-                        sameSite: 'lax',
-                    });
-                    return res.redirect('/dashboard/data');
+                    res.send(accessToken);
+                    // res.cookie('access_token', accessToken, {
+                    //     /*add several attributes to make this cookie more secure.*/
+                    //     maxAge: 3600 * 1000, //expire after 1h
+                    //     secure: true,
+                    //     httpOnly: true,
+                    //     sameSite: 'lax',
+                    // });
+                    //return res.redirect('/dashboard/data');
                     // res.cookie('refresh_token', refreshToken, {
                     //     maxAge: 24 * 3600 * 1000, //expire after 24h
                     //     secure: true,
