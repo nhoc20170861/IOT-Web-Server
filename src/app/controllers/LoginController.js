@@ -128,7 +128,9 @@ class LoginController {
                         authorities.push('ROLE_' + roles[i].name.toUpperCase());
                     }
                     console.log(authorities);
-                    res.send(accessToken);
+                    res.send({
+                        accessToken,
+                        url: "/dashboard/data"});
                     // res.cookie('access_token', accessToken, {
                     //     /*add several attributes to make this cookie more secure.*/
                     //     maxAge: 3600 * 1000, //expire after 1h

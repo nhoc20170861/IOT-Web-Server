@@ -52,8 +52,8 @@ $(document).ready(function () {
                     }
                     $("#alert").text(response.message);
                 }
-                if (response.token != null) {
-                    setCookie('token', response.token, { secure: true, 'max-age': 3600 });
+                if (response.accessToken != null) {
+                    setCookie('access_token', response.accessToken, { 'max-age': 3600 });
                     location.href = response.url;
                 }
                 //const url = response.url + response.id_quest.toString();

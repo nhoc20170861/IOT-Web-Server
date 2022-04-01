@@ -11,7 +11,7 @@
             Tracking Air Qualification
         </div> 
         <div class="profile-details">
-            <img src="../images/profile.jpg" alt="" />
+            <img src="../../images/profile.jpg" alt="" />
             <span class="admin_name">{{user_name}}</span>
             <div class="dropdown">
                 <button onclick="myFunction()" class="dropbtn">V</button>
@@ -48,7 +48,7 @@
                         <span class="text" id="pm2_5_log">Waiting for client update</span>
                     </div>
                 </div>
-                <img class="iconify data pm2_5" src="../images/pm2_5.icon.png" alt="" />
+                <img class="iconify data pm2_5" src="../../images/pm2_5.icon.png" alt="" />
 
             </div>
             <div class="box">
@@ -143,7 +143,9 @@
                 </div>
             </div>
         </div>
+    <a href ="/dashboard/data" style="display: block; margin: 10px; padding-left: 20px">Back...</a>
     </div>
+    
 </section>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://js.pusher.com/4.0/pusher.min.js"></script>
@@ -270,14 +272,14 @@
     $(document).ready(function(){
 
  socket.on("Server-sent-data", function (data) {
-        if (data.value != 0)  {
-            $("#humi").text(data.value.humi + " %");
+        if (data.humi != 0)  {
+            $("#humi").text(data.humi + " %");
             $("#humi_log").text(data.time);
-            $("#temp").text(data.value.temp + " " + String.fromCharCode(176));
+            $("#temp").text(data.temp + " " + String.fromCharCode(176));
             $("#temp_log").text(data.time);
-            $("#pm2_5").text(data.value.pm2_5);
+            $("#pm2_5").text(data.pm2_5);
             $("#pm2_5_log").text(data.time);
-            $("#bat").text(data.value.bat + " %");
+            $("#bat").text(data.bat + " %");
             $("#bat_log").text(data.time);
         }
      })
@@ -285,4 +287,4 @@
       
 </script>
 <script src="https://code.iconify.design/2/2.1.2/iconify.min.js"></script>
-<script src="../script/weather.js"></script>
+<script src="../../script/weather.js"></script>

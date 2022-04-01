@@ -3,8 +3,10 @@ const router = express.Router();
 const dashboardController = require('../app/controllers/DashboardController');
 const { authJwt } = require('../middleware');
 
-// Show dashboard interface for user role
-router.get('/data', [authJwt.verifyToken], dashboardController.getData);
+// Show dashboard interface for user role   
+router.get('/data', [authJwt.verifyToken], dashboardController.getDataSelect);
+//router.get('/data/:slug', [authJwt.verifyToken], dashboardController.getDataDetail);
+
 router.get('/product', [authJwt.verifyToken], dashboardController.getProduct);
 router.get('/knowledge', [authJwt.verifyToken], dashboardController.getKnowledge);
 router.get('/team', [authJwt.verifyToken], dashboardController.getTeam);

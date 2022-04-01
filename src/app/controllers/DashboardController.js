@@ -1,15 +1,35 @@
 const db = require('../models');
 const Question = db.question;
 const DataSensor = db.data_sensor;
+const Device = db.device;
 const weatherData = require('../../middleware/weather-utils')
 class DashboardController {
     // [GET] /dashboard/data
-    getData(req, res) {
-        return res.render('dashboard/data', {
+    getDataDetail(req, res) {
+
+        console.log(req.params)
+        //res.send("device" + req.params.slug);
+        return res.render('dashboard/data_detail', {
             change_header: true,
             user_name: req.userName,
         });
     }
+    getDataSelect(req, res) {
+        Device.findAll()
+            .then((devices) => {
+                const list_devices = devices.map((device) => device.dataValues)
+                //console.log(list_devices);
+
+                res.render('dashboard/data_select', {
+                    change_header: true,
+                    user_name: req.userName,
+                    //slug: "device"+ list_devices.id
+                    list_devices,
+
+                });
+            })
+    }
+
     getProduct(req, res) {
         return res.render('dashboard/product', {
             change_header: true,
@@ -23,7 +43,7 @@ class DashboardController {
             user_name: req.userName,
         });
     }
-     // [GET] /dashboard/controller
+    // [GET] /dashboard/controller
     getController(req, res) {
         return res.render('dashboard/controller', {
             change_header: true,
@@ -81,7 +101,7 @@ class DashboardController {
                 });
             })
             .catch((err) => {
-                res.status(500).send({message: "Quiz are not available"});
+                res.status(500).send({ message: "Quiz are not available" });
             });
 
     }
@@ -246,8 +266,7 @@ module.exports.createQuestion = (req, res) => {
     if (!req.body.Manychoice) {
         req.body.Manychoice = 0;
     }
-    if(typeof req.body.correctOption === "object")
-    {
+    if (typeof req.body.correctOption === "object") {
         req.body.correctOption = req.body.correctOption.join(",");
     }
     const { title, optionA, optionB, optionC, correctOption, Manychoice } = req.body;

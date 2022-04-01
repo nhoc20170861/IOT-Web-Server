@@ -10,7 +10,7 @@ var Pusher = require('pusher');
 const db = require('./app/models');
 const Device = db.device;
 const Role = db.role;
-const DataSensor = db.data_sensor
+const DataSensor = db.data_sensor;
 db.sequelize.sync();
 //force: true will drop the table if it already exists
 // db.sequelize.sync({force: true}).then(() => {
@@ -86,37 +86,64 @@ server.listen(port_server, () => {
     console.log(`App listening at http://localhost:${port_server}`);
 });
 
+// variable data stored
+var data = {
+    humi: 0,
+    temp: 0,
+    bat: 0,
+    pm2_5: 0,
+    time: ""
+}
+
+var device_current = 1;
+const month = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const day = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fir", "Sat"]
+
 // create connection between client and server thourgh socket
 io.on("connection", function (socket) {
     socket.on("disconnect", function () {
     });
     setInterval(async function () {
-        //if (flag == true) {
+        DataSensor.findOne({
+            where: {
+                deviceId: device_current
+            },
+            order: [['createdAt', 'DESC']],
+        })
+            .then((data_sensor) => {
+
+
+                //Get time when recieve data
+                let now = new Date(Date.now());
+                var formatted = day[now.getDay()] + " " + now.getDate() + ", " + month[now.getMonth()]
+                    + "  " + now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
+
+                data.time = formatted;
+                data.humi = data_sensor.dataValues.humidity;
+                data.temp = data_sensor.dataValues.temperature;
+                data.bat = data_sensor.dataValues.battery;
+                data.pm2_5 = data_sensor.dataValues.pm2_5;
+                console.log(data);
+
+            })
+            .catch((err) => { Console.log(err) })
         await socket.broadcast.emit("Server-sent-data", data);
-        console.log(data)
-        //     flag = false;
-        // }
+
+
+
     }, 5000);
-    //server listen data from client
-    // socket.on("Client-sent-data", function () {
-    //     // after listning data, server emit this data to another client
-    //     socket.emit("Server-sent-data", humi);
-    //     //console.log(humi);
-    //     });
+
 });
 
 // config connection mqtt broker
 const client = require('./config/mqtt.config');
+const { data_sensor } = require('./app/models');
 
 // defined subscribe and publish topic
 const topic_pub = 'nhoc20170861/mqtt';
-var topic_sub_ar = ['nhoc20170861/data/device1'];
+var topic_sub_ar = ['nhoc20170861/data/device0', 'nhoc20170861/data/device1', 'nhoc20170861/data/device2'];
 
-// variable data stored
-var data = {
-    value: 0,
-    time: ""
-};
+
 var currentTime = "";
 var flag = false;
 
@@ -131,23 +158,14 @@ client.on('connect', () => {
 
 // console.log message received from mqtt broker
 var count = 0;
-const month = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-const day = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fir", "Sat"]
+
 client.on('message', (topic_sub, payload) => {
     flag = true;
     console.log('Received Message:', topic_sub, payload.toString());
     const id_device = parseInt(topic_sub.slice(-1));
-    let now = new Date(Date.now());
+
     const data_sensor = JSON.parse(payload.toString());
 
-    //Get time when recieve data
-    var formatted = day[now.getDay()] + " " + now.getDate() + ", " + month[now.getMonth()]
-        + "  " + now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
-
-    currentTime = now.getDate() + ", " + month[now.getMonth()]
-        + " " + now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
-    data.time = formatted;
-    data.value = data_sensor;
 
     console.log(data)
     DataSensor.create({
@@ -196,11 +214,22 @@ var SensorData = {
     ]
 }
 
+const { authJwt } = require('./middleware');
+const res = require('express/lib/response');
+const { Console } = require('console');
+app.get('/dashboard/data/:slug', [authJwt.verifyToken], function (req, res) {
+    device_current = parseInt(req.params.slug.slice(-1));
+    console.log(device_current)
+    return res.render('dashboard/data_detail', {
+        change_header: true,
+        user_name: req.userName,
+    });
+})
 app.post('/dashboard/admin/createDevice', function (req, res) {
 
     console.log(req.body);
-    const { name_device} = req.body;
-    if (!name_device ) {
+    const { name_device, topic_device } = req.body;
+    if (!name_device) {
         return res.send({
             message: 'Create not success',
         })
@@ -208,21 +237,22 @@ app.post('/dashboard/admin/createDevice', function (req, res) {
 
     Device.create({
         name: name_device,
+        topic: topic_device,
 
     }).then((device) => {
         //count = device.id;
         console.log("device id= " + device.id);
         let new_device = "nhoc20170861/data/device" + device.id;
-        topic_sub_ar.unshift();
+        //topic_sub_ar.shift();
         topic_sub_ar.push(new_device);
         console.log(topic_sub_ar)
-   
-            client.subscribe(topic_sub_ar, () => {
-                console.log(`Subscribe to topic '${topic_sub_ar}'`);
-            });
-     
+
+        client.subscribe(topic_sub_ar, () => {
+            console.log(`Subscribe to topic '${topic_sub_ar}'`);
+        });
+
         return res.send({
-            message: 'Create success, device witd id ='+device.id,
+            message: 'Create success, device witd id =' + device.id,
         })
     });
 
