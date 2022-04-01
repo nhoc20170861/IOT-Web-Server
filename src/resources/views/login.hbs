@@ -5,7 +5,7 @@
             Login Form
         </div>
         <div class="card-body">
-            <form action="/auth/process_login" method="POST">
+            <form id="myForm" >
                 <div class="frame">
                     <label for="username">Username</label><br />
                     <input
@@ -63,8 +63,11 @@
             </form>
         </div>
     </div>
-    {{#if message}}
-        <h4 class="alert alert-danger mt-4">{{message}}</h4>
-    {{/if}}
+    <h4 class="alert alert-danger mt-4 hidden" id ="alert"></h4>
 </div>
+<style>
+.hidden {
+    display: none;
+}
+</style>
 <script src="../script/login.js"> </script>

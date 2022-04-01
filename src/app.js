@@ -5,6 +5,7 @@ dotenv.config({ path: path.join(__dirname, '.env') });
 const express = require('express');
 var session = require('express-session');
 var Pusher = require('pusher');
+var cors = require('cors')
 // connect db mysql
 const db = require('./app/models');
 const Device = db.device;
@@ -33,9 +34,18 @@ function initial() {
         name: 'admin',
     });
 }
-
+const corsOptions = {
+    credentials: true,
+    ///..other options
+};
 const app = express();
 const port_server = process.env.PORT_SERVER;
+app.use(cors(corsOptions));
+app.use(function (req, res, next) {
+    res.header("Access-Control-Allow-Origin", "http://192.168.1.4:3000");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
 app.use(
     session({
         resave: false,
@@ -130,7 +140,7 @@ client.on('connect', () => {
 // console.log message received from mqtt broker
 var count = 0;
 const month = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-const day = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fir", "Sat"];
+const day = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fir", "Sat"]
 client.on('message', (topic_sub, payload) => {
     flag = true;
     console.log('Received Message:', topic_sub, payload.toString());
@@ -144,7 +154,6 @@ client.on('message', (topic_sub, payload) => {
 
     currentTime = now.getDate() + ", " + month[now.getMonth()]
         + " " + now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
-
     data.time = formatted;
     data.value = data_sensor;
 
@@ -194,6 +203,7 @@ var SensorData = {
         },
     ]
 }
+<<<<<<< HEAD
 
 app.post('/dashboard/admin/createDevice', function (req, res) {
 
@@ -228,6 +238,8 @@ app.post('/dashboard/admin/createDevice', function (req, res) {
 
 });
 
+=======
+>>>>>>> 8690622a0b8d0514324a0f8486d1d154e18abfda
 
 app.get('/getDataSensor', function (req, res) {
     // DataSensor.findOne({
