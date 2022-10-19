@@ -1,8 +1,8 @@
 <div class='container mt-4'>
     <div class='card'>
+        {{!-- Form to process quiz --}}
         <div class='card-header' id="addQuestion" style='font-weight: bold'>
             <label>Add Question</label> 
-             {{!-- <button class='btn btn-primary' id="addQuestion">Add question</button> --}}
         </div>    
         <div class='card-body'>
             <form id="myForm" class="hidden">
@@ -40,21 +40,25 @@
         <span><button class='btn btn-primary' id="showquiz" onclick="showquiz()">View quiz</button>
         <button class='btn btn-primary' id="resetQuiz">Reset quiz</button></span>
         
+        {{!-- Form to process device --}}
         <div class='card-header' id="addDevice" style='font-weight: bold; '>   
             <label>Add Device</label> 
         </div>
-        <div class='card-body'>
-            <form id="myForm2" class="hidden">
+        <div class='card-body hidden' id = 'form-device'>
+            <form id="myForm2">
                 <div class='form-group' >
                     <label for='name_device'>Name Device</label>
                     <input type='text' class='form-control' id='name_device' name='name_device' />
-                    {<label for='topic_device'>Topic for Device</label>
+                    <label for='topic_device'>Topic for Device</label>
                     <input type='text' class='form-control' id='topic_device' name='topic_device' />
                 <button type='submit' class='btn btn-primary' id="createDevice">Submit</button>
             </form>
             <br>
             
         </div>
+        <label for='id_device'>Id Device to delete</label>
+        <input type='number' class='form-control' id='id_device' name='id_device' />
+        <span><button class='btn btn-primary' id="delete_device">Delete Device</button></span>
     
     </div>
     <br>
@@ -77,6 +81,20 @@
     }
     $(document).ready(function () {
 
+        $("#delete_device").click(function() {
+            const id_device = $("#id_device").val();
+            if(!id_device)
+                return $("#alert").text("id device not null");
+            $.post("/dashboard/admin/deleteDevice",
+                {
+                    command: "delete",
+                    id_device
+                },
+                function (response) {   
+                    $("#alert").text(response.message);
+                }) 
+            
+        })
         $("#addQuestion").click(function () {          
         
            if($("#myForm").hasClass('hidden')){
@@ -88,11 +106,11 @@
 
         $("#addDevice").click(function () {          
         
-           if($("#myForm2").hasClass('hidden')){
-                $("#myForm2").removeClass('hidden');
+           if($("#form-device").hasClass('hidden')){
+                $("#form-device").removeClass('hidden');
            }
            else
-                $("#myForm2").addClass('hidden');
+                $("#form-device").addClass('hidden');
         });
 
         $("#resetData").click(function () {       

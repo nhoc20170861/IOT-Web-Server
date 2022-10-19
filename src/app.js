@@ -13,9 +13,9 @@ const Role = db.role;
 const DataSensor = db.data_sensor;
 db.sequelize.sync();
 //force: true will drop the table if it already exists
-// db.sequelize.sync({force: true}).then(() => {
-//   console.log('Drop and Resync Database with { force: true }');
-//   initial();
+// db.sequelize.sync({ force: true }).then(() => {
+//     console.log('Drop and Resync Database with { force: true }');
+//     initial();
 // });
 
 function initial() {
@@ -72,11 +72,6 @@ app.use(cookieParser()); // cookie parser middleware
 const route = require('./routers');
 route(app);
 
-// app.post("/dashboard/product", function(req, res){
-//     res.sendFile(__dirname + '/resources/views//product.html');
-
-// })
-
 
 
 // initialize server and socket.io
@@ -96,44 +91,46 @@ var data = {
 }
 
 var device_current = 1;
-const month = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-const day = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fir", "Sat"]
+
 
 // create connection between client and server thourgh socket
 io.on("connection", function (socket) {
-    socket.on("disconnect", function () {
-    });
-    setInterval(async function () {
+    socket.on("disconnect", function () { });
+
+    //server listen data from client1
+    socket.on("device1-sent-data", function (id_device) {
+        // after listning data, server emit this data to another client
         DataSensor.findOne({
             where: {
-                deviceId: device_current
+                deviceId: parseInt(id_device)
             },
             order: [['createdAt', 'DESC']],
         })
             .then((data_sensor) => {
 
-
-                //Get time when recieve data
-                let now = new Date(Date.now());
-                var formatted = day[now.getDay()] + " " + now.getDate() + ", " + month[now.getMonth()]
-                    + "  " + now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
-
-                data.time = formatted;
-                data.humi = data_sensor.dataValues.humidity;
-                data.temp = data_sensor.dataValues.temperature;
-                data.bat = data_sensor.dataValues.battery;
-                data.pm2_5 = data_sensor.dataValues.pm2_5;
-                console.log(data);
-
+                socket.emit("Server-sent-device1", data_sensor);
             })
-            .catch((err) => { Console.log(err) })
-        await socket.broadcast.emit("Server-sent-data", data);
 
+    });
 
+    //server listen data from client2
+    socket.on("device2-sent-data", function (id_device) {
+        // after listning data, server emit this data to another client
+        DataSensor.findOne({
+            where: {
+                deviceId: parseInt(id_device)
+            },
+            order: [['createdAt', 'DESC']],
+        })
+            .then((data_sensor) => {
 
-    }, 5000);
+                socket.emit("Server-sent-device2", data_sensor);
+            })
+
+    });
 
 });
+
 
 // config connection mqtt broker
 const client = require('./config/mqtt.config');
@@ -141,12 +138,8 @@ const { data_sensor } = require('./app/models');
 
 // defined subscribe and publish topic
 const topic_pub = 'nhoc20170861/mqtt';
-var topic_sub_ar = ['nhoc20170861/data/device0', 'nhoc20170861/data/device1', 'nhoc20170861/data/device2'];
-
-
-var currentTime = "";
-var flag = false;
-
+const topic_pub1 = 'nhoc20170861/lamp';
+var topic_sub_ar = ['nhoc20170861/data/device1', 'nhoc20170861/data/device2'];
 
 // subscribe topic
 client.on('connect', () => {
@@ -155,6 +148,12 @@ client.on('connect', () => {
         console.log(`Subscribe to topic '${topic_sub_ar}'`);
     });
 });
+
+
+
+
+
+
 
 // console.log message received from mqtt broker
 var count = 0;
@@ -183,7 +182,7 @@ client.on('message', (topic_sub, payload) => {
 client.on('connect', () => {
     client.publish(
         topic_pub,
-        'nodejs mqtt test',
+        'nodejs mqtt connect',
         { qos: 2, retain: false },
         (error) => {
             if (error) {
@@ -192,44 +191,44 @@ client.on('connect', () => {
         },
     )
 });
-// var londonTempData = {
-//     city: 'London',
-//     unit: 'celsius',
-//     dataPoints: [
-//         {
-//             time: "12:30",
-//             temperature: 12
-//         },
-//     ]
-// }
 
-var SensorData = {
-    device: 'pm7003',
-    unit: 'ppm',
-    dataPoints: [
-        {
-            time: "",
-            value: 0
-        },
-    ]
-}
+// make api
+app.post('/dashboard/controller/lamp', (req, res) => {
 
-const { authJwt } = require('./middleware');
-const res = require('express/lib/response');
-const { Console } = require('console');
-app.get('/dashboard/data/:slug', [authJwt.verifyToken], function (req, res) {
-    device_current = parseInt(req.params.slug.slice(-1));
-    console.log(device_current)
-    return res.render('dashboard/data_detail', {
-        change_header: true,
-        user_name: req.userName,
-    });
+    let mode = req.body.lamp_mode;
+    // public to MQTT Broker
+    client.publish(topic_pub1, mode);
+    console.log(mode)
 })
+
+app.post('/dashboard/controller/lamp_timer', (req, res) => {
+
+    let mode = req.body;
+    // public to MQTT Broker
+    client.publish(topic_pub1, mode);
+    console.log(mode)
+})
+app.post('/dashboard/admin/deleteDevice', function (req, res) {
+
+    let id_device = req.body.id_device
+    Device.destroy({ where: { id: id_device } })
+        .then(() => {
+            let topic_unsub = "nhoc20170861/data/device" + id_device.toString()
+            client.unsubscribe(topic_unsub, () => {
+                console.log(`Subscribe to topic '${topic_unsub}'`);
+            });
+            return res.send({ message: "Delete device success" });
+        })
+        .catch((err) => {
+            return res.status(500).send({ message: err.message });
+        })
+})
+
+// create new device
 app.post('/dashboard/admin/createDevice', function (req, res) {
 
-    console.log(req.body);
     const { name_device, topic_device } = req.body;
-    if (!name_device) {
+    if (!name_device || !topic_device) {
         return res.send({
             message: 'Create not success',
         })
@@ -237,18 +236,14 @@ app.post('/dashboard/admin/createDevice', function (req, res) {
 
     Device.create({
         name: name_device,
-        topic: topic_device,
-
+        topic: topic_device
     }).then((device) => {
-        //count = device.id;
-        console.log("device id= " + device.id);
-        let new_device = "nhoc20170861/data/device" + device.id;
-        //topic_sub_ar.shift();
-        topic_sub_ar.push(new_device);
-        console.log(topic_sub_ar)
 
-        client.subscribe(topic_sub_ar, () => {
-            console.log(`Subscribe to topic '${topic_sub_ar}'`);
+        console.log("device id= " + device.id);
+        let new_topic_sub = "nhoc20170861/data/device" + device.id;
+
+        client.subscribe(new_topic_sub, () => {
+            console.log(`Subscribe to topic '${new_topic_sub}'`);
         });
 
         return res.send({
@@ -260,28 +255,6 @@ app.post('/dashboard/admin/createDevice', function (req, res) {
 });
 
 
-app.get('/getDataSensor', function (req, res) {
-    // DataSensor.findOne({
-    //     where: {
-    //         id: count,
-    //     }
-    // })
-    //     .then((data_sensor) => {
-    //         let DataPointFrist = {
-    //             time: currentTime,
-    //             value: data_sensor.dataValues.pm2_5
-
-    //         };
-    //SensorData.dataPoints[0].time = currentTime;
-    //SensorData.dataPoints[0].value = data_sensor.dataValues.pm2_5;
-    //SensorData.dataPoints.pop();
-    //SensorData.dataPoints.push(DataPointFrist);
-    console.log(SensorData);
-    //console.log(data_sensor.dataValues);
-    res.send(SensorData);
-    // });
-
-});
 
 
 const pusher = new Pusher({
@@ -291,28 +264,70 @@ const pusher = new Pusher({
     cluster: "ap1",
     useTLS: true
 });
+var currentTime = ""
+var SensorData_device1 = {
+    device: '1',
+    unit: 'none',
+    dataPoints: [
+        {
+            time: "",
+            value: 0
+        },
+    ]
+}
 
-app.get('/addDataSensor', function (req, res) {
+var SensorData_device2 = {
+    device: '2',
+    unit: 'none',
+    dataPoints: [
+        {
+            time: "",
+            value: 0
+        },
+    ]
+}
+app.get('/getDataSensor/:id', function (req, res) {
+    let id_device = parseInt(req.params.id);
+    if (id_device == 1) {
+        console.log(SensorData_device1)
+        res.send(SensorData_device1);
+    }
+    if (id_device == 2) {
+        console.log(SensorData_device2)
+        res.send(SensorData_device2);
+    }
+
+
+
+});
+
+app.get('/addDataSensor/1', function (req, res) {
+    //let id_device = req.params.id;
+    let id_device = 1;
     DataSensor.findOne({
         where: {
-            id: count,
-        }
+            deviceId: parseInt(id_device)
+        },
+        order: [['createdAt', 'DESC']],
     })
+
         .then((data_sensor) => {
-            //let now = new Date(Date.now());
-            //let currentTime = now.toLocaleString();        
+            console.log(SensorData_device1)
+            let now = new Date(Date.now());
+            currentTime = now.getDate() + "/" + (now.getMonth() + 1)
+                + "  " + now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
             let newDataPoint = {
                 time: currentTime,
                 value: data_sensor.dataValues.pm2_5
 
             };
             // remove first element
-            if (SensorData.dataPoints.length > 15) {
-                SensorData.dataPoints.shift();
+            if (SensorData_device1.dataPoints.length > 15) {
+                SensorData_device1.dataPoints.shift();
             }
-            SensorData.dataPoints.push(newDataPoint);
+            SensorData_device1.dataPoints.push(newDataPoint);
             //console.log(SensorData);   
-            pusher.trigger('london-temp-chart', 'new-temperature', {
+            pusher.trigger('device1-pm2_5-chart', 'new-pm2_5', {
                 dataPoint: newDataPoint
             });
             res.send({ success: true });
@@ -320,4 +335,42 @@ app.get('/addDataSensor', function (req, res) {
         .catch(() => {
             res.send({ success: false, errorMessage: 'Invalid Query Paramaters, required - temperature & time.' });
         })
+});
+app.get('/addDataSensor/2', function (req, res) {
+    let id_device = 2;
+    DataSensor.findOne({
+        where: {
+            deviceId: parseInt(id_device)
+        },
+        order: [['createdAt', 'DESC']],
+    })
+
+        .then((data_sensor) => {
+            console.log(SensorData_device1)
+            let now = new Date(Date.now());
+            currentTime = now.getDate() + "/" + (now.getMonth() + 1)
+                + "  " + now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
+            let newDataPoint = {
+                time: currentTime,
+                value: data_sensor.dataValues.pm2_5
+
+            };
+            // remove first element
+            if (SensorData_device1.dataPoints.length > 15) {
+                SensorData_device1.dataPoints.shift();
+            }
+            SensorData_device1.dataPoints.push(newDataPoint);
+            //console.log(SensorData);   
+            pusher.trigger('device2-pm2_5-chart', 'new-pm2_5', {
+                dataPoint: newDataPoint
+            });
+            res.send({ success: true });
+        })
+        .catch(() => {
+            res.send({ success: false, errorMessage: 'Invalid Query Paramaters, required - temperature & time.' });
+        })
+});
+
+app.get('*', function (req, res) {
+    res.status(404).render('page404');
 });

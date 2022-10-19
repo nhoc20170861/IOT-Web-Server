@@ -171,6 +171,16 @@ nav .profile-details i{
   border-radius: 12px;
   box-shadow: 0 5px 10px rgba(0,0,0,0.1);
 }
+.overview-boxes .box1{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* width: calc(100% / 4 - 15px); */
+  background: #fff;
+  padding: 15px 14px;
+  border-radius: 12px;
+  box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+}
 .overview-boxes .box-topic{
   font-size: 20px;
   font-weight: 500;
@@ -245,6 +255,8 @@ nav .profile-details i{
 
 /* left box */
 .home-content .sales-boxes .recent-sales{
+  position: relative;
+  flex-direction: column;
   width: 65%;
   background: #fff;
   padding: 20px 30px;
@@ -296,7 +308,12 @@ nav .profile-details i{
 }
 
 /* Right box */
+.home-content .sales-boxes {
+  width: 100%;
+}
+
 .home-content .sales-boxes .top-sales{
+  display: block;
   width: 35%;
   background: #fff;
   padding: 20px 30px;
@@ -428,4 +445,29 @@ nav .profile-details i{
   .sidebar.active ~ .home-section nav .profile-details{
     display: none;
   }
+}
+
+.overview-boxes .box-4 {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+
+.sales-boxes .title{
+  align-self: flex-start;
+  font-size: 24px;
+  font-weight: 500;
+  display: top;
+  align-items: center;
+  justify-content: space-between;
+  margin: 10px 0;
+}
+h2 {
+  display: block;
+  font-size: 1.5em;
+  margin-block-start: 0.83em;
+  margin-block-end: 0.83em;
+  margin-inline-start: 0px;
+  margin-inline-end: 0px;
+  font-weight: bold;
 }

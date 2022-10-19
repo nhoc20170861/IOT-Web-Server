@@ -8,7 +8,7 @@
             <span class="dashboard">Dashboard</span>
         </div>
         <div class="title">
-            Tracking Air Qualification
+            Tracking Air Qualification from {{device}}
         </div> 
         <div class="profile-details">
             <img src="../../images/profile.jpg" alt="" />
@@ -228,7 +228,7 @@
             ]
         };
 
-        ajax("/getDataSensor", "GET", {}, onFetchTempSuccess);
+        ajax("/getDataSensor/2", "GET", {}, onFetchTempSuccess);
 
         function onFetchTempSuccess(response) {
             hideEle("loader");
@@ -241,8 +241,8 @@
             renderWeatherChart(chartConfig)
         }
 
-        channel = pusher.subscribe('london-temp-chart');
-        channel.bind('new-temperature', function (data) {
+        channel = pusher.subscribe('device2-pm2_5-chart');
+        channel.bind('new-pm2_5', function (data) {
             var newTempData = data.dataPoint;
             console.log(newTempData);
             if (weatherChartRef.data.labels.length > 15) {
@@ -254,24 +254,24 @@
             weatherChartRef.update();
         });
 
-        /* TEMP CODE FOR TESTING */
+       
         var dummyTime = 1500;
         setInterval(function () {
-            //dummyTime = dummyTime + 10;
-            ajax("/addDataSensor" , "GET", {}, () => { });
-            //ajax("/addTemperature?temperature=" + getRandomInt(10, 20) + "&time=" + dummyTime, "GET", {}, () => { });
+   
+            ajax("/addDataSensor/2" , "GET", {}, () => { });
+           
         }, 5000);
 
-        /*function getRandomInt(min, max) {
-            return Math.floor(Math.random() * (max - min + 1)) + min;
-        }*/
-        /* TEMP CODE ENDS */
+       
     })();
 </script>
 <script> 
+    
+    const month = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const day = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fir", "Sat"]
     $(document).ready(function(){
 
- socket.on("Server-sent-data", function (data) {
+    /*socket.on("Server-sent-data", function (data) {
         if (data.humi != 0)  {
             $("#humi").text(data.humi + " %");
             $("#humi_log").text(data.time);
@@ -282,8 +282,31 @@
             $("#bat").text(data.bat + " %");
             $("#bat_log").text(data.time);
         }
-     })
+     })*/
+        setInterval(async () => {
+            await socket.emit("device2-sent-data", "2");
+            await socket.on("Server-sent-device2", function (data) {
+                if (data.humidity != 0)  {
+                //Get time when recieve data
+                    let now = new Date(Date.now());
+                    let formatted = day[now.getDay()] + " " + now.getDate() + ", " + month[now.getMonth()]
+                    + "  " + now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
+                    data.time = formatted;
+                    $("#humi").text(data.humidity + " %");
+                    $("#humi_log").text(data.time);
+                    $("#temp").text(data.temperature + " " + String.fromCharCode(176));
+                    $("#temp_log").text(data.time);
+                    $("#pm2_5").text(data.pm2_5);
+                    $("#pm2_5_log").text(data.time);
+                    $("#bat").text(data.battery + " %");
+                    $("#bat_log").text(data.time);
+                }
+            });
+        }, 5000);
     }) 
+
+
+
       
 </script>
 <script src="https://code.iconify.design/2/2.1.2/iconify.min.js"></script>

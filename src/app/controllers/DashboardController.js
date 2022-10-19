@@ -6,12 +6,11 @@ const weatherData = require('../../middleware/weather-utils')
 class DashboardController {
     // [GET] /dashboard/data
     getDataDetail(req, res) {
-
-        console.log(req.params)
-        //res.send("device" + req.params.slug);
-        return res.render('dashboard/data_detail', {
+        let device_current = parseInt(req.params.slug.slice(-1));
+        return res.render(`dashboard/data_detail_device${device_current}`, {
             change_header: true,
             user_name: req.userName,
+            device : 'device ' + device_current
         });
     }
     getDataSelect(req, res) {
@@ -20,7 +19,7 @@ class DashboardController {
                 const list_devices = devices.map((device) => device.dataValues)
                 //console.log(list_devices);
 
-                res.render('dashboard/data_select', {
+                res.render('dashboard/data_select_device', {
                     change_header: true,
                     user_name: req.userName,
                     //slug: "device"+ list_devices.id

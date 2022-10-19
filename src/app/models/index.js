@@ -43,10 +43,14 @@ db.user.belongsToMany(db.role, {
 // create data_sensor table relative with device table follow key: deviceId
 db.device =  require('../models/device.model.js')(sequelize, Sequelize);
 db.data_sensor = require('../models/data_sensor.model.js')(sequelize, Sequelize);
-db.device.hasOne(db.data_sensor);
+db.device.hasOne(db.data_sensor, {
+    onDelete: 'CASCADE',
+}
+    );
 db.data_sensor.belongsTo(db.device, {
     foreignKey: 'deviceId',
     as: 'devices',
+
 });
 
 

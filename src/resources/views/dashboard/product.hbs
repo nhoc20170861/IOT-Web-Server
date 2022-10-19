@@ -1,4 +1,5 @@
 {{> dashboard_slidebar}}
+
 <section class="home-section">
     <nav>
         <div class="sidebar-button">
@@ -25,28 +26,30 @@
     
     <div class="home-content">
         <div class="overview-boxes">
-            <div class="sales-boxes"></div>
-        <div class="recent-sales box">
-          
-          <div class="title">Hình ảnh sản phẩm</div>
-          <div class="box-4">
-            <img src="../images/product/eco1.png" alt="" width="200" height="200" class="myimage">
-            <img src="../images/product/eco2.png" alt="" width="200" height="200" class="myimage">
-            <img src="../images/product/eco3.png" alt="" width="200" height="200" class="myimage">
-            <img src="../images/product/eco4.png" alt="" width="200" height="200" class="myimage">
-          </div>
-        </div>
-        <div class="top-sales box">
-          <div class="title">Product Information</div>
-          <ul class="top-sales-details">
-             <p>Processer: ESP32</p>
-             </br>
-             <p>Temp & Humi Sensor: ATH10</p>
-             </br>
-             <p>PM2.5 Sensor: PMS7003 </p>
-             </br>
-              
-          </ul>
+            <div class="sales-boxes">
+                <div class="recent-sales box1">
+                <div class="title">Product Images</div>
+                <div class="box-4">
+                    <img class="mySlides" src="../images/product/eco11.jpg" width="400" height="400">
+                    <img class="mySlides" src="../images/product/eco21.jpg" width="400" height="400">
+                    <img class="mySlides" src="../images/product/eco31.jpg" width="400" height="400">
+                    <img class="mySlides" src="../images/product/eco41.jpg" width="400" height="400">
+
+                    <button class="w3-button w3-display-left" onclick="plusDivs(-1)">&#10094;</button>
+                    <button class="w3-button w3-display-right" onclick="plusDivs(+1)">&#10095;</button>
+                </div>
+            </div>
+            <div class="top-sales box">
+                <div class="title">Product Information</div>
+                <ul class="top-sales-details">
+                    <p>Processer: ESP32</p>
+                    </br>
+                    <p>Temp & Humi Sensor: ATH10</p>
+                    </br>
+                    <p>PM2.5 Sensor: PMS7003 </p>
+                    </br>
+                </ul>
+            </div>
         </div>
     </div>
 
@@ -57,4 +60,21 @@
             $("#product").addClass('active');
         }
     })
+</script>
+<script>
+var slideIndex = 1;
+showDivs(slideIndex);
+function plusDivs(n) {
+  showDivs(slideIndex += n);
+}
+function showDivs(n) {
+  var i;
+  var x = document.getElementsByClassName("mySlides");
+  if (n > x.length) {slideIndex = 1}
+  if (n < 1) {slideIndex = x.length}
+  for (i = 0; i < x.length; i++) {
+    x[i].style.display = "none";  
+  }
+  x[slideIndex-1].style.display = "block";  
+}
 </script>

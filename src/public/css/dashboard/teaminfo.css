@@ -21,7 +21,7 @@
 .overview-boxes .box3 {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-evenly;
     width: calc(100% - 15px);
     background: #fff;
     padding: 15px 14px;

@@ -61,15 +61,6 @@ $(document).ready(function () {
             });
     });
 
-    // $("#product").click(function () {
-    //     $.post("/dashboard/product",
-    //         function (response) {
-
-    //             $(".home-section .home-content").html(response);
-    //             console.log(response);
-
-    //         })
-    // });
 
     // setInterval(async () => {
     //     await socket.emit("Client-sent-data", "Hello world");

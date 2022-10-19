@@ -1,16 +1,4 @@
- <script>
-  		$(document).ready(function(){
-          $('#btn1').click(function(){
-            $('#lbl1').text('Click here');    });});
-  
-    </script>
-            <script>
-     $(document).ready(function(){
-      $('#updatechart').click(function(){
-      for (i=0; i<4; ++i){myArray[i]=Math.floor(Math.random() * 10);};
-         $('#lbl2').text(myArray);});});
-       </script> 
-</script>
+
 <!--<title> Responsiive Admin Dashboard | CodingLab </title>-->
     
 <style>
@@ -75,7 +63,16 @@ input:checked + .slider:before {
     <div class="home-content">
         <div class="overview-boxes">
             <div class="box3">
-                <h2>Save Mode  </h2>
+                <h2>LAMP</h2>
+                    <label class="switch">
+                        <input type="checkbox" onclick="handleClickSaveMode()"/>
+                        <span class="slider round"></span>
+                    </label>
+                </form>
+            </div>
+
+            <div class="box3">
+                <h2>TIMER</h2>
                 <label class="switch">
                     <input type="checkbox" />
                     <span class="slider round"></span>
@@ -83,15 +80,21 @@ input:checked + .slider:before {
             </div>
 
             <div class="box3">
-                <h2>Turn Light  </h2>
+                <label for="start">Date/Time</label>
+                    <input type="date" id="start" name="trip-start"
+                        value="2022-07-22"
+                        min="2022-01-01" max="2022-12-31">
+                    <input type="time" name="timeField"
+                        value="00:00">
+            </div>
+            <div class="box3">
+                <label for="start">Mode</label>
+                    <label>ON</label>
                 <label class="switch">
                     <input type="checkbox" />
                     <span class="slider round"></span>
                 </label>
-            </div>
-
-            <div class="box3">
-                <h2>Clear data  </h2>
+                    <label>OFF</label>
                 <label class="switch">
                     <input type="checkbox" />
                     <span class="slider round"></span>
@@ -100,10 +103,31 @@ input:checked + .slider:before {
         </div>
     </div>
 </section>
+<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.js" type="text/javascript"></script>
 <script>
     $(document).ready(function(){
         if(!$("#controller").hasClass('active')){
             $("#controller").addClass('active');
         }
     })
+      // click to call api turn on/off led
+    let saveModeStatus = false;
+    const handleClickSaveMode = () => {
+        let mode ='';
+        saveModeStatus = !saveModeStatus;
+        if (saveModeStatus == true) {mode = 'ON';}
+        else {mode = 'OFF';} 
+        const userAction = async () => {
+            const response = await fetch('/dashboard/controller/lamp', {
+                method: 'POST',
+                body: JSON.stringify({lamp_mode: mode}),
+                headers: {
+                    'Content-Type': 'application/json'
+                    } // string or object
+            });
+        };
+        userAction();
+    }
+
 </script>
