@@ -50,3 +50,32 @@ function checkPass() {
         setBGColor('passwordConfirm', goodColor);
     }
 }
+
+$(document).ready(function () {
+
+
+    $("#myFormRegister").on("submit", function (e) {
+        var dataString = $(this).serialize();
+        // console.log(dataString);
+        $.ajax({
+            type: "POST",
+            url: "/auth/register",
+            data: dataString,
+            success: function (response) {
+
+                // check message back to the user here
+                if (response.message != null) {
+                    console.log(response.message)
+                    if ($("#alert").hasClass('hidden') == true) {
+                        $("#alert").removeClass('hidden');
+                    }
+                    $("#alert").text(response.message);
+                }
+
+            }
+        });
+        e.preventDefault();
+    });
+
+
+})

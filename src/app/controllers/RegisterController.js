@@ -33,7 +33,7 @@ class RegisterController {
                         },
                     }).then((roles) => {
                         user.setRoles(roles).then(() => {
-                            return res.render('register', {
+                            return res.send({
                                 message: 'User was registered successfully!',
                             });
                         });
@@ -41,7 +41,7 @@ class RegisterController {
                 } else {
                     // user role = 1
                     user.setRoles([1]).then(() => {
-                        return res.render('register', {
+                        return res.send({
                             message: 'User was registered successfully!',
                         });
                     });

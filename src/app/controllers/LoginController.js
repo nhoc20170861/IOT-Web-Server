@@ -69,15 +69,17 @@ class LoginController {
     // [POST] /auth/process_login
     signin(req, res) {
         const { username, password } = req.body;
+
         User.findOne({
             where: {
                 username: username,
             },
         })
             .then((user) => {
+                console.log(user);
                 if (!user) {
-                    return res.render('login', {
-                        message: 'User Not found!',
+                    return res.send({
+                        'message': 'User Not found!',
                     });
                 }
 
@@ -87,8 +89,8 @@ class LoginController {
                 );
 
                 if (!passwordIsValid) {
-                    return res.render('login', {
-                        message: 'Password is wrong',
+                    return res.send({
+                        'message': 'Password is wrong',
                     });
                 }
                 console.log(user.id);
@@ -130,7 +132,8 @@ class LoginController {
                     console.log(authorities);
                     res.send({
                         accessToken,
-                        url: "/dashboard/data"});
+                        url: "/dashboard/data"
+                    });
                     // res.cookie('access_token', accessToken, {
                     //     /*add several attributes to make this cookie more secure.*/
                     //     maxAge: 3600 * 1000, //expire after 1h
@@ -170,15 +173,17 @@ class LoginController {
         console.log(req.session.userId)
         req.session.destroy();
         return res.status(200).send(
-            {   result : 'redirect',
-                url: '/home'})
+            {
+                result: 'redirect',
+                url: '/home'
+            })
 
         // Get userId from access_token to prepare delete refreshtoken
         // let token = req.cookies.access_token;
         // jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
         //     req.userId = decoded.id;
         // });
-    
+
         // delete refreshtoken from db
         // RefreshToken.destroy({
         //     where: {

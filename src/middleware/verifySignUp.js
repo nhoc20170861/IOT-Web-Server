@@ -7,11 +7,11 @@ checkDuplicateUsernameOrEmail = (req, res, next) => {
     console.log(req.body);
     const { username, email, password, passwordConfirm } = req.body;
     if (password.length < 6) {
-        return res.render('register', {
+        return res.send({
             message: 'Passwords must have 6 characters',
         });
     } else if (password !== passwordConfirm) {
-        return res.render('register', {
+        return res.send({
             message: 'Passwords do not match',
         });
     } else {
@@ -22,10 +22,8 @@ checkDuplicateUsernameOrEmail = (req, res, next) => {
             },
         }).then((user) => {
             if (user) {
-                // res.status(400).send({
-                //     message: 'Failed! Username is already in use!',
-                // });
-                return res.render('register', {
+
+                return res.send({
                     message: 'Failed! Username is already in use!',
                 });
             }
@@ -37,7 +35,7 @@ checkDuplicateUsernameOrEmail = (req, res, next) => {
                 },
             }).then((user) => {
                 if (user) {
-                    return res.render('register', {
+                    return res.send({
                         message: 'Failed! Email is already in use!',
                     });
                 }
@@ -51,7 +49,7 @@ checkDuplicateUsernameOrEmail = (req, res, next) => {
 checkRolesExisted = (req, res, next) => {
     if (req.body.roles) {
         let roles = ['user'];
-        if(req.body.roles ==='admin')
+        if (req.body.roles === 'admin')
             roles.push(req.body.roles);
         console.log(roles);
         for (let i = 0; i < roles.length; i++) {

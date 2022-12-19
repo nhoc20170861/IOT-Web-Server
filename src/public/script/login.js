@@ -38,15 +38,17 @@ $(document).ready(function () {
 
     $("#myForm").on("submit", function (e) {
         var dataString = $(this).serialize();
-        console.log(dataString);
+        // console.log(dataString);
         $.ajax({
             type: "POST",
             url: "/auth/process_login",
             data: dataString,
             success: function (response) {
+                console.log(response)
                 //console.log(response);
                 // check message back to the user here
                 if (response.message != null) {
+                    console.log(response.message)
                     if ($("#alert").hasClass('hidden') == true) {
                         $("#alert").removeClass('hidden');
                     }
@@ -68,28 +70,28 @@ $(document).ready(function () {
 function setCookie(name, value, options = {}) {
 
     options = {
-      path: '/',
-      // add other defaults here if necessary
-      ...options
+        path: '/',
+        // add other defaults here if necessary
+        ...options
     };
-  
+
     if (options.expires instanceof Date) {
-      options.expires = options.expires.toUTCString();
+        options.expires = options.expires.toUTCString();
     }
-  
+
     let updatedCookie = encodeURIComponent(name) + "=" + encodeURIComponent(value);
-  
+
     for (let optionKey in options) {
-      updatedCookie += "; " + optionKey;
-      let optionValue = options[optionKey];
-      if (optionValue !== true) {
-        updatedCookie += "=" + optionValue;
-      }
+        updatedCookie += "; " + optionKey;
+        let optionValue = options[optionKey];
+        if (optionValue !== true) {
+            updatedCookie += "=" + optionValue;
+        }
     }
-  
+
     document.cookie = updatedCookie;
-  }
-  
+}
+
   // Example of use:
 
 
