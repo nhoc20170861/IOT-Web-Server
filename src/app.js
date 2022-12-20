@@ -122,6 +122,18 @@ io.on("connection", function (socket) {
         })
             .then((data_sensor) => {
 
+
+
+                if (data_sensor == null) {
+                    data_sensor = {
+                        humidity: 0,
+                        temperature: 0,
+                        time: 0,
+                        pm2_5: 0,
+                        battery: 0
+                    };
+                }
+                console.log(data_sensor);
                 socket.emit("Server-sent-device1", data_sensor);
             })
 

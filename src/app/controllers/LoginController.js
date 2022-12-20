@@ -123,7 +123,7 @@ class LoginController {
                 session = req.session;
                 session.userName = user.username;
                 session.userId = user.id;
-                console.log(req.session);
+                // console.log(req.session);
                 var authorities = [];
                 user.getRoles().then((roles) => {
                     for (let i = 0; i < roles.length; i++) {
