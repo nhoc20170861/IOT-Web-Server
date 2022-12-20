@@ -76,7 +76,7 @@ class LoginController {
             },
         })
             .then((user) => {
-                console.log(user);
+                // console.log(user);
                 if (!user) {
                     return res.send({
                         'message': 'User Not found!',
