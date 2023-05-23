@@ -11,7 +11,7 @@ verifyToken = (req, res, next) => {
             message: 'No token provided!',
         });
     }
-    console.log(access_token);
+    // console.log(access_token);
 
     jwt.verify(
         access_token,
@@ -54,6 +54,7 @@ verify_refreshToken = (req, res, next) => {
 isAdmin = (req, res, next) => {
     User.findByPk(req.userId).then((user) => {
         user.getRoles().then((roles) => {
+            console.log("🚀 ~ file: authJwt.js:57 ~ user.getRoles ~ roles:", roles)
             for (let i = 0; i < roles.length; i++) {
                 if (roles[i].name === 'admin') {
                     next();

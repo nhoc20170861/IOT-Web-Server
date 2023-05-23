@@ -54,7 +54,7 @@ class LoginController {
                 // update access_token
                 res.cookie('access_token', accessToken, {
                     /*add several attributes to make this cookie more secure.*/
-                    maxAge: 3600 * 1000, //expire after 1h
+                    maxAge: 3600 * 1000 *24, //expire after 1h *24
                     secure: true,
                     httpOnly: true,
                     sameSite: 'lax',

@@ -8,15 +8,33 @@
         <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
         <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
         <link rel="manifest" href="/images/site.webmanifest">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+
     </head>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="/socket.io/socket.io.js"></script>
-    <body>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script >
+        const home_section = document.getElementsByClassName('home-section-class');
+        if(home_section){
+            home_section.app
+        }
+    </script>
+    {{!-- <script src="/socket.io/socket.io.js"></script> --}}
         {{> header}}
+    <body>
         <div class="container">
+            {{#if change_header}}
+                {{> dashboard_slidebar}}
+                <section class="home-section">
 
-            
-            {{{body}}}
+                     {{> dashboard_nav}}
+
+                     {{{body}}}
+                </section>
+            {{else}}
+                {{{body}}}
+            {{/if}}
+
 
         </div>    
         {{> footer}}  

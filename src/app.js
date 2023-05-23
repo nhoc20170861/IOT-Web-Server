@@ -75,25 +75,26 @@ route(app);
 
 
 // initialize server and socket.io
-// var server = require("http").Server(app);
-// var io = require("socket.io")(server);
-// server.listen(port_server, () => {
-//     console.log(`App listening at http://localhost:${port_server}`);
-// });
+var server = require("http").Server(app);
+var io = require("socket.io")(server);
+server.listen(port_server, () => {
+    console.log(`App listening at http://localhost:${port_server}`);
+});
 
-const https = require('https');
-const fs = require('fs');
+// _________________________start https server ___________________________________
+// const https = require('https');
+// const fs = require('fs');
 
-const https_options = {
-    ca: fs.readFileSync(path.join(__dirname, 'ca_bundle.crt')),
-    key: fs.readFileSync(path.join(__dirname, 'private.key')),
-    cert: fs.readFileSync(path.join(__dirname, 'certificate.crt'))
-};
-const httpsServer = https.createServer(https_options, app);
-var io = require("socket.io")(httpsServer);
-httpsServer.listen(port_server, () => {
-    console.log(`App listening at https://localhost:${port_server}`);
-})
+// const https_options = {
+//     ca: fs.readFileSync(path.join(__dirname, 'ca_bundle.crt')),
+//     key: fs.readFileSync(path.join(__dirname, 'private.key')),
+//     cert: fs.readFileSync(path.join(__dirname, 'certificate.crt'))
+// };
+// const httpsServer = https.createServer(https_options, app);
+// var io = require("socket.io")(httpsServer);
+// httpsServer.listen(port_server, () => {
+//     console.log(`App listening at https://localhost:${port_server}`);
+// })
 
 // variable data stored
 var data = {
@@ -400,3 +401,6 @@ app.get('/addDataSensor/2', function (req, res) {
 app.get('*', function (req, res) {
     res.status(404).render('page404');
 });
+
+
+// ============================== code nodejs connect to rosmaster

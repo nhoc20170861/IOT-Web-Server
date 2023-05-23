@@ -1,28 +1,5 @@
 
- {{> dashboard_slidebar}}
- 
-<section class="home-section">
-    <nav>
-        <div class="sidebar-button">
-            <i class="bx bx-menu sidebarBtn"></i>
-            <span class="dashboard">Dashboard</span>
-        </div>
-        <div class="title">
-            Tracking Air Qualification
-        </div> 
-        <div class="profile-details">
-            <img src="../images/profile.jpg" alt="" />
-            <span class="admin_name">{{user_name}}</span>
-            <div class="dropdown">
-                <button onclick="myFunction()" class="dropbtn">V</button>
-                <div id="myDropdown" class="dropdown-content">
-                    <a href="/home">Home</a>
-                    <a href="/changePassword">Change Password</a>
-                    <a href="/dashboard/admin/quiz">Admin</a>
-                </div>
-            </div>
-        </div>
-    </nav>
+
     <div class="home-content">
         <p style="display: block; margin: 10px; padding: 10px 20px ; ">Select device you want to view</p>
         <div class="overview-boxes">
@@ -43,7 +20,7 @@
         {{/each}}
          </div>
     </div>
-</section>
+
 <script>
     $(document).ready(function(){
         if(!$("#data").hasClass('active')){

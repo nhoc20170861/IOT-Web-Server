@@ -57,6 +57,14 @@ class DashboardController {
         });
     }
 
+     // [GET] /dashboard/robot
+    getRobotGui(req, res){
+        return res.render('dashboard/robotgui', {
+            change_header: true,
+            user_name: req.userName,
+        });
+    }
+
 
 
     // [GET] /dashboard/showquiz

@@ -1,61 +1,65 @@
 <style>.hidden{ display: none; }</style>
 <div class="container mt-4">
-    <div class="card">
-        <div class="card-header" style="font-weight: bold">
-            Register Form
-        </div>
-        <div class="card-body">
-            <form id="myFormRegister">
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input
-                        type="text"
-                        class="form-control"
-                        id="username"
-                        name="username"
-                    />
-                </div>
-                <div class="form-group">
-                    <label for="email">Email address</label>
-                    <input
-                        type="email"
-                        class="form-control"
-                        id="email"
-                        name="email"
-                        placeholder="sophie@example.com"
-                        required
-                    />
-                </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input
-                        type="password"
-                        class="form-control"
-                        id="password"
-                        name="password"
-                        onkeyup="checkPass()"
-                    />
-                </div>
-                <div class="form-group">
-                    <label for="passwordConfirm">Confirm Password</label>
-                    <input
-                        type="password"
-                        class="form-control"
-                        id="passwordConfirm"
-                        name="passwordConfirm"
-                        onkeyup="checkPass()"
-                    />
-                </div>
-                <div id="error-nwl">Enter a password of at least 6 characters</div>
-                <input type="checkbox" id="roles" name="roles" value="admin" />
-                <label>Register with admin</label><br />
-                <button type="submit" class="btn btn-primary">Register User</button>
-            </form>
-
-        </div>
+  <div class="card">
+    <div class="card-header" style="font-weight: bold">
+      Register Form
     </div>
+    <div class="card-body">
+      <form id="myFormRegister">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input
+            type="text"
+            class="form-control"
+            id="username"
+            name="username"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="email">Email address</label>
+          <input
+            type="email"
+            class="form-control"
+            id="email"
+            name="email"
+            placeholder="sophie@example.com"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input
+            type="password"
+            class="form-control"
+            id="password"
+            name="password"
+            onkeyup="checkPass()"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="passwordConfirm">Confirm Password</label>
+          <input
+            type="password"
+            class="form-control"
+            id="passwordConfirm"
+            name="passwordConfirm"
+            onkeyup="checkPass()"
+            required
+          />
+        </div>
+        <div id="error-nwl">Enter a password of at least 6 characters</div>
+        <input type="checkbox" id="roles" name="roles" value="admin" />
+        <label>Register with admin</label><br />
+        <button type="submit" class="btn btn-primary btn-lg btn-block">Register
+          User</button>
+      </form>
 
-    <h4 class="alert alert-danger mt-4 hidden" id="alert"></h4>
+    </div>
+  </div>
+
+  <h4 class="alert alert-danger mt-4 hidden" id="alert"></h4>
 
 </div>
 
