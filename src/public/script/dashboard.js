@@ -1,5 +1,4 @@
 function replaceClass(elem, oldClass, newClass) {
-
     if (elem.hasClass(oldClass)) {
         elem.removeClass(oldClass);
     }
@@ -7,13 +6,13 @@ function replaceClass(elem, oldClass, newClass) {
 }
 
 function myFunction() {
-    document.getElementById("myDropdown").classList.toggle("show");
+    document.getElementById('myDropdown').classList.toggle('show');
 }
 
 // Close the dropdown if the user clicks outside of it
 window.onclick = function (event) {
     if (!event.target.matches('.dropbtn')) {
-        let dropdowns = document.getElementsByClassName("dropdown-content");
+        let dropdowns = document.getElementsByClassName('dropdown-content');
 
         for (let i = 0; i < dropdowns.length; i++) {
             var openDropdown = dropdowns[i];
@@ -22,10 +21,10 @@ window.onclick = function (event) {
             }
         }
     }
-}
+};
 
 // var socket = io("https://localhost:8443"); // for https server
-var socket = io("http://localhost:3000");      // for http server
+var socket = io('http://localhost:3000'); // for http server
 var receive_data = {};
 
 $(document).ready(function () {
@@ -35,33 +34,31 @@ $(document).ready(function () {
         sidebar.toggleClass('active');
         if (sidebar.hasClass('active')) {
             replaceClass(sidebarBtn, 'bx-menu', 'bx-menu-alt-right');
-        }
-        else {
+        } else {
             replaceClass(sidebarBtn, 'bx-menu-alt-right', 'bx-menu');
         }
-
     });
 
-    $("#summit").click(function () {
-        $.post("/request",
+    $('#summit').click(function () {
+        $.post(
+            '/request',
             {
-                name: "viSion",
-                designation: "Professional gamer"
+                name: 'viSion',
+                designation: 'Professional gamer'
             },
             function (data, status) {
                 console.log(data);
-            });
+            }
+        );
     });
-    $("#logout").click(function () {
-        $.post("/auth/logout",
-            function (response) {
-                if (response.result == 'redirect') {
-                    alert("You will be redirected to home")
-                    location.href = response.url;
-                }
-            });
+    $('#logout').click(function () {
+        $.post('/v1/auth/logout', function (response) {
+            if (response.result == 'redirect') {
+                alert('You will be redirected to home');
+                location.href = response.url;
+            }
+        });
     });
-
 
     // setInterval(async () => {
     //     await socket.emit("Client-sent-data", "Hello world");
@@ -74,6 +71,4 @@ $(document).ready(function () {
     //     $("#time_log").text(now.toLocaleTimeString());
     //     console.log(now.toUTCString());
     // }, 5000);
-
 });
-

@@ -1,63 +1,53 @@
+<div class='home-content'>
+    <div class='overview-boxes'>
+        <div class='box1'>
 
-    <div class="home-content">
-        <div class="overview-boxes">
-            <div class="box1">
-
-                <div class="box3">
-                    <a
-                        href="https://dienmaycholon.vn/kinh-nghiem-mua-sam/bui-min-pm25-va-pm10-sat-thu-vo-hinh-cua-con-nguoi"
-                    ></a>
-                    <img src="../images/bui pm2.5.jpg" />
-                </div>
-                <div class="box2">
-                    <div class="right-side">
-                        <div class="indicator">
-                            <a
-                                href="https://dienmaycholon.vn/kinh-nghiem-mua-sam/bui-min-pm25-va-pm10-sat-thu-vo-hinh-cua-con-nguoi"
-                            >How PM2.5 can affect human health
-                            </a>
-                        </div>
+            <div class='box3'>
+                <a href='https://dienmaycholon.vn/kinh-nghiem-mua-sam/bui-min-pm25-va-pm10-sat-thu-vo-hinh-cua-con-nguoi'></a>
+                <img src='/images/bui pm2.5.jpg' />
+            </div>
+            <div class='box2'>
+                <div class='right-side'>
+                    <div class='indicator'>
+                        <a href='https://dienmaycholon.vn/kinh-nghiem-mua-sam/bui-min-pm25-va-pm10-sat-thu-vo-hinh-cua-con-nguoi'>How PM2.5 can affect human health
+                        </a>
                     </div>
                 </div>
             </div>
-
-            <div class="box1">
-
-                <div class="box3">
-                    <a
-                        href="https://dienmaycholon.vn/kinh-nghiem-mua-sam/bui-min-pm25-va-pm10-sat-thu-vo-hinh-cua-con-nguoi"
-                    ></a>
-                    <img src="../images/bui pm2.5 (2).jpg" />
-                </div>
-
-                <div class="box2">
-                    <div class="right-side">
-                        <div class="indicator">
-                            <a
-                                href="https://dienmaycholon.vn/kinh-nghiem-mua-sam/bui-min-pm25-va-pm10-sat-thu-vo-hinh-cua-con-nguoi"
-                            >What is PM2.5
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
         </div>
+
+        <div class='box1'>
+
+            <div class='box3'>
+                <a href='https://dienmaycholon.vn/kinh-nghiem-mua-sam/bui-min-pm25-va-pm10-sat-thu-vo-hinh-cua-con-nguoi'></a>
+                <img src='/images/bui pm2.5 (2).jpg' />
+            </div>
+
+            <div class='box2'>
+                <div class='right-side'>
+                    <div class='indicator'>
+                        <a href='https://dienmaycholon.vn/kinh-nghiem-mua-sam/bui-min-pm25-va-pm10-sat-thu-vo-hinh-cua-con-nguoi'>What is PM2.5
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <form action='/v1/dashboard/upload/photo' enctype='multipart/form-data' method='POST'>
+            <input type='file' name='myImage' accept='image/*' />
+            <input type='submit' value='Upload Photo' />
+        </form>
+
     </div>
-    <div>
-     <a id= "link_to_quiz" href="showquiz?page=1" > Do you want to take a small test of air quality? Let's click here. </a>
-    </div>
+</div>
+<div>
+    <a id='link_to_quiz' href='showquiz?page=1'> Do you want to take a small test of air quality? Let's click here. </a>
+</div>
 
 <script>
-    $(document).ready(function(){ $('#btn1').click(function(){
-    $('#lbl1').text('Click here'); }); $('#updatechart').click(function(){ for
-    (i=0; i<4; ++i){myArray[i]=Math.floor(Math.random() * 10);};
+    $(document).ready(function(){ $('#btn1').click(function(){ $('#lbl1').text('Click here'); }); $('#updatechart').click(function(){ for (i=0; i<4; ++i){myArray[i]=Math.floor(Math.random() * 10);};
     $('#lbl2').text(myArray); }); });
 </script>
 <script>
-    $(document).ready(function(){
-        if(!$("#knowledge").hasClass('active')){
-            $("#knowledge").addClass('active');
-        }
-    })
+    $(document).ready(function(){ if(!$("#knowledge").hasClass('active')){ $("#knowledge").addClass('active'); } })
 </script>

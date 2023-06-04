@@ -1,6 +1,4 @@
-
 function setCookie(name, value, options = {}) {
-
     options = {
         path: '/',
         // add other defaults here if necessary
@@ -11,13 +9,13 @@ function setCookie(name, value, options = {}) {
         options.expires = options.expires.toUTCString();
     }
 
-    let updatedCookie = encodeURIComponent(name) + "=" + encodeURIComponent(value);
+    let updatedCookie = encodeURIComponent(name) + '=' + encodeURIComponent(value);
 
     for (let optionKey in options) {
-        updatedCookie += "; " + optionKey;
+        updatedCookie += '; ' + optionKey;
         let optionValue = options[optionKey];
         if (optionValue !== true) {
-            updatedCookie += "=" + optionValue;
+            updatedCookie += '=' + optionValue;
         }
     }
 
@@ -25,34 +23,34 @@ function setCookie(name, value, options = {}) {
 }
 $(document).ready(function () {
     // show and hide password
-    $(".eye.eye-close").on("click", function () {
-        $(".eye.eye-close").addClass('hidden');
-        $(".eye.eye-open").removeClass('hidden');
-        $("#password").attr('type', 'text');
+    $('.eye.eye-close').on('click', function () {
+        $('.eye.eye-close').addClass('hidden');
+        $('.eye.eye-open').removeClass('hidden');
+        $('#password').attr('type', 'text');
     });
-    $(".eye.eye-open").on("click", function () {
-        $(".eye.eye-open").addClass('hidden');
-        $(".eye.eye-close").removeClass('hidden');
-        $("#password").attr('type', 'password');
+    $('.eye.eye-open').on('click', function () {
+        $('.eye.eye-open').addClass('hidden');
+        $('.eye.eye-close').removeClass('hidden');
+        $('#password').attr('type', 'password');
     });
 
-    $("#myForm").on("submit", function (e) {
+    $('#myForm').on('submit', function (e) {
         var dataString = $(this).serialize();
-        // console.log(dataString);
+        console.log(dataString);
         $.ajax({
-            type: "POST",
-            url: "/auth/process_login",
+            type: 'POST',
+            url: '/v1/auth/process_login',
             data: dataString,
             success: function (response) {
-                console.log(response)
+                console.log(response);
                 //console.log(response);
                 // check message back to the user here
                 if (response.message != null) {
-                    console.log(response.message)
-                    if ($("#alert").hasClass('hidden') == true) {
-                        $("#alert").removeClass('hidden');
+                    console.log(response.message);
+                    if ($('#alert').hasClass('hidden') == true) {
+                        $('#alert').removeClass('hidden');
                     }
-                    $("#alert").text(response.message);
+                    $('#alert').text(response.message);
                 }
                 if (response.accessToken != null) {
                     setCookie('access_token', response.accessToken, { 'max-age': 3600 });
@@ -63,12 +61,9 @@ $(document).ready(function () {
         });
         e.preventDefault();
     });
-
-
-})
+});
 
 function setCookie(name, value, options = {}) {
-
     options = {
         path: '/',
         // add other defaults here if necessary
@@ -79,43 +74,17 @@ function setCookie(name, value, options = {}) {
         options.expires = options.expires.toUTCString();
     }
 
-    let updatedCookie = encodeURIComponent(name) + "=" + encodeURIComponent(value);
+    let updatedCookie = encodeURIComponent(name) + '=' + encodeURIComponent(value);
 
     for (let optionKey in options) {
-        updatedCookie += "; " + optionKey;
+        updatedCookie += '; ' + optionKey;
         let optionValue = options[optionKey];
         if (optionValue !== true) {
-            updatedCookie += "=" + optionValue;
+            updatedCookie += '=' + optionValue;
         }
     }
 
     document.cookie = updatedCookie;
 }
 
-  // Example of use:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// Example of use:
