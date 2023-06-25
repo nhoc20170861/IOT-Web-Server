@@ -71,7 +71,8 @@ ros.on("close", function () {
 });
 
 // Create a connection to the rosbridge WebSocket server.
-ros.connect("ws://192.168.0.129:9090");
+// ros.connect("ws://192.168.0.129:9090");
+ros.connect("ws://0.0.0.0:9090");
 
 async function init() {
   console.log("robot visual start");
@@ -124,7 +125,7 @@ async function init() {
     var mouseDown = false;
     var zoomKey = false;
     var panKey = false;
-    var startPos = new ROSLIB.Vector3();
+    // var startPos = new ROSLIB.Vector3();
     viewer.scene.addEventListener("stagemousedown", function (event) {
       if (event.nativeEvent.ctrlKey === true) {
         zoomKey = true;
@@ -170,7 +171,8 @@ async function init() {
         } else {
           var pos = viewer.scene.globalToRos(event.stageX, event.stageY);
           var goalPose = navGoal.endGoalSelection(pos);
-          navGoal.sendGoal(goalPose);
+          console.log("🚀 ~ file: robotgui.js:174 ~ goalPose:", goalPose)
+          // navGoal.sendGoal(goalPose);
         }
         mouseDown = false;
       }

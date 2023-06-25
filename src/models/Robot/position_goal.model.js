@@ -24,7 +24,7 @@ module.exports = (sequelize, Sequelize) => {
             allowNull: false,
             defaultValue: 0
         },
-        orientation: {
+        theta: {
             type: Sequelize.FLOAT,
             allowNull: false,
             defaultValue: 0

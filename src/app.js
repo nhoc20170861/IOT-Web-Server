@@ -102,13 +102,19 @@ app.use('/', routes);
 // Start Server
 
 const server = require('http').Server(app);
-const io = require('socket.io')(server);
+export const socketIo = require('socket.io')(server, {
+    cors: {
+        origin: '*'
+    }
+});
+
 server.listen(port_server, () => {
     Logging.info(`⚡️[server]: Server is running at http://localhost:${port_server}`);
 });
 
 // create connection between client and server thourgh socket
-io.on('connection', function (socket) {
+socketIo.on('connection', function (socket) {
+    Logging.info("🚀 New client connected " + socket.id); 
     socket.on('disconnect', function () {});
 
     //server listen data from client1
@@ -147,6 +153,7 @@ io.on('connection', function (socket) {
         });
     });
 });
+
 
 // _________________________start https server ___________________________________
 // const https = require('https');

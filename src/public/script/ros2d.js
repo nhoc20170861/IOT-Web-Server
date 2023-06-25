@@ -2855,10 +2855,14 @@ var ROS2D = (function (exports, createjs, ROSLIB) {
         });
         console.log("🚀 ~ file: ros2d.js:2856 ~ NavGoal ~ endGoalSelection ~ quat:", quat)
 
-        return new ROSLIB.Pose({
+        // return new ROSLIB.Pose({
+        //   position: this.goalStartPos,
+        //   orientation: quat,
+        // });
+        return {
           position: this.goalStartPos,
           orientation: quat,
-        });
+        };
       }
   
       /**
@@ -2974,10 +2978,10 @@ var ROS2D = (function (exports, createjs, ROSLIB) {
         this.width = (this.autoScale ? divIDwrapper.offsetWidth:options.width)
         this.height = (this.autoScale ? divIDwrapper.offsetHeight:options.height)
        ;
-        let background = options.background || '#111111';
-  
-        // create the canvas to render to
-        let canvas = document.createElement('canvas');
+          let background = options.background || '#111111';
+    
+          // create the canvas to render to
+          let canvas = document.createElement('canvas');
         
         canvas.width = this.width;
         canvas.height = this.height;

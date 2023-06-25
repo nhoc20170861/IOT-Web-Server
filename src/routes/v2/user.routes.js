@@ -24,4 +24,5 @@ router.get('/all', [verifyTokenInHeaderReq], (req, res) => {
         userName: req.userName
     });
 });
+
 export default router;
