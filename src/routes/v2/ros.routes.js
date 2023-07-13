@@ -18,7 +18,9 @@ router.use(function (req, res, next) {
  * */
 router.get('/robot/getTaskQueueFromAllRobots',rosController.getTaskQueueFromAllRobots);
 router.post('/robot/resetAllTaskQueue',rosController.resetAllTaskQueue);
-router.post('/robot/send-task-list', rosController.sendTaskListToOneRobot);
+router.post('/robot/sendTaskList', rosController.autoPickRobotAndSendTaskList);
+router.get('/robot/getCurrentPose', rosController.getCurrentPose);
+
 /**
  * @brief Api remote to a robot through server 
  * 
