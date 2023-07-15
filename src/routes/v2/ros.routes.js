@@ -5,30 +5,39 @@ const router = Router();
 import RosController from '../../controllers/v2/ros.controller';
 const rosController = new RosController();
 
-
 router.use(function (req, res, next) {
     res.header('Access-Control-Allow-Headers', 'x-access-token, Origin, Content-Type, Accept');
     next();
 });
 
-
+/**
+ * @brief Api is used to setTargetPointFromCallStation from call station esp32
+ *
+ * */
+router.post('/robot/setTargetPoint', rosController.setTargetPoint);
+router.get('/robot/getStatusOfAllRobots', rosController.getStatusOfAllRobots);
+/**
+ * @brief Api used to create and get targetPoint list
+ *
+ * */
+router.post('/robot/createNewTargetPoint', rosController.createNewTargetPoint);
+router.get('/robot/getAllTargetPoint', rosController.getAllTargetPoint);
 /**
  * @brief Api used to auto pick robot to execute taskList
- * 
+ *
  * */
-router.get('/robot/getTaskQueueFromAllRobots',rosController.getTaskQueueFromAllRobots);
-router.post('/robot/resetAllTaskQueue',rosController.resetAllTaskQueue);
+router.get('/robot/getTaskQueueFromAllRobots', rosController.getTaskQueueFromAllRobots);
+router.post('/robot/resetAllTaskQueue', rosController.resetAllTaskQueue);
 router.post('/robot/sendTaskList', rosController.autoPickRobotAndSendTaskList);
 router.get('/robot/getCurrentPose', rosController.getCurrentPose);
 
 /**
- * @brief Api remote to a robot through server 
- * 
+ * @brief Api remote to a robot through server
+ *
  * */
 router.post('/robot/:id/send-task-list', rosController.sendTaskListToOneRobot);
 router.post('/robot/:id/resetAllGoals', rosController.callServiceResetAllGoals);
 router.get('/robot/:id/get-current-status', rosController.callServiceGetCurrentStatus);
-
 
 router.post('/robot/:id/state/toggle-state', rosController.callServiceToggleState);
 router.post('/robot/:id/state/set-state', rosController.callServiceSetState);

@@ -17,42 +17,94 @@ import db from './models';
 
 const Device = db.device;
 const Role = db.role;
+const PositionGoal = db.position_goals;
 const DataSensor = db.data_sensor;
-db.sequelize.sync();
-//force: true will drop the table if it already exists
-// db.sequelize
-//   .query("SET FOREIGN_KEY_CHECKS = 0")
-//   .then(function () {
-//     return db.sequelize.sync({ force: true });
-//   })
-//   .then(function () {
-//     return db.sequelize.query("SET FOREIGN_KEY_CHECKS = 1");
-//   })
-//   .then(
-//     function () {
-//       console.log("Drop and Resync Database with { force: true }");
-//       initial();
-//     },
-//     function (err) {
-//       console.log(err);
-//     }
-//   );
 
-function initial() {
-    Role.create({
-        id: 1,
-        name: 'user'
-    });
+async function initialDataBase() {
+    const TargetPointList = [
+        {
+            pointName: 'point_1',
+            pointType: 'Goal point',
+            xCoordinate: -4.06,
+            yCoordinate: 3.5,
+            theta: 0
+        },
+        {
+            pointName: 'point_2',
+            pointType: 'Goal Point',
+            xCoordinate: -4.048,
+            yCoordinate: 1.09,
+            theta: 0
+        },
+        {
+            pointName: 'point_3',
+            pointType: 'Goal Point',
+            xCoordinate: 0.47,
+            yCoordinate: 0.32,
+            theta: 0
+        },
+        {
+            pointName: 'point_4',
+            pointType: 'Goal Point',
+            xCoordinate: 4.63,
+            yCoordinate: 3.7,
+            theta: 0
+        },
+        {
+            pointName: 'point_5',
+            pointType: 'Goal Point',
+            xCoordinate: 4.55,
+            yCoordinate: 0.74,
+            theta: 0
+        }
+    ];
 
-    Role.create({
-        id: 2,
-        name: 'moderator'
-    });
+    const HomePointList = [
+        {
+            pointName: 'home_0',
+            pointType: 'Home Point',
+            xCoordinate: -6.62,
+            yCoordinate: 4.0,
+            theta: 0
+        },
+        {
+            pointName: 'home_1',
+            pointType: 'Home Point',
+            xCoordinate: -6.62,
+            yCoordinate: 3.25,
+            theta: 0
+        },
+        {
+            pointName: 'home_2',
+            pointType: 'Home Point',
+            xCoordinate: -6.62,
+            yCoordinate: 2.5,
+            theta: 0
+        }
+    ];
 
-    Role.create({
-        id: 3,
-        name: 'admin'
-    });
+    const RoleList = [
+        {
+            id: 1,
+            name: 'user'
+        },
+        {
+            id: 2,
+            name: 'moderator'
+        },
+        {
+            id: 3,
+            name: 'admin'
+        }
+    ];
+
+    try {
+        await Role.bulkCreate(RoleList);
+        await PositionGoal.bulkCreate(TargetPointList);
+        await PositionGoal.bulkCreate(HomePointList);
+    } catch (error) {
+        console.log('🚀 ~ file: position_goal.model.js:100 ~ module.exports= ~ error:', error);
+    }
 }
 
 const app = express();
@@ -108,13 +160,71 @@ export const socketIo = require('socket.io')(server, {
     }
 });
 
-server.listen(port_server, () => {
-    Logging.info(`⚡️[server]: Server is running at http://localhost:${port_server}`);
-});
+import { robotConfigs, currentPose, GoalPoseArray, ParseFloat } from './controllers/v2/ros.controller';
+
+db.sequelize
+    .sync()
+    .then(() => {
+        // Lấy toàn bộ bản ghi từ cơ sở dữ liệu
+        PositionGoal.findAll().then((allPositionGoals) => {
+            // Phân loại bản ghi theo pointType
+            allPositionGoals.forEach((positionGoal) => {
+                const { pointName } = positionGoal;
+                if (!GoalPoseArray.hasOwnProperty(pointName)) {
+                    GoalPoseArray[pointName] = {
+                        position: {
+                            x: positionGoal.xCoordinate,
+                            y: positionGoal.yCoordinate,
+                            z: 0
+                        },
+                        orientation: {
+                            x: 0,
+                            y: 0,
+                            z: ParseFloat(Math.sin(positionGoal.theta / 2.0), 2),
+                            w: ParseFloat(Math.cos(positionGoal.theta / 2.0), 2)
+                        }
+                    };
+                } else {
+                }
+            });
+
+            // set current pose for all robot;
+            Object.keys(robotConfigs).forEach((key, index) => {
+                if (GoalPoseArray.hasOwnProperty(robotConfigs[key].initPose)) {
+                    currentPose[key] = GoalPoseArray[robotConfigs[key].initPose];
+                }
+            });
+        });
+
+        server.listen(port_server, () => {
+            Logging.info(`⚡️[server]: Server is running at http://localhost:${port_server}`);
+        });
+    })
+    .catch((error) => {
+        console.error('Database synchronization error:', error);
+    });
+// force: true will drop the table if it already exists
+// db.sequelize
+//     .query('SET FOREIGN_KEY_CHECKS = 0')
+//     .then(function () {
+//         return db.sequelize.sync({ force: true });
+//     })
+//     .then(function () {
+//         return db.sequelize.query('SET FOREIGN_KEY_CHECKS = 1');
+//     })
+//     .then(
+//         function () {
+//             console.log('Drop and Resync Database with { force: true }');
+//             initialDataBase();
+//         },
+//         function (err) {
+//             console.log(err);
+//         }
+//     );
 
 // create connection between client and server thourgh socket
 socketIo.on('connection', function (socket) {
-    Logging.info("🚀 New client connected " + socket.id); 
+    Logging.info('🚀 New client connected ' + socket.id);
     socket.on('disconnect', function () {});
 
     //server listen data from client1
@@ -153,7 +263,6 @@ socketIo.on('connection', function (socket) {
         });
     });
 });
-
 
 // _________________________start https server ___________________________________
 // const https = require('https');

@@ -1,5 +1,5 @@
 module.exports = (sequelize, Sequelize) => {
-    const PostionGoal = sequelize.define('position_goals', {
+    const PositionGoal = sequelize.define('position_goals', {
         id: {
             type: Sequelize.INTEGER,
             allowNull: false,
@@ -8,11 +8,28 @@ module.exports = (sequelize, Sequelize) => {
         },
         pointName: {
             type: Sequelize.STRING,
-            allowNull: false
+            allowNull: false,
+            unique: true,
+            validate: {
+                notEmpty: {
+                    msg: 'Point type is required.'
+                },
+                isUnique: async function (value) {
+                    const record = await PositionGoal.findOne({ where: { pointName: value } });
+                    if (record) {
+                        throw new Error('Point name must be unique.');
+                    }
+                }
+            }
         },
         pointType: {
             type: Sequelize.STRING,
-            allowNull: false
+            allowNull: false,
+            validate: {
+                notEmpty: {
+                    msg: 'Point type is required.'
+                }
+            }
         },
         xCoordinate: {
             type: Sequelize.FLOAT,
@@ -31,5 +48,5 @@ module.exports = (sequelize, Sequelize) => {
         }
     });
 
-    return PostionGoal;
+    return PositionGoal;
 };
