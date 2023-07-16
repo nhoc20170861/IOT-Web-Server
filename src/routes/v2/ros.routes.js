@@ -35,8 +35,9 @@ router.get('/robot/getCurrentPose', rosController.getCurrentPose);
  * @brief Api remote to a robot through server
  *
  * */
+router.post('/robot/:id/add-new-goal', rosController.addNewGoalToTaskList);
 router.post('/robot/:id/send-task-list', rosController.sendTaskListToOneRobot);
-router.post('/robot/:id/resetAllGoals', rosController.callServiceResetAllGoals);
+router.post('/robot/:id/reset-all-goals', rosController.callServiceResetAllGoals);
 router.get('/robot/:id/get-current-status', rosController.callServiceGetCurrentStatus);
 
 router.post('/robot/:id/state/toggle-state', rosController.callServiceToggleState);
