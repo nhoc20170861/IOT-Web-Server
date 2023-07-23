@@ -47,7 +47,7 @@ const clientId = `mqtt_${Math.random().toString(16).slice(3)}`;
 
 // connect to mqtt broker
 const connectUrl = `mqtt://${host_mqtt}:${port_mqtt}`;
-const client = mqtt.connect(connectUrl, {
+const clientMqtt = mqtt.connect(connectUrl, {
     clientId,
     clean: true,
     connectTimeout: 4000,
@@ -56,4 +56,4 @@ const client = mqtt.connect(connectUrl, {
     reconnectPeriod: 2000
 });
 console.log(connectUrl);
-export default client;
+export default clientMqtt;

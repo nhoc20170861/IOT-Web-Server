@@ -66,4 +66,30 @@ db.ROLES = ['user', 'admin', 'moderator'];
 // Code fore robot
 db.position_goals = require('./Robot/position_goal.model')(sequelize, Sequelize);
 db.robot = require('./Robot/robot.model')(sequelize, Sequelize);
+
+const { Task, SubTask } = require('./Robot/taskList.model')(sequelize, Sequelize);
+db.Task = Task;
+db.SubTask = SubTask;
+// Quan hệ 1-nhiều giữa Task và Subtask
+db.Task.hasOne(SubTask, { as: 'subtasks', foreignKey: 'taskId' });
+db.SubTask.belongsTo(Task, { as: 'task', foreignKey: 'taskId' });
+
+// Thiết lập quan hệ giữa Robot và Task
+db.robot.hasOne(db.Task, { as: 'tasks', foreignKey: 'robotId' });
+db.Task.belongsTo(db.robot, { as: 'robots', foreignKey: 'robotId' });
+
+// Kết nối đến cơ sở dữ liệu và đồng bộ hóa model
+// (async () => {
+//     try {
+//       await sequelize.authenticate();
+//       console.log('Database connection has been established successfully.');
+
+//       // Đồng bộ hóa model với cơ sở dữ liệu
+//       await sequelize.sync();
+//       console.log('Database and tables synced successfully.');
+//     } catch (error) {
+//       console.error('Unable to connect to the database:', error);
+//     }
+//   })();
+
 module.exports = db;

@@ -2,14 +2,15 @@
 
 import path from 'path';
 import dotenv from 'dotenv';
-
 dotenv.config();
 import cors from 'cors';
 import express from 'express';
-
 import session from 'express-session';
 import Pusher from 'pusher';
 import cookieParser from 'cookie-parser';
+const { createBullBoard } = require('@bull-board/api');
+const { BullMQAdapter } = require('@bull-board/api/bullMQAdapter');
+const { ExpressAdapter } = require('@bull-board/express');
 import { SERVER_PORT } from './configs';
 import Logging from './library/Logging';
 // connect db mysql
@@ -18,6 +19,7 @@ import db from './models';
 const Device = db.device;
 const Role = db.role;
 const PositionGoal = db.position_goals;
+const Robot = db.robot;
 const DataSensor = db.data_sensor;
 
 async function initialDataBase() {
@@ -83,6 +85,30 @@ async function initialDataBase() {
         }
     ];
 
+    const RobotConfigList = [
+        {
+            robotName: 'tb3_0',
+            robotType: 'Mir100',
+            initPoint: 'home_0',
+            ip: '192.168.0.130',
+            portWebSocket: 9090
+        },
+        {
+            robotName: 'tb3_1',
+            robotType: 'Mir100',
+            initPoint: 'home_1',
+            ip: '192.168.0.130',
+            portWebSocket: 9090
+        },
+        {
+            robotName: 'tb3_2',
+            robotType: 'Mir100',
+            initPoint: 'home_2',
+            ip: '192.168.0.130',
+            portWebSocket: 9090
+        }
+    ];
+
     const RoleList = [
         {
             id: 1,
@@ -102,6 +128,7 @@ async function initialDataBase() {
         await Role.bulkCreate(RoleList);
         await PositionGoal.bulkCreate(TargetPointList);
         await PositionGoal.bulkCreate(HomePointList);
+        await Robot.bulkCreate(RobotConfigList);
     } catch (error) {
         console.log('🚀 ~ file: position_goal.model.js:100 ~ module.exports= ~ error:', error);
     }
@@ -147,12 +174,21 @@ app.use(
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Router init
-
 import routes from './routes';
 app.use('/', routes);
 
-// Start Server
-
+// create dashboard queue
+import { queue, queueEsp } from './controllers/v2/bullmq.js';
+const serverAdapter = new ExpressAdapter();
+serverAdapter.setBasePath('/queueDashBoard');
+const queueAdapter = new BullMQAdapter(queue, { allowRetries: true, readOnlyMode: true });
+const queueAdapterEsp = new BullMQAdapter(queueEsp, { allowRetries: true, readOnlyMode: true });
+const bullBoard = createBullBoard({
+    queues: [queueAdapter, queueAdapterEsp],
+    serverAdapter: serverAdapter
+});
+app.use('/queueDashBoard', serverAdapter.getRouter());
+// Start Server and socket
 const server = require('http').Server(app);
 export const socketIo = require('socket.io')(server, {
     cors: {
@@ -160,49 +196,22 @@ export const socketIo = require('socket.io')(server, {
     }
 });
 
-import { robotConfigs, currentPose, GoalPoseArray, ParseFloat } from './controllers/v2/ros.controller';
-
-db.sequelize
-    .sync()
-    .then(() => {
-        // Lấy toàn bộ bản ghi từ cơ sở dữ liệu
-        PositionGoal.findAll().then((allPositionGoals) => {
-            // Phân loại bản ghi theo pointType
-            allPositionGoals.forEach((positionGoal) => {
-                const { pointName } = positionGoal;
-                if (!GoalPoseArray.hasOwnProperty(pointName)) {
-                    GoalPoseArray[pointName] = {
-                        position: {
-                            x: positionGoal.xCoordinate,
-                            y: positionGoal.yCoordinate,
-                            z: 0
-                        },
-                        orientation: {
-                            x: 0,
-                            y: 0,
-                            z: ParseFloat(Math.sin(positionGoal.theta / 2.0), 2),
-                            w: ParseFloat(Math.cos(positionGoal.theta / 2.0), 2)
-                        }
-                    };
-                } else {
-                }
-            });
-
-            // set current pose for all robot;
-            Object.keys(robotConfigs).forEach((key, index) => {
-                if (GoalPoseArray.hasOwnProperty(robotConfigs[key].initPose)) {
-                    currentPose[key] = GoalPoseArray[robotConfigs[key].initPose];
-                }
-            });
-        });
+// // Kiểm tra xem kết nối cơ sở dữ liệu đã thành công hay chưa
+(async () => {
+    try {
+        await db.sequelize.authenticate();
+        Logging.info('Database connection is ready.');
+        // Đồng bộ hóa model với cơ sở dữ liệu
+        await db.sequelize.sync();
 
         server.listen(port_server, () => {
             Logging.info(`⚡️[server]: Server is running at http://localhost:${port_server}`);
         });
-    })
-    .catch((error) => {
-        console.error('Database synchronization error:', error);
-    });
+    } catch (error) {
+        console.error('Unable to connect to the database:', error);
+    }
+})();
+
 // force: true will drop the table if it already exists
 // db.sequelize
 //     .query('SET FOREIGN_KEY_CHECKS = 0')
@@ -222,14 +231,14 @@ db.sequelize
 //         }
 //     );
 
-// create connection between client and server thourgh socket
+// create connection between clientMqtt and server thourgh socket
 socketIo.on('connection', function (socket) {
-    Logging.info('🚀 New client connected ' + socket.id);
+    Logging.info('🚀 New socket client connected ' + socket.id);
     socket.on('disconnect', function () {});
 
     //server listen data from client1
     socket.on('device1-sent-data', function (id_device) {
-        // after listning data, server emit this data to another client
+        // after listning data, server emit this data to another clientMqtt
         DataSensor.findOne({
             where: {
                 deviceId: parseInt(id_device)
@@ -252,7 +261,7 @@ socketIo.on('connection', function (socket) {
 
     //server listen data from client2
     socket.on('device2-sent-data', function (id_device) {
-        // after listning data, server emit this data to another client
+        // after listning data, server emit this data to another clientMqtt
         DataSensor.findOne({
             where: {
                 deviceId: parseInt(id_device)
@@ -294,7 +303,7 @@ var data = {
 var device_current = 1;
 
 // config connection mqtt broker
-import client from './configs';
+import clientMqtt from './configs';
 
 // defined subscribe and publish topic
 const topic_pub = 'nhoc20170861/mqtt';
@@ -302,9 +311,9 @@ const topic_pub1 = 'nhoc20170861/lamp';
 var topic_sub_ar = ['nhoc20170861/data/device1', 'nhoc20170861/data/device2'];
 
 // subscribe topic
-client.on('connect', () => {
-    console.log('Connected');
-    client.subscribe(topic_sub_ar, () => {
+clientMqtt.on('connect', () => {
+    Logging.info('Client mqtt Connected');
+    clientMqtt.subscribe(topic_sub_ar, () => {
         console.log(`Subscribe to topic '${topic_sub_ar}'`);
     });
 });
@@ -312,7 +321,7 @@ client.on('connect', () => {
 // console.log message received from mqtt broker
 var count = 0;
 
-client.on('message', (topic_sub, payload) => {
+clientMqtt.on('message', (topic_sub, payload) => {
     flag = true;
     console.log('Received Message:', topic_sub, payload.toString());
     const id_device = parseInt(topic_sub.slice(-1));
@@ -332,8 +341,8 @@ client.on('message', (topic_sub, payload) => {
     });
 });
 
-client.on('connect', () => {
-    client.publish(topic_pub, 'nodejs mqtt connect', { qos: 2, retain: false }, (error) => {
+clientMqtt.on('connect', () => {
+    clientMqtt.publish(topic_pub, 'nodejs mqtt connect', { qos: 2, retain: false }, (error) => {
         if (error) {
             console.error(error);
         }
@@ -351,7 +360,7 @@ app.post('/dashboard/controller/lamp', async (req, res) => {
     const device_id = 'ebdd31ffb97ec2b5a05bpc';
     await apiTuya.sendCommands(device_id, commands);
     // public to MQTT Broker
-    client.publish(topic_pub1, mode);
+    clientMqtt.publish(topic_pub1, mode);
     console.log(mode);
 });
 
@@ -366,7 +375,7 @@ app.get('/dashboard/controller/lamp_stutus', async (req, res) => {
 app.post('/dashboard/controller/lamp_timer', (req, res) => {
     let mode = req.body;
     // public to MQTT Broker
-    client.publish(topic_pub1, mode);
+    clientMqtt.publish(topic_pub1, mode);
     console.log(mode);
 });
 app.post('/dashboard/admin/deleteDevice', function (req, res) {
@@ -374,7 +383,7 @@ app.post('/dashboard/admin/deleteDevice', function (req, res) {
     Device.destroy({ where: { id: id_device } })
         .then(() => {
             let topic_unsub = 'nhoc20170861/data/device' + id_device.toString();
-            client.unsubscribe(topic_unsub, () => {
+            clientMqtt.unsubscribe(topic_unsub, () => {
                 console.log(`Subscribe to topic '${topic_unsub}'`);
             });
             return res.send({ message: 'Delete device success' });
@@ -400,7 +409,7 @@ app.post('/dashboard/admin/createDevice', function (req, res) {
         console.log('device id= ' + device.id);
         let new_topic_sub = 'nhoc20170861/data/device' + device.id;
 
-        client.subscribe(new_topic_sub, () => {
+        clientMqtt.subscribe(new_topic_sub, () => {
             console.log(`Subscribe to topic '${new_topic_sub}'`);
         });
 

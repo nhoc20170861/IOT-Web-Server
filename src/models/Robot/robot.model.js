@@ -13,6 +13,18 @@ module.exports = (sequelize, Sequelize) => {
         robotType: {
             type: Sequelize.STRING,
             allowNull: false
+        },
+        initPoint: {
+            type: Sequelize.STRING,
+            allowNull: false
+        },
+        ip: {
+            type: Sequelize.STRING,
+            allowNull: false
+        },
+        portWebSocket: {
+            type: Sequelize.INTEGER,
+            allowNull: false
         }
     });
 

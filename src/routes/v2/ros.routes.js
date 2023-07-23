@@ -28,7 +28,7 @@ router.get('/robot/getAllTargetPoint', rosController.getAllTargetPoint);
  * */
 router.get('/robot/getTaskQueueFromAllRobots', rosController.getTaskQueueFromAllRobots);
 router.post('/robot/resetAllTaskQueue', rosController.resetAllTaskQueue);
-router.post('/robot/sendTaskList', rosController.autoPickRobotAndSendTaskList);
+router.post('/robot/createNewTask', rosController.createNewTask);
 router.get('/robot/getCurrentPose', rosController.getCurrentPose);
 
 /**
@@ -36,7 +36,7 @@ router.get('/robot/getCurrentPose', rosController.getCurrentPose);
  *
  * */
 router.post('/robot/:id/add-new-goal', rosController.addNewGoalToTaskList);
-router.post('/robot/:id/send-task-list', rosController.sendTaskListToOneRobot);
+router.post('/robot/:id/create-new-task', rosController.createNewTaskForOneRobot);
 router.post('/robot/:id/reset-all-goals', rosController.callServiceResetAllGoals);
 router.get('/robot/:id/get-current-status', rosController.callServiceGetCurrentStatus);
 
