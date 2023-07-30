@@ -1,6 +1,5 @@
 import { Worker, Queue } from 'bullmq';
 const ROSLIB = require('roslib');
-import { socketIo } from '../../app';
 import Logging from '../../library/Logging';
 import clientMqtt from '../../configs';
 // import module handle database
@@ -125,6 +124,7 @@ myWorker.on('completed', (job, robotName) => {
         message: `TaskId ${job.data.taskId} assign to ${robotName}`
     });
     if (robotConfigs.hasOwnProperty(robotName)) {
+        statusOfAllRobots[robotName] ="get new task";
         robotConfigs[robotName].taskQueue[0].taskId = job.data.taskId;
         Logging.info(`Completed job with jobId ${job.id}`);
     }

@@ -1,5 +1,4 @@
 import Logging from '../../library/Logging';
-import { socketIo } from '../../app';
 
 // Required ROSlib and Ros API Dependencies
 const ROSLIB = require('roslib');
@@ -417,7 +416,7 @@ class RobotController {
      */
     // router.post('/robot/:id/add-new-goal', rosController.addNewGoalToTaskList);
     addNewGoalToTaskList = function (req, res) {
-        const robotId = req.params.id;
+        const robotId = req.params.robotId;
         const { newGoal } = req.body;
 
         if (robotId && robotConfigs.hasOwnProperty(robotId)) {
@@ -464,7 +463,7 @@ class RobotController {
     };
     // [POST] /robot/:id/send-task-list
     createNewTaskForOneRobot = function (req, res) {
-        const robotId = req.params.id;
+        const robotId = req.params.robotId;
         const { taskList } = req.body;
 
         if (robotId && robotConfigs.hasOwnProperty(robotId)) {
@@ -531,8 +530,8 @@ class RobotController {
     };
     // [POST] /robot/:id/reset-all-goals
     callServiceResetAllGoals(req, res) {
-        console.log('🚀 ~ file: ros.controller.js:56 ~ RobotController ~ callServiceResetAllGoals ~ req:', req.params.id);
-        const robotName = req.params.id;
+        console.log('🚀 ~ file: ros.controller.js:56 ~ RobotController ~ callServiceResetAllGoals ~ req:', req.params.robotId);
+        const robotName = req.params.robotId;
         if (robotName && robotConfigs.hasOwnProperty(robotName)) {
             const serviceClient = new ROSLIB.Service({
                 ros: robotConfigs[robotName].rosWebsocket,
@@ -572,7 +571,7 @@ class RobotController {
 
     // [POST] /robot/:id/get-current-status
     callServiceGetCurrentStatus = function (req, res) {
-        const robotId = req.params.id;
+        const robotId = req.params.robotId;
         if (robotId && robotConfigs.hasOwnProperty(robotId)) {
             const serviceClient = new ROSLIB.Service({
                 ros: robotConfigs[robotId].rosWebsocket,
@@ -600,7 +599,7 @@ class RobotController {
     // [POST] /robot/:id/state/toggle-state
     callServiceToggleState = function (req, res) {
         Logging.info('callServiceToggleState success');
-        const robotId = req.params.id;
+        const robotId = req.params.robotId;
         if (robotId && robotConfigs.hasOwnProperty(robotId)) {
             const serviceClient = new ROSLIB.Service({
                 ros: robotConfigs[robotId].rosWebsocket,
@@ -612,11 +611,12 @@ class RobotController {
 
             serviceClient.callService(request, function (result) {
                 console.log('Result for service call on ' + serviceClient.name + ': ' + JSON.stringify(result));
+                const nextPoint = robotConfigs[robotId].taskQueue.length > 1 ? robotConfigs[robotId].taskQueue[robotConfigs[robotId].taskQueue[0].indexActiveTask + 1].targetName : 'undefine';
                 return res.status(200).json({
                     success: true,
                     serviceClient: serviceClient.name,
                     message: 'toggle state success',
-                    nextPoint: robotConfigs[robotId].taskQueue[robotConfigs[robotId].taskQueue[0].indexActiveTask + 1].targetName
+                    // nextPoint: nextPoint
                 });
             });
         } else {
@@ -629,28 +629,36 @@ class RobotController {
     };
     // [POST] /robot/:id/state/set-state
     callServiceSetState = function (req, res) {
+        Logging.debug(`callServiceSetState___`);
         const { state } = req.body;
-        const robotId = req.params.id;
-        if (state && robotId && robotConfigs.hasOwnProperty(robotId)) {
+        console.log('🚀 ~ file: ros.controller.js:634 ~ RobotController ~ req.body:', req.body);
+        const robotId = req.params.robotId;
+        console.log('🚀 ~ file: ros.controller.js:636 ~ RobotController ~ req.params:', req.params);
+        if (robotConfigs.hasOwnProperty(robotId)) {
+           
             const serviceClient = new ROSLIB.Service({
-                ros: robotConfigs[robotId].robotWebsocket,
+                ros: robotConfigs[robotId].rosWebsocket,
                 name: robotId ? `/${robotId}/move_base_sequence/set_state` : '/move_base_sequence/set_state',
                 serviceType: 'move_base_sequence/set_state'
             });
 
-            const request = new ROSLIB.ServiceRequest({ state });
+            const request = new ROSLIB.ServiceRequest({ state: state });
+            console.log('🚀 ~ file: ros.controller.js:643 ~ RobotController ~ request:', request);
 
             serviceClient.callService(request, function (result) {
+                console.log('Result for service call on ' + serviceClient.name + ': ' + JSON.stringify(result));
+                const nextPoint = robotConfigs[robotId].taskQueue.length > 1 ? robotConfigs[robotId].taskQueue[robotConfigs[robotId].taskQueue[0].indexActiveTask + 1].targetName : 'undefine';
                 let message = '';
                 if (result.success) {
-                    message: 'Robot is operating, now.';
+                    message = 'Robot is operating, now.';
                 } else {
-                    message: 'Robot is operating,';
+                    message = 'Robot is operating,';
                 }
                 return res.status(200).json({
                     success: true,
                     serviceClient: serviceClient.name,
-                    message: message
+                    message: message,
+                    nextPoint
                 });
             });
         } else {
@@ -664,10 +672,10 @@ class RobotController {
 
     // [GET]  /robot/:id/state/get-state
     callServiceGetState = function (req, res) {
-        const robotId = req.params.id;
+        const robotId = req.params.robotId;
         if (robotId && robotConfigs.hasOwnProperty(robotId)) {
             const serviceClient = new ROSLIB.Service({
-                ros: robotConfigs[robotId].robotWebsocket,
+                ros: robotConfigs[robotId].rosWebsocket,
                 name: robotId ? `/${robotId}/move_base_sequence/get_state` : '/move_base_sequence/get_state',
                 serviceType: 'move_base_sequence/get_state'
             });

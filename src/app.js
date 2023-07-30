@@ -90,21 +90,21 @@ async function initialDataBase() {
             robotName: 'tb3_0',
             robotType: 'Mir100',
             initPoint: 'home_0',
-            ip: '192.168.0.130',
+            ip: '0.0.0.0',
             portWebSocket: 9090
         },
         {
             robotName: 'tb3_1',
             robotType: 'Mir100',
             initPoint: 'home_1',
-            ip: '192.168.0.130',
+            ip: '0.0.0.0',
             portWebSocket: 9090
         },
         {
             robotName: 'tb3_2',
             robotType: 'Mir100',
             initPoint: 'home_2',
-            ip: '192.168.0.130',
+            ip: '0.0.0.0',
             portWebSocket: 9090
         }
     ];
@@ -190,7 +190,7 @@ const bullBoard = createBullBoard({
 app.use('/queueDashBoard', serverAdapter.getRouter());
 // Start Server and socket
 const server = require('http').Server(app);
-export const socketIo = require('socket.io')(server, {
+global.socketIo = require('socket.io')(server, {
     cors: {
         origin: '*'
     }

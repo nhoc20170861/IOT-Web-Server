@@ -35,13 +35,13 @@ router.get('/robot/getCurrentPose', rosController.getCurrentPose);
  * @brief Api remote to a robot through server
  *
  * */
-router.post('/robot/:id/add-new-goal', rosController.addNewGoalToTaskList);
-router.post('/robot/:id/create-new-task', rosController.createNewTaskForOneRobot);
-router.post('/robot/:id/reset-all-goals', rosController.callServiceResetAllGoals);
-router.get('/robot/:id/get-current-status', rosController.callServiceGetCurrentStatus);
+router.post('/robot/:robotId/add-new-goal', rosController.addNewGoalToTaskList);
+router.post('/robot/:robotId/create-new-task', rosController.createNewTaskForOneRobot);
+router.post('/robot/:robotId/reset-all-goals', rosController.callServiceResetAllGoals);
+router.get('/robot/:robotId/get-current-status', rosController.callServiceGetCurrentStatus);
 
-router.post('/robot/:id/state/toggle-state', rosController.callServiceToggleState);
-router.post('/robot/:id/state/set-state', rosController.callServiceSetState);
-router.get('/robot/:id/state/get-state', rosController.callServiceGetState);
+router.post('/robot/:robotId/state/toggle-state', rosController.callServiceToggleState);
+router.post('/robot/:robotId/state/set-state', rosController.callServiceSetState);
+router.get('/robot/:robotId/state/get-state', rosController.callServiceGetState);
 
 export default router;
