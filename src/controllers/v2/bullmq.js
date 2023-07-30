@@ -26,7 +26,7 @@ export const myWorker = new Worker(
     async (job) => {
         // console.log(`wroker process job `, job.data);
         let nameRobotWillCall = '';
-        console.log('🚀 ~ statusOfAllRobots:', statusOfAllRobots);
+
         for (const key in statusOfAllRobots) {
             if (statusOfAllRobots[key] === 'navigation finish' || statusOfAllRobots[key] === 'free' || statusOfAllRobots[key] === 'Waiting for goals') {
                 nameRobotWillCall = key;

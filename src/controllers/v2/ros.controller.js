@@ -61,7 +61,7 @@ setTimeout(async function () {
                     ...robot.dataValues,
                     topicSubNav: '/move_base_sequence/statusNav',
                     currentGoal: robot.initPoint,
-                    taskQueue: [{ indexActiveTask: 0, taskId: '' }],
+                    taskQueue: [{ indexActiveTask: 0, taskId: '', robotName: robotName }],
                     currentStatus: 'free'
                 };
                 currentPose[robotName] = GoalPoseArray[initPoint];
@@ -125,7 +125,10 @@ setTimeout(async function () {
                 await Task.updateFields(robotConfigs[key].taskQueue[0].taskId, new Date(), 'FINISH');
                 await SubTask.updateSubtasksStatusByTaskId(robotConfigs[key].taskQueue[0].taskId, true);
             }
-            socketIo.emit(`taskQueue_${key}`, robotConfigs[key]['taskQueue']);
+            socketIo.emit(`updateTaskQueue`, {
+                robotName: key,
+                taskQueueUpdate: robotConfigs[key]['taskQueue']
+            });
 
             socketIo.emit('statusOfAllRobots', statusOfAllRobots);
         });
@@ -220,36 +223,37 @@ class RobotController {
     // [POST] /robot/resetAllTaskQueue
     resetAllTaskQueue = function (req, res) {
         Logging.info('🚀 ~ ~ resetAllTaskQueue');
+
+        let allTaskQueues = {};
         Object.keys(robotConfigs).forEach((key) => {
-            robotConfigs[key].taskQueue = [{ indexActiveTask: 0, taskId: '' }];
+            robotConfigs[key].taskQueue = [{ indexActiveTask: 0, taskId: '', robotName: key }];
+            allTaskQueues[key] = robotConfigs[key].taskQueue;
+        });
+        Object.keys(statusOfAllRobots).forEach((key) => {
+            statusOfAllRobots[key] = 'free';
         });
 
-        statusOfAllRobots = {
-            tb3_0: 'free',
-            tb3_1: 'free',
-            tb3_2: 'free'
-        };
         return res.status(200).json({
             success: true,
-            message: {
-                tb3_0: robotConfigs['tb3_0'].taskQueue,
-                tb3_1: robotConfigs['tb3_1'].taskQueue,
-                tb3_2: robotConfigs['tb3_2'].taskQueue,
-                statusOfAllRobots: statusOfAllRobots
-            }
+            message: 'Reset all task queue succes',
+            allTaskQueues: allTaskQueues,
+            statusOfAllRobots: statusOfAllRobots
         });
     };
     // [GET] /robot/getTaskQueueFromAllRobots
     getTaskQueueFromAllRobots = function (req, res) {
         Logging.info('🚀 ~ ~ getTaskQueueFromAllRobots');
+        let allTaskQueues = {};
+        Object.keys(robotConfigs).forEach((key) => {
+            if (!allTaskQueues.hasOwnProperty(key)) {
+                allTaskQueues[key] = robotConfigs[key].taskQueue;
+            }
+        });
         return res.status(200).json({
             success: true,
-            message: {
-                tb3_0: robotConfigs['tb3_0'].taskQueue,
-                tb3_1: robotConfigs['tb3_1'].taskQueue,
-                tb3_2: robotConfigs['tb3_2'].taskQueue,
-                statusOfAllRobots: statusOfAllRobots
-            }
+            message: 'Get all task queues successfully',
+            allTaskQueues: allTaskQueues,
+            statusOfAllRobots: statusOfAllRobots
         });
     };
     // [GET] /robot/getCurrentPose
@@ -528,30 +532,33 @@ class RobotController {
     // [POST] /robot/:id/reset-all-goals
     callServiceResetAllGoals(req, res) {
         console.log('🚀 ~ file: ros.controller.js:56 ~ RobotController ~ callServiceResetAllGoals ~ req:', req.params.id);
-        const robotId = req.params.id;
-        if (robotId && robotConfigs.hasOwnProperty(robotId)) {
+        const robotName = req.params.id;
+        if (robotName && robotConfigs.hasOwnProperty(robotName)) {
             const serviceClient = new ROSLIB.Service({
-                ros: robotConfigs[robotId].rosWebsocket,
-                name: `/${robotId}/move_base_sequence/reset`,
+                ros: robotConfigs[robotName].rosWebsocket,
+                name: `/${robotName}/move_base_sequence/reset`,
                 serviceType: 'move_base_sequence/reset'
             });
 
             const request = new ROSLIB.ServiceRequest({});
 
             serviceClient.callService(request, function (result) {
-                console.log('Result for service call ' + robotId + ' on ' + serviceClient.name + ': ' + JSON.stringify(result));
+                console.log('Result for service call ' + robotName + ' on ' + serviceClient.name + ': ' + JSON.stringify(result));
                 let taskQueueReset = [];
 
-                if (robotConfigs.hasOwnProperty(robotId)) {
-                    robotConfigs[robotId].taskQueue = [{ indexActiveTask: 0, taskId: '' }];
-                    taskQueueReset = robotConfigs[robotId].taskQueue;
+                if (robotConfigs.hasOwnProperty(robotName)) {
+                    robotConfigs[robotName].taskQueue = [{ indexActiveTask: 0, taskId: '', robotName: robotName }];
+                    taskQueueReset = robotConfigs[robotName].taskQueue;
                 }
-                statusOfAllRobots[robotId] = 'free';
+                statusOfAllRobots[robotName] = 'free';
 
                 return res.status(200).json({
                     success: result['success'],
                     serviceClient: serviceClient.name,
-                    message: { robotId, taskQueueReset, statusOfAllRobots }
+                    message: 'Reset all goals successfully',
+                    robotName,
+                    taskQueueReset,
+                    statusOfAllRobots
                 });
             });
         } else {
