@@ -1,0 +1,22 @@
+{
+    "map_load_time": {
+        "secs": 0,
+        "nsecs": 1000000
+    },
+    "resolution": 0.05,
+    "width": 2048,
+    "height": 2048,
+    "origin": {
+        "position": {
+            "x": -46.23,
+            "y": -41.45,
+            "z": 0
+        },
+        "orientation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+        }
+    }
+}

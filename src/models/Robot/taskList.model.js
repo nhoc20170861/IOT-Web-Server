@@ -19,6 +19,11 @@ module.exports = (sequelize, Sequelize) => {
             allowNull: false,
             defaultValue: true
         },
+        autoGoHome: {
+            type: Sequelize.BOOLEAN,
+            allowNull: false,
+            defaultValue: false
+        },
         robotId: {
             type: Sequelize.INTEGER
             // allowNull: false

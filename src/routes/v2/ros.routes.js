@@ -10,6 +10,7 @@ router.use(function (req, res, next) {
     next();
 });
 
+router.get('/robot/getConfigMap/:fileName', rosController.getConfigMap);
 /**
  * @brief Api is used to setTargetPointFromCallStation from call station esp32
  *
@@ -29,7 +30,12 @@ router.get('/robot/getAllTargetPoint', rosController.getAllTargetPoint);
 router.get('/robot/getTaskQueueFromAllRobots', rosController.getTaskQueueFromAllRobots);
 router.post('/robot/resetAllTaskQueue', rosController.resetAllTaskQueue);
 router.post('/robot/createNewTask', rosController.createNewTask);
+/**
+ * @brief Api used to tracking path of the robots
+ *
+ * */
 router.get('/robot/getCurrentPose', rosController.getCurrentPose);
+router.get('/robot/getRobotConfigs', rosController.getRobotConfigs);
 
 /**
  * @brief Api remote to a robot through server

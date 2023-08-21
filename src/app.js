@@ -21,7 +21,8 @@ const Role = db.role;
 const PositionGoal = db.position_goals;
 const Robot = db.robot;
 const DataSensor = db.data_sensor;
-
+const config = require('./configs/maps/map_hospital.json');
+console.log(config);
 async function initialDataBase() {
     const TargetPointList = [
         {
@@ -48,15 +49,15 @@ async function initialDataBase() {
         {
             pointName: 'point_4',
             pointType: 'Goal Point',
-            xCoordinate: 4.63,
-            yCoordinate: 3.7,
+            xCoordinate: 4.55,
+            yCoordinate: 0.74,
             theta: 0
         },
         {
             pointName: 'point_5',
             pointType: 'Goal Point',
-            xCoordinate: 4.55,
-            yCoordinate: 0.74,
+            xCoordinate: 4.63,
+            yCoordinate: 3.7,
             theta: 0
         }
     ];
@@ -87,24 +88,24 @@ async function initialDataBase() {
 
     const RobotConfigList = [
         {
-            robotName: 'tb3_0',
-            robotType: 'Mir100',
-            initPoint: 'home_0',
-            ip: '192.168.0.130',
-            portWebSocket: 9090
-        },
-        {
-            robotName: 'tb3_1',
+            robotName: 'mir1',
             robotType: 'Mir100',
             initPoint: 'home_1',
-            ip: '192.168.0.130',
+            ip: '192.168.1.117',
             portWebSocket: 9090
         },
         {
-            robotName: 'tb3_2',
+            robotName: 'mir2',
             robotType: 'Mir100',
             initPoint: 'home_2',
-            ip: '192.168.0.130',
+            ip: '192.168.1.117',
+            portWebSocket: 9090
+        },
+        {
+            robotName: 'mir3',
+            robotType: 'Mir100',
+            initPoint: 'home_3',
+            ip: '192.168.1.117',
             portWebSocket: 9090
         }
     ];
@@ -178,22 +179,71 @@ import routes from './routes';
 app.use('/', routes);
 
 // create dashboard queue
-import { queue, queueEsp } from './controllers/v2/bullmq.js';
+import { queue, queueEsp, queueRobots } from './controllers/v2/bullmq.js';
 const serverAdapter = new ExpressAdapter();
 serverAdapter.setBasePath('/queueDashBoard');
 const queueAdapter = new BullMQAdapter(queue, { allowRetries: true, readOnlyMode: true });
 const queueAdapterEsp = new BullMQAdapter(queueEsp, { allowRetries: true, readOnlyMode: true });
+// create Queue dashboard to monitor
+const queueAdapterRobots = [];
+Object.keys(queueRobots).forEach((key) => {
+    const queueRb = new BullMQAdapter(queueRobots[key], { allowRetries: true, readOnlyMode: true });
+    queueAdapterRobots.push(queueRb);
+});
 const bullBoard = createBullBoard({
-    queues: [queueAdapter, queueAdapterEsp],
+    queues: [queueAdapter, queueAdapterEsp, ...queueAdapterRobots],
     serverAdapter: serverAdapter
 });
 app.use('/queueDashBoard', serverAdapter.getRouter());
-// Start Server and socket
+
+// initialize Server and socket
 const server = require('http').Server(app);
-export const socketIo = require('socket.io')(server, {
+// create global socketIo
+global.socketIo = require('socket.io')(server, {
     cors: {
         origin: '*'
     }
+});
+
+socketIo.on('connection', function (socket) {
+    Logging.info('🚀 New socket client connected ' + socket.id);
+    socket.on('disconnect', function () {});
+
+    //server listen data from client1
+    // socket.on('device1-sent-data', function (id_device) {
+    //     // after listning data, server emit this data to another clientMqtt
+    //     DataSensor.findOne({
+    //         where: {
+    //             deviceId: parseInt(id_device)
+    //         },
+    //         order: [['createdAt', 'DESC']]
+    //     }).then((data_sensor) => {
+    //         if (data_sensor == null) {
+    //             data_sensor = {
+    //                 humidity: 0,
+    //                 temperature: 0,
+    //                 time: 0,
+    //                 pm2_5: 0,
+    //                 battery: 0
+    //             };
+    //         }
+    //         console.log(data_sensor);
+    //         socket.emit('Server-sent-device1', data_sensor);
+    //     });
+    // });
+
+    // //server listen data from client2
+    // socket.on('device2-sent-data', function (id_device) {
+    //     // after listning data, server emit this data to another clientMqtt
+    //     DataSensor.findOne({
+    //         where: {
+    //             deviceId: parseInt(id_device)
+    //         },
+    //         order: [['createdAt', 'DESC']]
+    //     }).then((data_sensor) => {
+    //         socket.emit('Server-sent-device2', data_sensor);
+    //     });
+    // });
 });
 
 // // Kiểm tra xem kết nối cơ sở dữ liệu đã thành công hay chưa
@@ -204,9 +254,12 @@ export const socketIo = require('socket.io')(server, {
         // Đồng bộ hóa model với cơ sở dữ liệu
         await db.sequelize.sync();
 
+        // starting server
         server.listen(port_server, () => {
             Logging.info(`⚡️[server]: Server is running at http://localhost:${port_server}`);
         });
+
+        // create connection between clientMqtt and server thourgh socket
     } catch (error) {
         console.error('Unable to connect to the database:', error);
     }
@@ -230,48 +283,6 @@ export const socketIo = require('socket.io')(server, {
 //             console.log(err);
 //         }
 //     );
-
-// create connection between clientMqtt and server thourgh socket
-socketIo.on('connection', function (socket) {
-    Logging.info('🚀 New socket client connected ' + socket.id);
-    socket.on('disconnect', function () {});
-
-    //server listen data from client1
-    socket.on('device1-sent-data', function (id_device) {
-        // after listning data, server emit this data to another clientMqtt
-        DataSensor.findOne({
-            where: {
-                deviceId: parseInt(id_device)
-            },
-            order: [['createdAt', 'DESC']]
-        }).then((data_sensor) => {
-            if (data_sensor == null) {
-                data_sensor = {
-                    humidity: 0,
-                    temperature: 0,
-                    time: 0,
-                    pm2_5: 0,
-                    battery: 0
-                };
-            }
-            console.log(data_sensor);
-            socket.emit('Server-sent-device1', data_sensor);
-        });
-    });
-
-    //server listen data from client2
-    socket.on('device2-sent-data', function (id_device) {
-        // after listning data, server emit this data to another clientMqtt
-        DataSensor.findOne({
-            where: {
-                deviceId: parseInt(id_device)
-            },
-            order: [['createdAt', 'DESC']]
-        }).then((data_sensor) => {
-            socket.emit('Server-sent-device2', data_sensor);
-        });
-    });
-});
 
 // _________________________start https server ___________________________________
 // const https = require('https');

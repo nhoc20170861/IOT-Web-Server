@@ -1,13 +1,10 @@
 import Logging from '../../library/Logging';
-import { socketIo } from '../../app';
-
+import { queueRobots } from './bullmq';
+import path from 'path';
+const jsonfile = require('jsonfile');
 // Required ROSlib and Ros API Dependencies
-const ROSLIB = require('roslib');
+global.ROSLIB = require('roslib');
 
-// import worker
-import { myWorker, queue, myWorkerEsp, queueEsp, addTaskToQueueEsp, addTaskToQueue } from './bullmq';
-myWorker.run();
-myWorkerEsp.run();
 // import module handle database
 const db = require('../../models');
 const PositionGoal = db.position_goals;
@@ -22,40 +19,125 @@ global.robotConfigs = {};
 // currentPose of all robot
 global.currentPose = {};
 // monitor status of all robots
-global.statusOfAllRobots = {
-    tb3_0: 'free',
-    tb3_1: 'free',
-    tb3_2: 'free'
-};
-setTimeout(async function () {
+global.statusOfAllRobots = {};
+// setTimeout(async function () {
+
+/**
+ * @brief bộ dữ liệu cho Mir
+ */
+const allPositionGoals = [
+    {
+        pointName: 'point_1',
+        pointType: 'Goal point',
+        xCoordinate: 5.0,
+        yCoordinate: -10.0,
+        theta: -1.57
+    },
+    {
+        pointName: 'point_2',
+        pointType: 'Goal Point',
+        xCoordinate: 5.0,
+        yCoordinate: -23.0,
+        theta: -1.57
+    },
+    {
+        pointName: 'point_3',
+        pointType: 'Goal Point',
+        xCoordinate: -5.0,
+        yCoordinate: -23.0,
+        theta: -1.57
+    },
+    {
+        pointName: 'point_4',
+        pointType: 'Goal Point',
+        xCoordinate: -5.0,
+        yCoordinate: -10.0,
+        theta: -1.57
+    },
+    {
+        pointName: 'point_5',
+        pointType: 'Goal Point',
+        xCoordinate: -5.0,
+        yCoordinate: 7.8,
+        theta: -1.57
+    },
+    {
+        pointName: 'home_1',
+        pointType: 'Home Point',
+        xCoordinate: 5.03,
+        yCoordinate: 9.94,
+        theta: 0
+    },
+    {
+        pointName: 'home_2',
+        pointType: 'Home Point',
+        xCoordinate: 0.0,
+        yCoordinate: 9.96,
+        theta: 0
+    },
+    {
+        pointName: 'home_3',
+        pointType: 'Home Point',
+        xCoordinate: 0.01,
+        yCoordinate: 7.87,
+        theta: 0
+    }
+];
+(async function () {
     // Lấy toàn bộ bản ghi từ cơ sở dữ liệu
-    await PositionGoal.findAll().then((allPositionGoals) => {
-        // Phân loại bản ghi theo pointType
-        allPositionGoals.forEach((positionGoal) => {
-            const { pointName } = positionGoal;
-            if (!GoalPoseArray.hasOwnProperty(pointName)) {
-                GoalPoseArray[pointName] = {
-                    position: {
-                        x: positionGoal.xCoordinate,
-                        y: positionGoal.yCoordinate,
-                        z: 0
-                    },
-                    orientation: {
-                        x: 0,
-                        y: 0,
-                        z: ParseFloat(Math.sin(positionGoal.theta / 2.0), 2),
-                        w: ParseFloat(Math.cos(positionGoal.theta / 2.0), 2)
-                    }
-                };
-            } else {
-            }
-        });
+    // await PositionGoal.findAll().then((allPositionGoals) => {
+    //     // Phân loại bản ghi theo pointType
+    //     allPositionGoals.forEach((positionGoal) => {
+    //         const { pointName } = positionGoal;
+    //         if (!GoalPoseArray.hasOwnProperty(pointName)) {
+    //             GoalPoseArray[pointName] = {
+    //                 position: {
+    //                     x: positionGoal.xCoordinate,
+    //                     y: positionGoal.yCoordinate,
+    //                     z: 0
+    //                 },
+    //                 orientation: {
+    //                     x: 0,
+    //                     y: 0,
+    //                     z: ParseFloat(Math.sin(positionGoal.theta / 2.0), 2),
+    //                     w: ParseFloat(Math.cos(positionGoal.theta / 2.0), 2)
+    //                 }
+    //             };
+    //         } else {
+    //         }
+    //     });
+    // });
+    // ==================================
+    allPositionGoals.forEach((positionGoal) => {
+        const { pointName } = positionGoal;
+        if (!GoalPoseArray.hasOwnProperty(pointName)) {
+            GoalPoseArray[pointName] = {
+                position: {
+                    x: positionGoal.xCoordinate,
+                    y: positionGoal.yCoordinate,
+                    z: 0
+                },
+                orientation: {
+                    x: 0,
+                    y: 0,
+                    z: ParseFloat(Math.sin(positionGoal.theta / 2.0), 2),
+                    w: ParseFloat(Math.cos(positionGoal.theta / 2.0), 2)
+                }
+            };
+        } else {
+        }
     });
+    totalCountTargetPoint = Object.keys(GoalPoseArray).length;
 
     await Robot.findAll().then((allRobot) => {
         // Phân loại bản ghi theo robotName
         allRobot.forEach((robot) => {
             const { robotName, initPoint } = robot;
+            // create object to store status of all robots
+            if (!statusOfAllRobots.hasOwnProperty(robotName)) {
+                statusOfAllRobots[robotName] = 'free';
+            }
+
             if (!robotConfigs.hasOwnProperty(robotName)) {
                 robotConfigs[robotName] = {
                     ...robot.dataValues,
@@ -124,6 +206,7 @@ setTimeout(async function () {
                 // robotConfigs[key]['taskQueue'][0].indexActiveTask = 0;
                 await Task.updateFields(robotConfigs[key].taskQueue[0].taskId, new Date(), 'FINISH');
                 await SubTask.updateSubtasksStatusByTaskId(robotConfigs[key].taskQueue[0].taskId, true);
+                queueRobots[`taskQueue_${key}`].resume();
             }
             socketIo.emit(`updateTaskQueue`, {
                 robotName: key,
@@ -135,7 +218,7 @@ setTimeout(async function () {
         robotConfigs[key]['poseTopic'].subscribe(function (response) {
             const x = ParseFloat(response.pose.pose.position.x, 2);
             const y = ParseFloat(response.pose.pose.position.y, 2);
-            // Logging.info(`${robotConfigs[key].robotName} positionX: ${x} positionY: ${y}`);
+            Logging.debug(`${robotConfigs[key].robotName} positionX: ${x} positionY: ${y}`);
 
             currentPose[key] = response.pose.pose;
             socketIo.emit(`currentPose`, { robotId: key, currentPose });
@@ -145,11 +228,47 @@ setTimeout(async function () {
         //     robotConfigs[key].rosWebsocket.connect(websocket);
         // }, 4000);
     });
-}, 4000);
+})();
+// }, 4000);
+
+// import worker
+import { addTaskToQueueEsp, addTaskToQueue } from './bullmq';
+import { myWorker } from './worker.mainQueue';
+import { myWorkerEsp } from './worker.esp32';
+import { myWorkerRobot1, myWorkerRobot2, myWorkerRobot3 } from './worker.queueRobots';
+
+myWorker.run();
+myWorkerEsp.run();
+// myWorkerRobot1.run();
+// myWorkerRobot2.run();
+// myWorkerRobot3.run();
 
 // Initialize Ros API
 class RobotController {
     constructor() {}
+    /**
+     * @breif api for edit or get map
+     */
+
+    getConfigMap = async function (req, res) {
+        const fileName = req.params.fileName;
+
+        const filePath = path.join(__dirname, `../../configs/maps/${fileName}`);
+        jsonfile.readFile(filePath, (err, data) => {
+            if (err) {
+                console.log(err);
+                return res.status(200).json({
+                    success: false,
+                    message: err.message
+                });
+            }
+            return res.status(200).json({
+                success: true,
+                message: 'Get Map config successfully',
+                mapConfig: data
+            });
+        });
+    };
     /**
      * @breif api for esp32
      */
@@ -165,6 +284,7 @@ class RobotController {
             ];
 
             // Tạo task và lưu vào cơ sở dữ liệu
+
             const { id: taskId } = await Task.create({
                 taskName: `task_${stationId}`,
                 taskDescription: `task_${stationId}`,
@@ -180,11 +300,20 @@ class RobotController {
                     isDone: subTask.status
                 });
             }
-            const jobEsp = await addTaskToQueueEsp({
+            // const jobEsp = await addTaskToQueueEsp({
+            //     taskId,
+            //     taskName: `task_${stationId}`,
+            //     taskDescription: `task_${stationId}`,
+            //     pathOptimization: false,
+            //     subTaskList
+            // });
+
+            const jobEsp = await addTaskToQueue({
                 taskId,
                 taskName: `task_${stationId}`,
                 taskDescription: `task_${stationId}`,
                 pathOptimization: false,
+                autoGoHome: false,
                 subTaskList
             });
 
@@ -249,6 +378,7 @@ class RobotController {
                 allTaskQueues[key] = robotConfigs[key].taskQueue;
             }
         });
+        console.log('🚀 RobotController ~ allTaskQueues:', allTaskQueues);
         return res.status(200).json({
             success: true,
             message: 'Get all task queues successfully',
@@ -261,16 +391,30 @@ class RobotController {
         console.log('🚀 ~ ~ getCurrentPose');
         return res.status(200).json({
             success: true,
-            message: {
-                currentPose
-            }
+            message: 'Get currentPose successfully',
+            currentPose: currentPose
+        });
+    };
+    // [GET] /robot/getRobotConfigs
+    getRobotConfigs = function (req, res) {
+        console.log('🚀 ~ ~ getRobotConfigs');
+        const robotConfigsFilter = {};
+        Object.keys(robotConfigs).forEach((key) => {
+            robotConfigsFilter[key] = { robotName: key };
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: 'Get Robot Configs successfully',
+            robotConfigs: robotConfigsFilter
         });
     };
     // [POST] /robot/sendTaskList
     createNewTask = async function (req, res) {
         Logging.info('__autoPickRobotAndSendTaskList:');
 
-        const { taskName, taskDescription, pathOptimization, targetPointList: subTaskList } = req.body;
+        const { taskName, taskDescription, pathOptimization, autoGoHome, targetPointList: subTaskList } = req.body;
+        console.log('🚀 ~ file: ros.controller.js:274 ~ RobotController ~ body:', req.body);
 
         if (!taskName || !subTaskList) {
             return res.json({
@@ -287,24 +431,20 @@ class RobotController {
                 taskName: taskName,
                 taskDescription: taskDescription || 'new task',
                 pathOptimization: pathOptimization,
+                autoGoHome: autoGoHome,
                 status: 'INITIALIZE',
                 startTime: new Date()
             });
-            for (const subTask of subTaskList) {
-                await SubTask.create({
-                    taskId: taskId,
-                    cargo: subTask.cargoVolume,
-                    targetName: subTask.targetName,
-                    isDone: subTask.status
-                });
-            }
+
             const job = await addTaskToQueue({
                 taskId,
                 taskName,
                 taskDescription,
                 pathOptimization,
+                autoGoHome,
                 subTaskList
             });
+
             return res.status(200).json({
                 success: true,
                 jobId: job.id,
@@ -361,8 +501,8 @@ class RobotController {
 
     // [GET] /robot/getAllTargetPoint
     getAllTargetPoint = async function (req, res) {
-        Logging.info('get getAllTargetPoint');
         if (totalCountTargetPoint === 0 || Object.keys(GoalPoseArray).length != totalCountTargetPoint) {
+            Logging.info('get getAllTargetPoint');
             try {
                 // Lấy toàn bộ bản ghi từ cơ sở dữ liệu
                 const allPositionGoals = await PositionGoal.findAll();
@@ -430,7 +570,7 @@ class RobotController {
 
                 const TargetGoal = new ROSLIB.Topic({
                     ros: robotConfigs[robotId].rosWebsocket,
-                    name: robotId ? `/${robotId}/move_base_sequence/corner_pose` : '/move_base_sequence/corner_pose',
+                    name: '/' + robotConfigs[key].robotName + '/move_base_sequence/corner_pose',
                     messageType: 'geometry_msgs/PoseStamped'
                 });
 
@@ -473,7 +613,7 @@ class RobotController {
 
                 const optimalPath = findOptimalPath(tspMatrix);
 
-                console.log('Đường đi tối ưu: ' + optimalPath.join(' -> '));
+                // console.log('Đường đi tối ưu: ' + optimalPath.join(' -> '));
                 const optimalOrder = createOptimalOrder(taskList, optimalPath);
 
                 console.log('Mảng đã sắp xếp theo thứ tự tối ưu:', optimalOrder);
@@ -499,7 +639,7 @@ class RobotController {
 
                 const TargetGoal = new ROSLIB.Topic({
                     ros: robotConfigs[robotId].rosWebsocket,
-                    name: robotId ? `/${robotId}/move_base_sequence/wayposes` : '/move_base_sequence/wayposes',
+                    name: '/' + robotConfigs[key].robotName + '/move_base_sequence/wayposes',
                     messageType: 'geometry_msgs/PoseArray'
                 });
 
@@ -632,27 +772,32 @@ class RobotController {
         const { state } = req.body;
         const robotId = req.params.id;
         if (state && robotId && robotConfigs.hasOwnProperty(robotId)) {
-            const serviceClient = new ROSLIB.Service({
-                ros: robotConfigs[robotId].robotWebsocket,
-                name: robotId ? `/${robotId}/move_base_sequence/set_state` : '/move_base_sequence/set_state',
-                serviceType: 'move_base_sequence/set_state'
-            });
-
-            const request = new ROSLIB.ServiceRequest({ state });
-
-            serviceClient.callService(request, function (result) {
-                let message = '';
-                if (result.success) {
-                    message: 'Robot is operating, now.';
-                } else {
-                    message: 'Robot is operating,';
-                }
-                return res.status(200).json({
-                    success: true,
-                    serviceClient: serviceClient.name,
-                    message: message
+            try {
+                const serviceClient = new ROSLIB.Service({
+                    ros: robotConfigs[robotId].rosWebsocket,
+                    name: robotId ? `/${robotId}/move_base_sequence/set_state` : '/move_base_sequence/set_state',
+                    serviceType: 'move_base_sequence/set_state'
                 });
-            });
+                console.log('🚀 ~ file: ros.controller.js:754 ~ RobotController ~ serviceClient:', serviceClient);
+
+                const request = new ROSLIB.ServiceRequest({ state });
+
+                serviceClient.callService(request, function (result) {
+                    let message = '';
+                    if (result.success) {
+                        message: 'Robot is operating, now.';
+                    } else {
+                        message: 'Robot is operating,';
+                    }
+                    return res.status(200).json({
+                        success: true,
+                        serviceClient: serviceClient.name,
+                        message: message
+                    });
+                });
+            } catch (error) {
+                console.log('callServiceSetState ~ error:', error.message);
+            }
         } else {
             return res.status(400).json({
                 errorCode: 400,
