@@ -83,50 +83,112 @@ const allPositionGoals = [
         theta: 0
     }
 ];
+/**
+ * @brief bộ dữ liệu cho Turtelbot3 map house
+ */
+const allPositionGoals2 = [
+    {
+        pointName: 'point_1',
+        pointType: 'Goal point',
+        xCoordinate: -4.06,
+        yCoordinate: 3.5,
+        theta: 0
+    },
+    {
+        pointName: 'point_2',
+        pointType: 'Goal Point',
+        xCoordinate: -4.05,
+        yCoordinate: 1.1,
+        theta: 0
+    },
+    {
+        pointName: 'point_3',
+        pointType: 'Goal Point',
+        xCoordinate: 0.47,
+        yCoordinate: 0.32,
+        theta: 0
+    },
+    {
+        pointName: 'point_4',
+        pointType: 'Goal Point',
+        xCoordinate: 4.63,
+        yCoordinate: 3.7,
+        theta: 0
+    },
+    {
+        pointName: 'point_5',
+        pointType: 'Goal Point',
+        xCoordinate: 4.55,
+        yCoordinate: 0.74,
+        theta: 0
+    },
+    {
+        pointName: 'home_1',
+        pointType: 'Home Point',
+        xCoordinate: -6.62,
+        yCoordinate: 4.0,
+        theta: 0
+    },
+    {
+        pointName: 'home_2',
+        pointType: 'Home Point',
+        xCoordinate: -6.62,
+        yCoordinate: 3.25,
+        theta: 0
+    },
+    {
+        pointName: 'home_3',
+        pointType: 'Home Point',
+        xCoordinate: -6.62,
+        yCoordinate: 2.5,
+        theta: 0
+    }
+];
+
+// Lấy toàn bộ bản ghi từ cơ sở dữ liệu
 (async function () {
-    // Lấy toàn bộ bản ghi từ cơ sở dữ liệu
-    // await PositionGoal.findAll().then((allPositionGoals) => {
-    //     // Phân loại bản ghi theo pointType
-    //     allPositionGoals.forEach((positionGoal) => {
-    //         const { pointName } = positionGoal;
-    //         if (!GoalPoseArray.hasOwnProperty(pointName)) {
-    //             GoalPoseArray[pointName] = {
-    //                 position: {
-    //                     x: positionGoal.xCoordinate,
-    //                     y: positionGoal.yCoordinate,
-    //                     z: 0
-    //                 },
-    //                 orientation: {
-    //                     x: 0,
-    //                     y: 0,
-    //                     z: ParseFloat(Math.sin(positionGoal.theta / 2.0), 2),
-    //                     w: ParseFloat(Math.cos(positionGoal.theta / 2.0), 2)
-    //                 }
-    //             };
-    //         } else {
-    //         }
-    //     });
-    // });
-    // ==================================
-    allPositionGoals.forEach((positionGoal) => {
-        const { pointName } = positionGoal;
-        if (!GoalPoseArray.hasOwnProperty(pointName)) {
-            GoalPoseArray[pointName] = {
-                position: {
-                    x: positionGoal.xCoordinate,
-                    y: positionGoal.yCoordinate,
-                    z: 0
-                },
-                orientation: {
-                    x: 0,
-                    y: 0,
-                    z: ParseFloat(Math.sin(positionGoal.theta / 2.0), 2),
-                    w: ParseFloat(Math.cos(positionGoal.theta / 2.0), 2)
-                }
-            };
-        } else {
-        }
+    await PositionGoal.findAll().then((allPositionGoals) => {
+        // Phân loại bản ghi theo pointType
+        allPositionGoals.forEach((positionGoal) => {
+            const { pointName } = positionGoal;
+            if (!GoalPoseArray.hasOwnProperty(pointName)) {
+                GoalPoseArray[pointName] = {
+                    position: {
+                        x: positionGoal.xCoordinate,
+                        y: positionGoal.yCoordinate,
+                        z: 0
+                    },
+                    orientation: {
+                        x: 0,
+                        y: 0,
+                        z: ParseFloat(Math.sin(positionGoal.theta / 2.0), 2),
+                        w: ParseFloat(Math.cos(positionGoal.theta / 2.0), 2)
+                    }
+                };
+            } else {
+            }
+        });
     });
+    // ==================================
+    // allPositionGoals.forEach((positionGoal) => {
+    //     const { pointName } = positionGoal;
+    //     if (!GoalPoseArray.hasOwnProperty(pointName)) {
+    //         GoalPoseArray[pointName] = {
+    //             position: {
+    //                 x: positionGoal.xCoordinate,
+    //                 y: positionGoal.yCoordinate,
+    //                 z: 0
+    //             },
+    //             orientation: {
+    //                 x: 0,
+    //                 y: 0,
+    //                 z: ParseFloat(Math.sin(positionGoal.theta / 2.0), 2),
+    //                 w: ParseFloat(Math.cos(positionGoal.theta / 2.0), 2)
+    //             }
+    //         };
+    //     } else {
+    //     }
+    // });
     totalCountTargetPoint = Object.keys(GoalPoseArray).length;
 
     await Robot.findAll().then((allRobot) => {
@@ -157,22 +219,10 @@ const allPositionGoals = [
     Logging.info(`Start connect to each robot`);
     Object.keys(robotConfigs).forEach((key, index) => {
         // khởi tạo websocket
-        const websocket = `ws://${robotConfigs[key].ip}:${robotConfigs[key].portWebSocket}`;
+        // const websocket = `ws://${robotConfigs[key].ip}:${robotConfigs[key].portWebSocket}`;
+        const websocket = `ws://0.0.0.0:${robotConfigs[key].portWebSocket}`;
         robotConfigs[key].rosWebsocket = new ROSLIB.Ros({ encoding: 'ascii' });
-        // xử lý event khi ros connected
-        robotConfigs[key].rosWebsocket.on('connection', function () {
-            Logging.info(`Connected to websocket ros ${robotConfigs[key].robotName} server`);
-        });
-
-        robotConfigs[key].rosWebsocket.on('close', function (e) {
-            Logging.info(`Try to connect to robot ${robotConfigs[key].robotName} through websocket`);
-        });
-
-        robotConfigs[key].rosWebsocket.on('error', function (error) {
-            Logging.error(`Server can not connect to ros, ${error.message}`);
-        });
-        robotConfigs[key].rosWebsocket.connect(websocket);
-
+        robotConfigs[key].isConnected = false;
         // Khởi tạo node subcribe topic
         robotConfigs[key]['statusNav'] = new ROSLIB.Topic({
             ros: robotConfigs[key].rosWebsocket,
@@ -185,44 +235,60 @@ const allPositionGoals = [
             name: '/' + robotConfigs[key].robotName + '/amcl_pose',
             messageType: 'geometry_msgs/PoseWithCovarianceStamped'
         });
-
-        // handle when new message from topic subcribe
-        robotConfigs[key]['statusNav'].subscribe(async function (response) {
-            const { data } = response;
-            statusOfAllRobots[key] = data;
-            if (data !== 'navigation finish' && data != 'Waiting for goals') {
-                const headerPayload = data.split('_')[0];
-                const currentTargetPoint = Number(data.split('_')[1]) + 1;
-                if (headerPayload === 'navigation to') {
-                    robotConfigs[key]['taskQueue'][0].indexActiveTask = currentTargetPoint;
-                } else if (headerPayload === 'Goal done' && currentTargetPoint === robotConfigs[key]['taskQueue'][0].indexActiveTask) {
-                    const indexTaskFinish = robotConfigs[key]['taskQueue'][0].indexActiveTask;
-                    try {
-                        robotConfigs[key]['taskQueue'][indexTaskFinish].isDone = true;
-                        robotConfigs[key].currentGoal = robotConfigs[key]['taskQueue'][indexTaskFinish].targetName;
-                    } catch (error) {}
+        // xử lý event khi ros connected
+        robotConfigs[key].rosWebsocket.on('connection', function () {
+            Logging.info(`Connected to websocket ros ${robotConfigs[key].robotName} server`);
+            robotConfigs[key].isConnected = true;
+         
+            // handle when new message from topic subcribe
+            robotConfigs[key]['statusNav'].subscribe(async function (response) {
+                const { data } = response;
+                statusOfAllRobots[key] = data;
+                if (data !== 'navigation finish' && data != 'Waiting for goals') {
+                    const headerPayload = data.split('_')[0];
+                    const currentTargetPoint = Number(data.split('_')[1]) + 1;
+                    if (headerPayload === 'navigation to') {
+                        robotConfigs[key]['taskQueue'][0].indexActiveTask = currentTargetPoint;
+                    } else if (headerPayload === 'Goal done' && currentTargetPoint === robotConfigs[key]['taskQueue'][0].indexActiveTask) {
+                        const indexTaskFinish = robotConfigs[key]['taskQueue'][0].indexActiveTask;
+                        try {
+                            robotConfigs[key]['taskQueue'][indexTaskFinish].isDone = true;
+                            robotConfigs[key].currentGoal = robotConfigs[key]['taskQueue'][indexTaskFinish].targetName;
+                        } catch (error) {}
+                    }
+                } else {
+                    // robotConfigs[key]['taskQueue'][0].indexActiveTask = 0;
+                    await Task.updateFields(robotConfigs[key].taskQueue[0].taskId, new Date(), 'FINISH');
+                    await SubTask.updateSubtasksStatusByTaskId(robotConfigs[key].taskQueue[0].taskId, true);
+                    queueRobots[`taskQueue_${key}`].resume();
                 }
-            } else {
-                // robotConfigs[key]['taskQueue'][0].indexActiveTask = 0;
-                await Task.updateFields(robotConfigs[key].taskQueue[0].taskId, new Date(), 'FINISH');
-                await SubTask.updateSubtasksStatusByTaskId(robotConfigs[key].taskQueue[0].taskId, true);
-                queueRobots[`taskQueue_${key}`].resume();
-            }
-            socketIo.emit(`updateTaskQueue`, {
-                robotName: key,
-                taskQueueUpdate: robotConfigs[key]['taskQueue']
+                socketIo.emit(`updateTaskQueue`, {
+                    robotName: key,
+                    taskQueueUpdate: robotConfigs[key]['taskQueue']
+                });
+
+                socketIo.emit('statusOfAllRobots', statusOfAllRobots);
             });
+            robotConfigs[key]['poseTopic'].subscribe(function (response) {
+                const x = ParseFloat(response.pose.pose.position.x, 2);
+                const y = ParseFloat(response.pose.pose.position.y, 2);
+                Logging.debug(`${robotConfigs[key].robotName} positionX: ${x} positionY: ${y}`);
 
-            socketIo.emit('statusOfAllRobots', statusOfAllRobots);
+                currentPose[key] = response.pose.pose;
+                socketIo.emit(`currentPose`, { robotId: key, currentPose });
+            });
         });
-        robotConfigs[key]['poseTopic'].subscribe(function (response) {
-            const x = ParseFloat(response.pose.pose.position.x, 2);
-            const y = ParseFloat(response.pose.pose.position.y, 2);
-            Logging.debug(`${robotConfigs[key].robotName} positionX: ${x} positionY: ${y}`);
 
-            currentPose[key] = response.pose.pose;
-            socketIo.emit(`currentPose`, { robotId: key, currentPose });
+        robotConfigs[key].rosWebsocket.on('close', function (e) {
+            Logging.info(`Try to connect to robot ${robotConfigs[key].robotName} through websocket`);
+            robotConfigs[key].isConnected = false;
         });
+
+        robotConfigs[key].rosWebsocket.on('error', function (error) {
+            Logging.error(`Server can not connect to ros, ${error.message}`);
+        });
+        robotConfigs[key].rosWebsocket.connect(websocket);
+
         //Auto Reconnection for roslibjsx
         // setInterval(function () {
         //     robotConfigs[key].rosWebsocket.connect(websocket);
@@ -397,10 +463,10 @@ class RobotController {
     };
     // [GET] /robot/getRobotConfigs
     getRobotConfigs = function (req, res) {
-        console.log('🚀 ~ ~ getRobotConfigs');
+        Logging.debug('🚀 ~ ~ getRobotConfigs');
         const robotConfigsFilter = {};
         Object.keys(robotConfigs).forEach((key) => {
-            robotConfigsFilter[key] = { robotName: key };
+            robotConfigsFilter[key] = { robotName: key, isConnected: robotConfigs[key].isConnected };
         });
 
         return res.status(200).json({

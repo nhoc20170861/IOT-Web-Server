@@ -21,8 +21,7 @@ const Role = db.role;
 const PositionGoal = db.position_goals;
 const Robot = db.robot;
 const DataSensor = db.data_sensor;
-const config = require('./configs/maps/map_hospital.json');
-console.log(config);
+
 async function initialDataBase() {
     const TargetPointList = [
         {
