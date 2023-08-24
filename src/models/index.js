@@ -53,7 +53,7 @@ db.user.belongsToMany(db.home, {
 // create data_sensor table relative with device table follow key: deviceId
 db.device = require('./device.model.js')(sequelize, Sequelize);
 db.data_sensor = require('./data_sensor.model.js')(sequelize, Sequelize);
-db.device.hasOne(db.data_sensor, {
+db.device.hasMany(db.data_sensor, {
     onDelete: 'CASCADE'
 });
 db.data_sensor.belongsTo(db.device, {
@@ -65,17 +65,21 @@ db.ROLES = ['user', 'admin', 'moderator'];
 
 // Code fore robot
 db.position_goals = require('./Robot/position_goal.model')(sequelize, Sequelize);
-db.robot = require('./Robot/robot.model')(sequelize, Sequelize);
+db.map = require('./Robot/map.model')(sequelize, Sequelize);
+// Quan hệ 1-nhiều giữa map và position_goals
+db.map.hasMany(db.position_goals, { as: 'position_goals', foreignKey: 'mapId' });
+db.position_goals.belongsTo(db.map, { as: 'maps', foreignKey: 'mapId' });
 
 const { Task, SubTask } = require('./Robot/taskList.model')(sequelize, Sequelize);
+db.robot = require('./Robot/robot.model')(sequelize, Sequelize);
 db.Task = Task;
 db.SubTask = SubTask;
 // Quan hệ 1-nhiều giữa Task và Subtask
-db.Task.hasOne(SubTask, { as: 'subtasks', foreignKey: 'taskId' });
-db.SubTask.belongsTo(Task, { as: 'task', foreignKey: 'taskId' });
+db.Task.hasMany(SubTask, { as: 'subtasks', foreignKey: 'taskId' });
+db.SubTask.belongsTo(Task, { as: 'tasks', foreignKey: 'taskId' });
 
 // Thiết lập quan hệ giữa Robot và Task
-db.robot.hasOne(db.Task, { as: 'tasks', foreignKey: 'robotId' });
+db.robot.hasMany(db.Task, { as: 'tasks', foreignKey: 'robotId' });
 db.Task.belongsTo(db.robot, { as: 'robots', foreignKey: 'robotId' });
 
 // Kết nối đến cơ sở dữ liệu và đồng bộ hóa model

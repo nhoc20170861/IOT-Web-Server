@@ -21,9 +21,82 @@ const Role = db.role;
 const PositionGoal = db.position_goals;
 const Robot = db.robot;
 const DataSensor = db.data_sensor;
-
+const Map = db.map;
 async function initialDataBase() {
-    const TargetPointList = [
+    /**
+     * @brief bộ dữ liệu cho Mir
+     */
+    const allPositionGoalMir = [
+        {
+            pointName: 'point_1',
+            pointType: 'Goal point',
+            xCoordinate: 5.0,
+            yCoordinate: -10.0,
+            theta: -1.57,
+            mapId: 1
+        },
+        {
+            pointName: 'point_2',
+            pointType: 'Goal Point',
+            xCoordinate: 5.0,
+            yCoordinate: -23.0,
+            theta: -1.57,
+            mapId: 1
+        },
+        {
+            pointName: 'point_3',
+            pointType: 'Goal Point',
+            xCoordinate: -5.0,
+            yCoordinate: -23.0,
+            theta: -1.57,
+            mapId: 1
+        },
+        {
+            pointName: 'point_4',
+            pointType: 'Goal Point',
+            xCoordinate: -5.0,
+            yCoordinate: -10.0,
+            theta: -1.57,
+            mapId: 1
+        },
+        {
+            pointName: 'point_5',
+            pointType: 'Goal Point',
+            xCoordinate: -5.0,
+            yCoordinate: 7.8,
+            theta: -1.57,
+            mapId: 1
+        },
+        {
+            pointName: 'home_1',
+            pointType: 'Home Point',
+            xCoordinate: 5.03,
+            yCoordinate: 9.94,
+            theta: 0,
+            mapId: 1
+        },
+        {
+            pointName: 'home_2',
+            pointType: 'Home Point',
+            xCoordinate: 0.0,
+            yCoordinate: 9.96,
+            theta: 0,
+            mapId: 1
+        },
+        {
+            pointName: 'home_3',
+            pointType: 'Home Point',
+            xCoordinate: 0.01,
+            yCoordinate: 7.87,
+            theta: 0,
+            mapId: 1
+        }
+    ];
+
+    /**
+     * @brief bộ dữ liệu cho Turtelbot3 map house
+     */
+    const allPositionGoals2 = [
         {
             pointName: 'point_1',
             pointType: 'Goal point',
@@ -34,8 +107,8 @@ async function initialDataBase() {
         {
             pointName: 'point_2',
             pointType: 'Goal Point',
-            xCoordinate: -4.048,
-            yCoordinate: 1.09,
+            xCoordinate: -4.05,
+            yCoordinate: 1.1,
             theta: 0
         },
         {
@@ -48,36 +121,33 @@ async function initialDataBase() {
         {
             pointName: 'point_4',
             pointType: 'Goal Point',
-            xCoordinate: 4.55,
-            yCoordinate: 0.74,
+            xCoordinate: 4.63,
+            yCoordinate: 3.7,
             theta: 0
         },
         {
             pointName: 'point_5',
             pointType: 'Goal Point',
-            xCoordinate: 4.63,
-            yCoordinate: 3.7,
-            theta: 0
-        }
-    ];
-
-    const HomePointList = [
-        {
-            pointName: 'home_0',
-            pointType: 'Home Point',
-            xCoordinate: -6.62,
-            yCoordinate: 4.0,
+            xCoordinate: 4.55,
+            yCoordinate: 0.74,
             theta: 0
         },
         {
             pointName: 'home_1',
             pointType: 'Home Point',
             xCoordinate: -6.62,
-            yCoordinate: 3.25,
+            yCoordinate: 4.0,
             theta: 0
         },
         {
             pointName: 'home_2',
+            pointType: 'Home Point',
+            xCoordinate: -6.62,
+            yCoordinate: 3.25,
+            theta: 0
+        },
+        {
+            pointName: 'home_3',
             pointType: 'Home Point',
             xCoordinate: -6.62,
             yCoordinate: 2.5,
@@ -124,11 +194,33 @@ async function initialDataBase() {
         }
     ];
 
+    const MapList = [
+        {
+            id: 1,
+            mapName: 'Map Hospital AWS',
+            mapImageSrc: 'images/maps/map_hospital.png',
+            mapConfigSrc: 'map_hospital.json'
+        },
+        {
+            id: 2,
+            mapName: 'Map House Turtlebot3',
+            mapImageSrc: 'images/maps/map_house.png',
+            mapConfigSrc: 'map_house.json'
+        },
+        {
+            id: 3,
+            mapName: 'Map World Turtlebot3',
+            mapImageSrc: 'images/maps/map_world.png',
+            mapConfigSrc: 'map_world.json'
+        }
+    ];
+
     try {
+        await Map.bulkCreate(MapList);
         await Role.bulkCreate(RoleList);
-        await PositionGoal.bulkCreate(TargetPointList);
-        await PositionGoal.bulkCreate(HomePointList);
         await Robot.bulkCreate(RobotConfigList);
+        await PositionGoal.bulkCreate(allPositionGoals);
+        await PositionGoal.bulkCreate(allPositionGoalMir);
     } catch (error) {
         console.log('🚀 ~ file: position_goal.model.js:100 ~ module.exports= ~ error:', error);
     }

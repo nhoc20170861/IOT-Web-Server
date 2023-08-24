@@ -6,18 +6,22 @@ module.exports = (sequelize, Sequelize) => {
             primaryKey: true,
             autoIncrement: true
         },
+        mapId: {
+            type: Sequelize.INTEGER,
+            allowNull: false
+        },
         pointName: {
             type: Sequelize.STRING,
             allowNull: false,
-            unique: true,
             validate: {
                 notEmpty: {
-                    msg: 'Point type is required.'
+                    msg: 'Point name is required.'
                 },
                 isUnique: async function (value) {
                     const record = await PositionGoal.findOne({ where: { pointName: value } });
-                    if (record) {
-                        throw new Error('Point name must be unique.');
+                    // console.log('🚀 ~ file: position_goal.model.js:22 ~ record:', record);
+                    if (record && record.dataValues.mapId === this.mapId) {
+                        throw new Error('Point name in this map is exist.');
                     }
                 }
             }

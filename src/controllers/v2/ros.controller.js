@@ -11,7 +11,7 @@ const PositionGoal = db.position_goals;
 const Robot = db.robot;
 const SubTask = db.SubTask;
 const Task = db.Task;
-
+var currentMapId = 1;
 var totalCountTargetPoint = 0;
 // robot models
 global.GoalPoseArray = {};
@@ -25,64 +25,73 @@ global.statusOfAllRobots = {};
 /**
  * @brief bộ dữ liệu cho Mir
  */
-const allPositionGoals = [
+const allPositionGoalMir = [
     {
         pointName: 'point_1',
         pointType: 'Goal point',
         xCoordinate: 5.0,
         yCoordinate: -10.0,
-        theta: -1.57
+        theta: -1.57,
+        mapId: 1
     },
     {
         pointName: 'point_2',
         pointType: 'Goal Point',
         xCoordinate: 5.0,
         yCoordinate: -23.0,
-        theta: -1.57
+        theta: -1.57,
+        mapId: 1
     },
     {
         pointName: 'point_3',
         pointType: 'Goal Point',
         xCoordinate: -5.0,
         yCoordinate: -23.0,
-        theta: -1.57
+        theta: -1.57,
+        mapId: 1
     },
     {
         pointName: 'point_4',
         pointType: 'Goal Point',
         xCoordinate: -5.0,
         yCoordinate: -10.0,
-        theta: -1.57
+        theta: -1.57,
+        mapId: 1
     },
     {
         pointName: 'point_5',
         pointType: 'Goal Point',
         xCoordinate: -5.0,
         yCoordinate: 7.8,
-        theta: -1.57
+        theta: -1.57,
+        mapId: 1
     },
     {
         pointName: 'home_1',
         pointType: 'Home Point',
         xCoordinate: 5.03,
         yCoordinate: 9.94,
-        theta: 0
+        theta: 0,
+        mapId: 1
     },
     {
         pointName: 'home_2',
         pointType: 'Home Point',
         xCoordinate: 0.0,
         yCoordinate: 9.96,
-        theta: 0
+        theta: 0,
+        mapId: 1
     },
     {
         pointName: 'home_3',
         pointType: 'Home Point',
         xCoordinate: 0.01,
         yCoordinate: 7.87,
-        theta: 0
+        theta: 0,
+        mapId: 1
     }
 ];
+
 /**
  * @brief bộ dữ liệu cho Turtelbot3 map house
  */
@@ -147,48 +156,48 @@ const allPositionGoals2 = [
 
 // Lấy toàn bộ bản ghi từ cơ sở dữ liệu
 (async function () {
-    await PositionGoal.findAll().then((allPositionGoals) => {
-        // Phân loại bản ghi theo pointType
-        allPositionGoals.forEach((positionGoal) => {
-            const { pointName } = positionGoal;
-            if (!GoalPoseArray.hasOwnProperty(pointName)) {
-                GoalPoseArray[pointName] = {
-                    position: {
-                        x: positionGoal.xCoordinate,
-                        y: positionGoal.yCoordinate,
-                        z: 0
-                    },
-                    orientation: {
-                        x: 0,
-                        y: 0,
-                        z: ParseFloat(Math.sin(positionGoal.theta / 2.0), 2),
-                        w: ParseFloat(Math.cos(positionGoal.theta / 2.0), 2)
-                    }
-                };
-            } else {
-            }
-        });
-    });
-    // ==================================
-    // allPositionGoals.forEach((positionGoal) => {
-    //     const { pointName } = positionGoal;
-    //     if (!GoalPoseArray.hasOwnProperty(pointName)) {
-    //         GoalPoseArray[pointName] = {
-    //             position: {
-    //                 x: positionGoal.xCoordinate,
-    //                 y: positionGoal.yCoordinate,
-    //                 z: 0
-    //             },
-    //             orientation: {
-    //                 x: 0,
-    //                 y: 0,
-    //                 z: ParseFloat(Math.sin(positionGoal.theta / 2.0), 2),
-    //                 w: ParseFloat(Math.cos(positionGoal.theta / 2.0), 2)
-    //             }
-    //         };
-    //     } else {
-    //     }
+    // await PositionGoal.findAll({where:  {mapId: currentMapId}}).then((allPositionGoals) => {
+    //     // Phân loại bản ghi theo pointType
+    //     allPositionGoals.forEach((positionGoal) => {
+    //         const { pointName } = positionGoal;
+    //         if (!GoalPoseArray.hasOwnProperty(pointName)) {
+    //             GoalPoseArray[pointName] = {
+    //                 position: {
+    //                     x: positionGoal.xCoordinate,
+    //                     y: positionGoal.yCoordinate,
+    //                     z: 0
+    //                 },
+    //                 orientation: {
+    //                     x: 0,
+    //                     y: 0,
+    //                     z: ParseFloat(Math.sin(positionGoal.theta / 2.0), 2),
+    //                     w: ParseFloat(Math.cos(positionGoal.theta / 2.0), 2)
+    //                 }
+    //             };
+    //         } else {
+    //         }
+    //     });
     // });
+    //==================================
+    allPositionGoalMir.forEach((positionGoal) => {
+        const { pointName } = positionGoal;
+        if (!GoalPoseArray.hasOwnProperty(pointName)) {
+            GoalPoseArray[pointName] = {
+                position: {
+                    x: positionGoal.xCoordinate,
+                    y: positionGoal.yCoordinate,
+                    z: 0
+                },
+                orientation: {
+                    x: 0,
+                    y: 0,
+                    z: ParseFloat(Math.sin(positionGoal.theta / 2.0), 2),
+                    w: ParseFloat(Math.cos(positionGoal.theta / 2.0), 2)
+                }
+            };
+        } else {
+        }
+    });
     totalCountTargetPoint = Object.keys(GoalPoseArray).length;
 
     await Robot.findAll().then((allRobot) => {
@@ -239,7 +248,7 @@ const allPositionGoals2 = [
         robotConfigs[key].rosWebsocket.on('connection', function () {
             Logging.info(`Connected to websocket ros ${robotConfigs[key].robotName} server`);
             robotConfigs[key].isConnected = true;
-         
+
             // handle when new message from topic subcribe
             robotConfigs[key]['statusNav'].subscribe(async function (response) {
                 const { data } = response;
@@ -295,7 +304,6 @@ const allPositionGoals2 = [
         // }, 4000);
     });
 })();
-// }, 4000);
 
 // import worker
 import { addTaskToQueueEsp, addTaskToQueue } from './bullmq';
@@ -315,9 +323,27 @@ class RobotController {
     /**
      * @breif api for edit or get map
      */
+    getMapList = async function (req, res) {
+        Logging.debug('🚀 ~ ~ getAllMap');
+        try {
+            const mapList = await db.map.findAll();
 
+            return res.status(200).json({
+                success: true,
+                message: 'Get all map successfully',
+                mapList: mapList
+            });
+        } catch (error) {
+            return res.status(200).json({
+                success: false,
+                errorCode: 500,
+                message: 'Internal server erroy'
+            });
+        }
+    };
     getConfigMap = async function (req, res) {
         const fileName = req.params.fileName;
+        Logging.debug(` getConfigMap: ${fileName}`);
 
         const filePath = path.join(__dirname, `../../configs/maps/${fileName}`);
         jsonfile.readFile(filePath, (err, data) => {
@@ -325,6 +351,7 @@ class RobotController {
                 console.log(err);
                 return res.status(200).json({
                     success: false,
+                    errorCode: 500,
                     message: err.message
                 });
             }
@@ -465,6 +492,7 @@ class RobotController {
     getRobotConfigs = function (req, res) {
         Logging.debug('🚀 ~ ~ getRobotConfigs');
         const robotConfigsFilter = {};
+        // console.log('🚀 ~ file: ros.controller.js:497 ~ RobotController ~ Object.keys ~ robotConfigs:', robotConfigs);
         Object.keys(robotConfigs).forEach((key) => {
             robotConfigsFilter[key] = { robotName: key, isConnected: robotConfigs[key].isConnected };
         });
@@ -520,21 +548,23 @@ class RobotController {
         } else {
             return res.json({
                 success: false,
-                message: 'taskList is null'
+                errorCoe: 403,
+                message: 'Bad request'
             });
         }
     };
     // [POST] /robot/createNewTargetPoint
     createNewTargetPoint = async function (req, res) {
         try {
-            const { pointName, pointType, xCoordinate, yCoordinate, theta } = req.body.newTargetPoint;
+            const { pointName, pointType, mapId, xCoordinate, yCoordinate, theta } = req.body.newTargetPoint;
             // Validate the input using Sequelize validation
             const positionGoal = await PositionGoal.build({
                 pointName,
                 pointType,
                 xCoordinate,
                 yCoordinate,
-                theta
+                theta,
+                mapId
             });
 
             await positionGoal.validate();
@@ -545,7 +575,8 @@ class RobotController {
                 pointType,
                 xCoordinate,
                 yCoordinate,
-                theta
+                theta,
+                mapId
             });
             // Count the total number of records
             totalCountTargetPoint = await PositionGoal.count();
@@ -567,32 +598,38 @@ class RobotController {
 
     // [GET] /robot/getAllTargetPoint
     getAllTargetPoint = async function (req, res) {
-        if (totalCountTargetPoint === 0 || Object.keys(GoalPoseArray).length != totalCountTargetPoint) {
-            Logging.info('get getAllTargetPoint');
+        const mapId = req.params.mapId;
+
+        if (currentMapId != mapId || totalCountTargetPoint === 0 || Object.keys(GoalPoseArray).length != totalCountTargetPoint) {
+            Logging.info('get getAllTargetPoint from db');
+            currentMapId = mapId;
             try {
                 // Lấy toàn bộ bản ghi từ cơ sở dữ liệu
-                const allPositionGoals = await PositionGoal.findAll();
+                const allPositionGoals = await PositionGoal.findAll({ where: { mapId: mapId } });
+                if (!allPositionGoals) {
+                    throw new Error('Something is wrong');
+                }
+                // console.log('🚀 ~ file: ros.controller.js:607 ~ RobotController ~ allPositionGoals:', allPositionGoals);
 
                 // Phân loại bản ghi theo pointType
                 totalCountTargetPoint = allPositionGoals.length;
+                GoalPoseArray = {};
                 allPositionGoals.forEach((positionGoal) => {
                     const { pointName } = positionGoal;
-                    if (!GoalPoseArray.hasOwnProperty(pointName)) {
-                        GoalPoseArray[pointName] = {
-                            position: {
-                                x: positionGoal.xCoordinate,
-                                y: positionGoal.yCoordinate,
-                                z: 0
-                            },
-                            orientation: {
-                                x: 0,
-                                y: 0,
-                                z: ParseFloat(Math.sin(positionGoal.theta / 2.0), 2),
-                                w: ParseFloat(Math.cos(positionGoal.theta / 2.0), 2)
-                            }
-                        };
-                    } else {
-                    }
+
+                    GoalPoseArray[pointName] = {
+                        position: {
+                            x: positionGoal.xCoordinate,
+                            y: positionGoal.yCoordinate,
+                            z: 0
+                        },
+                        orientation: {
+                            x: 0,
+                            y: 0,
+                            z: ParseFloat(Math.sin(positionGoal.theta / 2.0), 2),
+                            w: ParseFloat(Math.cos(positionGoal.theta / 2.0), 2)
+                        }
+                    };
                 });
 
                 return res.status(200).json({
@@ -657,12 +694,13 @@ class RobotController {
             } else {
                 return res.json({
                     success: false,
+                    errorCoe: 403,
                     message: 'can not add new goal'
                 });
             }
         } else {
             return res.status(400).json({
-                errorCode: 400,
+                errorCode: 403,
                 success: false,
                 message: 'Bad requsest'
             });
@@ -724,12 +762,13 @@ class RobotController {
             } else {
                 return res.json({
                     success: false,
-                    message: 'taskList is null'
+                    errorCoe: 403,
+                    message: 'Bad request'
                 });
             }
         } else {
-            return res.status(400).json({
-                errorCode: 400,
+            return res.status(200).json({
+                errorCode: 403,
                 success: false,
                 message: 'Bad requsest'
             });
