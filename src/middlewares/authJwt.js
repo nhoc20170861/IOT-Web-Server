@@ -9,9 +9,10 @@ const verifyToken = (req, res, next) => {
     //let access_token = req.headers["x-access-token"];
     let access_token = req.cookies.access_token;
     if (!access_token) {
-        return res.status(403).send({
-            message: 'No token provided!'
-        });
+        // return res.status(403).send({
+        //     message: 'No token provided!'
+        // });
+        return res.redirect('/v1/home');
     }
     // console.log(access_token);
 

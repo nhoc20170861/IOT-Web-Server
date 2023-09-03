@@ -8,6 +8,7 @@ import express from 'express';
 import session from 'express-session';
 import Pusher from 'pusher';
 import cookieParser from 'cookie-parser';
+const { authJwt } = require('./middlewares');
 const { createBullBoard } = require('@bull-board/api');
 const { BullMQAdapter } = require('@bull-board/api/bullMQAdapter');
 const { ExpressAdapter } = require('@bull-board/express');
@@ -269,23 +270,24 @@ app.use(express.static(path.join(__dirname, 'public')));
 import routes from './routes';
 app.use('/', routes);
 
-// create dashboard queue
-import { queue, queueEsp, queueRobots } from './controllers/v2/bullmq.js';
+// create dashboard mainQueue
+import { mainQueue, queueEsp, queueRobots, queueBacklog } from './controllers/v2/bullmq.js';
 const serverAdapter = new ExpressAdapter();
 serverAdapter.setBasePath('/queueDashBoard');
-const queueAdapter = new BullMQAdapter(queue, { allowRetries: true, readOnlyMode: true });
+const queueAdapter = new BullMQAdapter(mainQueue, { allowRetries: true, readOnlyMode: false });
+const queueBacklogAdapter = new BullMQAdapter(queueBacklog, { allowRetries: true, readOnlyMode: false });
 const queueAdapterEsp = new BullMQAdapter(queueEsp, { allowRetries: true, readOnlyMode: true });
 // create Queue dashboard to monitor
 const queueAdapterRobots = [];
 Object.keys(queueRobots).forEach((key) => {
-    const queueRb = new BullMQAdapter(queueRobots[key], { allowRetries: true, readOnlyMode: true });
+    const queueRb = new BullMQAdapter(queueRobots[key], { allowRetries: true, readOnlyMode: false });
     queueAdapterRobots.push(queueRb);
 });
 const bullBoard = createBullBoard({
-    queues: [queueAdapter, queueAdapterEsp, ...queueAdapterRobots],
+    queues: [queueAdapter, queueBacklogAdapter, queueAdapterEsp, ...queueAdapterRobots],
     serverAdapter: serverAdapter
 });
-app.use('/queueDashBoard', serverAdapter.getRouter());
+app.use('/queueDashBoard', [], serverAdapter.getRouter());
 
 // initialize Server and socket
 const server = require('http').Server(app);

@@ -59,7 +59,7 @@ export const myWorkerEsp = new Worker(
             TargetGoal.publish(targetGoalMessage);
             return nameRobotWillCall;
         } else {
-            console.log("🚀 queue.process ~  'All robot are busy!");
+            console.log("🚀 mainQueue.process ~  'All robot are busy!");
             throw new Error('Job failed');
         }
     },

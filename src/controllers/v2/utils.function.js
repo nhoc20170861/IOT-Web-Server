@@ -1,5 +1,46 @@
 // utils function
-// calculate optimal path
+
+import Logging from '../../library/Logging';
+
+// calculate total volume of task
+function calculateVolume(previousSubTaskList) {
+    let totalVolume = 0;
+    previousSubTaskList.forEach((item) => {
+        totalVolume += item.cargoVolume;
+    });
+    return totalVolume;
+}
+// merge task
+function mergeTask(taskArray) {
+    const mergedTask = {
+        taskName: 'Merged_Task',
+        taskDescription: 'merged_task',
+        pathOptimization: true,
+        autoGoHome: true,
+        taskId: taskArray[0].taskId,
+        subTaskList: []
+    };
+    const mergedTargetMap = new Map();
+    taskArray.forEach((task) => {
+        // console.log(task)
+        task.subTaskList.forEach((subTask, index) => {
+            const targetName = subTask.targetName;
+            if (mergedTargetMap.has(targetName)) {
+                // Nếu targetName đã tồn tại, cộng thêm giá trị cargoVolume
+                const existingSubTask = mergedTargetMap.get(targetName);
+                existingSubTask.cargoVolume += subTask.cargoVolume;
+            } else {
+                // Nếu targetName chưa tồn tại, thêm subTask mới vào Map
+                mergedTargetMap.set(targetName, { ...subTask });
+            }
+        });
+    });
+    const mergedTargetPoints = [...mergedTargetMap.values()];
+
+    mergedTask.subTaskList = mergedTargetPoints;
+    return mergedTask;
+}
+
 function calculateTaskPath(data) {
     let orderPath = data.subTaskList;
     const nameRobotWillCall = data.nameRobotWillCall;
@@ -35,58 +76,70 @@ function calculateTaskPath(data) {
     return orderPath;
 }
 // Create TSP Matrix
-function createRoutePath(orderPath, robotId) {
-    let routePath = JSON.parse(JSON.stringify(orderPath));
+function createRoutePath(previousSubTaskList, robotId) {
+    let newSubTaskList = JSON.parse(JSON.stringify(previousSubTaskList));
     if (robotConfigs.hasOwnProperty(robotId)) {
         if (robotConfigs[robotId].currentGoal === robotConfigs[robotId].initPoint) {
-            // Robot chua nhan nhiem vu dang o vi tri home
-            routePath.unshift({ targetName: robotConfigs[robotId].initPoint, cargoVolume: 0, isDone: false });
+            // Robot chua nhan nhiem vu dang o vi tri home hoac da thuc hien nhiem vu xong va tro ve home
+            newSubTaskList.unshift({ targetName: robotConfigs[robotId].initPoint, cargoVolume: 0, isDone: false });
         } else {
-            routePath.unshift({ targetName: robotConfigs[robotId].currentGoal, cargoVolume: 0, isDone: false });
+            newSubTaskList.unshift({ targetName: robotConfigs[robotId].currentGoal, cargoVolume: 0, isDone: false });
         }
     }
-    return routePath;
+    return newSubTaskList;
 }
-function createTSPMatrix(goalTargetList) {
+function createTSPMatrix(goalTargetList, key) {
     const n = goalTargetList.length;
 
     const tspMatrix = Array.from({ length: n }, () => Array(n).fill(0.0));
+    const checkCurrent = 'currentPose_' + key;
     for (let i = 0; i < n; i++) {
-        let firstPoint = GoalPoseArray[goalTargetList[i].targetName].position;
+        let firstPoint = goalTargetList[i].targetName !== checkCurrent ? GoalPoseArray[goalTargetList[i].targetName].position : currentPose[key].position;
+        // console.log('🚀 ~ file: utils.function.js:59 ~ createTSPMatrix ~ firstPoint:', firstPoint);
         // if ((i = 0 && robotConfigs[robotId].currentGoal !== robotConfigs[robotId].initPoint))
         // firstPoint = currentPose[robotId];
         for (let j = 0; j < n; j++) {
-            const secondPoint = GoalPoseArray[goalTargetList[j].targetName].position;
+            const secondPoint = goalTargetList[j].targetName !== checkCurrent ? GoalPoseArray[goalTargetList[j].targetName].position : currentPose[key].position;
+            // console.log('🚀 ~ file: utils.function.js:64 ~ createTSPMatrix ~ secondPoint:', secondPoint);
             tspMatrix[i][j] = calculateDistance(firstPoint, secondPoint);
         }
     }
 
+    console.log(`🚀 ~ ${key} ~ createTSPMatrix`, tspMatrix);
     return tspMatrix;
 }
+// calculate optimal path based on Greedy ALgorithms
 function findOptimalPath(tspMatrix) {
     const n = tspMatrix.length;
-    const path = [0]; // Bắt đầu từ điểm xuất phát (điểm 0)
+    const visited = new Array(n).fill(false);
+    const path = [];
     let currentNode = 0;
+    // Start from node 0
+    path.push(currentNode);
+    visited[currentNode] = true;
 
     while (path.length < n) {
         let minDistance = Infinity;
         let nextNode = -1;
 
         for (let i = 0; i < n; i++) {
-            if (!path.includes(i) && tspMatrix[currentNode][i] < minDistance) {
+            if (!visited[i] && tspMatrix[currentNode][i] < minDistance) {
                 minDistance = tspMatrix[currentNode][i];
                 nextNode = i;
             }
         }
-
-        path.push(nextNode);
-        currentNode = nextNode;
+        if (nextNode !== -1) {
+            path.push(nextNode);
+            visited[nextNode] = true;
+            currentNode = nextNode;
+        }
     }
+    path.push(0);
 
     return path;
 }
 
-function createOptimalPath(originalArray, optimalPath) {
+function createOptimalOrderPath(originalArray, optimalPath) {
     const optimalOrder = [];
     for (const index of optimalPath) {
         optimalOrder.push(originalArray[index]);
@@ -98,7 +151,7 @@ function createOptimalPath(originalArray, optimalPath) {
 function calculateDistance(p1, p2) {
     const dx = p1.x - p2.x;
     const dy = p1.y - p2.y;
-    return Math.sqrt(dx * dx + dy * dy);
+    return Math.round((Math.sqrt(dx * dx + dy * dy) + Number.EPSILON) * 100);
 }
 // Tính tổng quãng đường của một chu trình
 function calculateTotalDistance(tspMatrix, optimalPath) {
@@ -112,13 +165,100 @@ function calculateTotalDistance(tspMatrix, optimalPath) {
     return totalDistance;
 }
 
+function waitforme(millisec) {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve('');
+        }, millisec);
+    });
+}
+
+function tspGreedyAlgorithm(tspDistanceMatrix) {
+    Logging.info('tspGreedyAlgorithm begin');
+    const n = tspDistanceMatrix.length;
+    let totalDistance = 0;
+    const visited = new Array(n).fill(false);
+    const path = [];
+    let currentNode = 0;
+    // Start from node 0
+    path.push(currentNode);
+    visited[currentNode] = true;
+
+    while (path.length < n) {
+        let minDistance = Infinity;
+        let nextNode = -1;
+
+        for (let i = 0; i < n; i++) {
+            if (!visited[i] && tspDistanceMatrix[currentNode][i] < minDistance) {
+                minDistance = tspDistanceMatrix[currentNode][i];
+                nextNode = i;
+            }
+        }
+        if (nextNode !== -1) {
+            path.push(nextNode);
+            visited[nextNode] = true;
+            currentNode = nextNode;
+            totalDistance += minDistance;
+        }
+    }
+    // return start point
+    totalDistance += tspDistanceMatrix[path[path.length - 1]][path[0]];
+    path.push(0);
+
+    return { totalDistance, path };
+}
+
+function tspDynamicProgramming(tspDistanceMatrix) {
+    Logging.info('tspDynamicProgramming begin');
+    const n = tspDistanceMatrix.length;
+    const dp = new Array(1 << n).fill(null).map(() => new Array(n).fill(null));
+    function solve(mask, pos) {
+        if (mask === (1 << n) - 1) {
+            return {
+                totalDistance: tspDistanceMatrix[pos][0], // Return to starting point
+                path: [pos, 0] // Path includes starting point
+            };
+        }
+
+        if (dp[mask][pos] !== null) {
+            return dp[mask][pos];
+        }
+
+        let minDistance = Infinity;
+        let minPath = [];
+
+        for (let next = 0; next < n; next++) {
+            if ((mask & (1 << next)) === 0) {
+                const subproblem = solve(mask | (1 << next), next);
+                const newDistance = tspDistanceMatrix[pos][next] + subproblem.totalDistance;
+
+                if (newDistance < minDistance) {
+                    minDistance = newDistance;
+                    minPath = [pos, ...subproblem.path];
+                }
+            }
+        }
+
+        dp[mask][pos] = { totalDistance: minDistance, path: minPath };
+        return dp[mask][pos];
+    }
+    const { totalDistance, path } = solve(1, 0); // Start with mask = 1 (only the starting point is visited)
+    return { totalDistance, path };
+}
+
 const utilsFunction = {
+    tspDynamicProgramming,
+    tspGreedyAlgorithm,
+    mergeTask,
+    calculateVolume,
+    calculateDistance,
     calculateTaskPath,
     createTSPMatrix,
     findOptimalPath,
-    createOptimalPath,
+    createOptimalOrderPath,
     calculateTotalDistance,
-    createRoutePath
+    createRoutePath,
+    waitforme
 };
 
 export default utilsFunction;

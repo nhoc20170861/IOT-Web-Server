@@ -2,9 +2,9 @@ import { Queue } from 'bullmq';
 import Logging from '../../library/Logging';
 
 // initialize queueRobots
-export const queueRobots = {};
+const queueRobots = {};
 for (let i = 1; i <= 3; i++) {
-    queueRobots[`taskQueue_mir${i}`] = new Queue(`taskQueue_mir${i}`, {
+    queueRobots[`mir${i}`] = new Queue(`mir${i}`, {
         connection: {
             host: 'localhost',
             port: 6379
@@ -12,37 +12,42 @@ for (let i = 1; i <= 3; i++) {
     });
 }
 
-export const queue = new Queue('taskQueue', {
+const mainQueue = new Queue('taskQueue', {
     connection: {
         host: 'localhost',
         port: 6379
     }
 });
 
-export const queueEsp = new Queue('taskQueueEsp', {
+const queueEsp = new Queue('taskQueueEsp', {
     connection: {
         host: 'localhost',
         port: 6379
     }
 });
-
-export const addTaskToQueue = async function (data) {
+const queueBacklog = new Queue('queueBacklog', {
+    connection: {
+        host: 'localhost',
+        port: 6379
+    }
+});
+const addTaskToQueue = async function (data) {
     const { taskId } = data;
-    const job = await queue.add(`task_${taskId}`, data, {
-        attempts: 3,
+    const job = await mainQueue.add(`task_${taskId}`, data, {
+        attempts: 0,
         backoff: {
             type: 'exponential',
             delay: 5000
         },
         delay: 5000
     });
-    // Get the size of the queue
-    const sizeQueue = await queue.count();
-    Logging.info(`Size of the queue: ${sizeQueue}`);
+    // Get the size of the mainQueue
+    const sizeQueue = await mainQueue.count();
+    Logging.info(`Size of the mainQueue: ${sizeQueue}`);
 
     return job;
 };
-export const addTaskToQueueEsp = async function (data) {
+const addTaskToQueueEsp = async function (data) {
     const { taskId } = data;
     const jobEsp = await queueEsp.add(`task_${taskId}`, data, {
         attempts: 6,
@@ -54,3 +59,16 @@ export const addTaskToQueueEsp = async function (data) {
     });
     return jobEsp;
 };
+
+const addTaskToQueueBackLog = async function (data) {
+    const { taskId } = data;
+    const job = await queueBacklog.add(`queueBacklog_${taskId}`, data, {
+        delay: 5000
+    });
+    // Get the size of the mainQueue
+    const sizeQueue = await queueBacklog.count();
+    Logging.info(`Size of the queueBacklog: ${sizeQueue}`);
+    return job;
+};
+
+export { queueRobots, queueBacklog, mainQueue, queueEsp, addTaskToQueue, addTaskToQueueEsp, addTaskToQueueBackLog };
