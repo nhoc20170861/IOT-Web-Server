@@ -103,56 +103,64 @@ async function initialDataBase() {
             pointType: 'Goal point',
             xCoordinate: -4.06,
             yCoordinate: 3.5,
-            theta: 0
+            theta: 0,
+            mapId: 2
         },
         {
             pointName: 'point_2',
             pointType: 'Goal Point',
             xCoordinate: -4.05,
             yCoordinate: 1.1,
-            theta: 0
+            theta: 0,
+            mapId: 2
         },
         {
             pointName: 'point_3',
             pointType: 'Goal Point',
             xCoordinate: 0.47,
             yCoordinate: 0.32,
-            theta: 0
+            theta: 0,
+            mapId: 2
         },
         {
             pointName: 'point_4',
             pointType: 'Goal Point',
             xCoordinate: 4.63,
             yCoordinate: 3.7,
-            theta: 0
+            theta: 0,
+            mapId: 2
         },
         {
             pointName: 'point_5',
             pointType: 'Goal Point',
             xCoordinate: 4.55,
             yCoordinate: 0.74,
-            theta: 0
+            theta: 0,
+            mapId: 2
         },
         {
             pointName: 'home_1',
             pointType: 'Home Point',
             xCoordinate: -6.62,
             yCoordinate: 4.0,
-            theta: 0
+            theta: 0,
+            mapId: 2
         },
         {
             pointName: 'home_2',
             pointType: 'Home Point',
             xCoordinate: -6.62,
             yCoordinate: 3.25,
-            theta: 0
+            theta: 0,
+            mapId: 2
         },
         {
             pointName: 'home_3',
             pointType: 'Home Point',
             xCoordinate: -6.62,
             yCoordinate: 2.5,
-            theta: 0
+            theta: 0,
+            mapId: 2
         }
     ];
 
@@ -220,8 +228,8 @@ async function initialDataBase() {
         await Map.bulkCreate(MapList);
         await Role.bulkCreate(RoleList);
         await Robot.bulkCreate(RobotConfigList);
-        await PositionGoal.bulkCreate(allPositionGoals);
         await PositionGoal.bulkCreate(allPositionGoalMir);
+        await PositionGoal.bulkCreate(allPositionGoals2);
     } catch (error) {
         console.log('🚀 ~ file: position_goal.model.js:100 ~ module.exports= ~ error:', error);
     }
@@ -339,7 +347,7 @@ socketIo.on('connection', function (socket) {
     // });
 });
 
-// // Kiểm tra xem kết nối cơ sở dữ liệu đã thành công hay chưa
+// Kiểm tra xem kết nối cơ sở dữ liệu đã thành công hay chưa
 (async () => {
     try {
         await db.sequelize.authenticate();

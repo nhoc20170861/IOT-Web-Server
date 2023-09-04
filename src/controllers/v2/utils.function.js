@@ -86,26 +86,21 @@ function createRoutePath(previousSubTaskList, robotId) {
             newSubTaskList.unshift({ targetName: robotConfigs[robotId].currentGoal, cargoVolume: 0, isDone: false });
         }
     }
+    // console.log('🚀 ~ file: utils.function.js:90 ~ createRoutePath ~ newSubTaskList:', newSubTaskList);
     return newSubTaskList;
 }
 function createTSPMatrix(goalTargetList, key) {
     const n = goalTargetList.length;
-
     const tspMatrix = Array.from({ length: n }, () => Array(n).fill(0.0));
     const checkCurrent = 'currentPose_' + key;
+
     for (let i = 0; i < n; i++) {
         let firstPoint = goalTargetList[i].targetName !== checkCurrent ? GoalPoseArray[goalTargetList[i].targetName].position : currentPose[key].position;
-        // console.log('🚀 ~ file: utils.function.js:59 ~ createTSPMatrix ~ firstPoint:', firstPoint);
-        // if ((i = 0 && robotConfigs[robotId].currentGoal !== robotConfigs[robotId].initPoint))
-        // firstPoint = currentPose[robotId];
         for (let j = 0; j < n; j++) {
             const secondPoint = goalTargetList[j].targetName !== checkCurrent ? GoalPoseArray[goalTargetList[j].targetName].position : currentPose[key].position;
-            // console.log('🚀 ~ file: utils.function.js:64 ~ createTSPMatrix ~ secondPoint:', secondPoint);
             tspMatrix[i][j] = calculateDistance(firstPoint, secondPoint);
         }
     }
-
-    console.log(`🚀 ~ ${key} ~ createTSPMatrix`, tspMatrix);
     return tspMatrix;
 }
 // calculate optimal path based on Greedy ALgorithms

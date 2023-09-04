@@ -24,14 +24,18 @@ module.exports = (sequelize, Sequelize) => {
             allowNull: false,
             defaultValue: false
         },
-        robotId: {
-            type: Sequelize.INTEGER
-            // allowNull: false
-        },
+        // robotId: {
+        //     type: Sequelize.INTEGER,
+        //     allowNull: true
+        // },
         statusTask: {
             type: Sequelize.STRING,
             allowNull: false,
             defaultValue: 'INITIALIZE'
+        },
+        totalVolume: {
+            type: Sequelize.INTEGER,
+            allowNull: true
         },
         startTime: {
             type: Sequelize.DATE,
@@ -43,7 +47,7 @@ module.exports = (sequelize, Sequelize) => {
         }
     });
     // Phương thức cập nhật trạng thái statusTask và finsihTime của nhiệm vụ
-    Task.updateFields = async function (taskId, finishTime, statusTask, taskDescription = "") {
+    Task.updateFields = async function (taskId, finishTime, statusTask, taskDescription = '') {
         try {
             // Tìm nhiệm vụ có id tương ứng
             const task = await Task.findByPk(taskId);
@@ -55,7 +59,7 @@ module.exports = (sequelize, Sequelize) => {
             // Cập nhật các trường trong đối tượng fieldsToUpdate
             task['finishTime'] = finishTime;
             task['statusTask'] = statusTask;
-            if(taskDescription !== ""){
+            if (taskDescription !== '') {
                 task['taskDescription'] = taskDescription;
             }
 
@@ -63,7 +67,25 @@ module.exports = (sequelize, Sequelize) => {
 
             return true; // hoặc giá trị phù hợp tùy vào yêu cầu
         } catch (error) {
-            console.error('Error updating task:', error);
+            console.error('Error updating task:', error.message);
+            return false; // hoặc giá trị phù hợp tùy vào yêu cầu
+        }
+    };
+
+    Task.setRobots = async function (taskId, arrayRobot = [1]) {
+        try {
+            // Tìm nhiệm vụ có id tương ứng
+            const task = await Task.findOne({
+                where: { id: taskId }
+            });
+
+            if (!task) {
+                throw new Error('Task not found');
+            }
+            await task.setRobots(arrayRobot);
+            return true; // hoặc giá trị phù hợp tùy vào yêu cầu
+        } catch (error) {
+            console.error('Error updating task:', error.message);
             return false; // hoặc giá trị phù hợp tùy vào yêu cầu
         }
     };
@@ -79,9 +101,14 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.INTEGER,
             allowNull: false
         },
-        cargo: {
-            type: Sequelize.STRING,
-            allowNull: false
+        robotId: {
+            type: Sequelize.INTEGER,
+            allowNull: true
+        },
+        cargoVolume: {
+            type: Sequelize.INTEGER,
+            allowNull: false,
+            defaultValue: 0
         },
         targetName: {
             type: Sequelize.STRING,

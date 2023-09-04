@@ -77,10 +77,13 @@ db.SubTask = SubTask;
 // Quan hệ 1-nhiều giữa Task và Subtask
 db.Task.hasMany(SubTask, { as: 'subtasks', foreignKey: 'taskId' });
 db.SubTask.belongsTo(Task, { as: 'tasks', foreignKey: 'taskId' });
+// Quan hệ 1-nhiều giữa Robot và SubTask
+db.robot.hasMany(SubTask, { as: 'subtasks', foreignKey: 'robotId' });
+db.SubTask.belongsTo(Task, { as: 'robots', foreignKey: 'robotId' });
 
 // Thiết lập quan hệ giữa Robot và Task
-db.robot.hasMany(db.Task, { as: 'tasks', foreignKey: 'robotId' });
-db.Task.belongsTo(db.robot, { as: 'robots', foreignKey: 'robotId' });
+db.robot.belongsToMany(db.Task, { through: 'robot_tasks', foreignKey: 'robotId' });
+db.Task.belongsToMany(db.robot, { through: 'robot_tasks', foreignKey: 'taskId' });
 
 // Kết nối đến cơ sở dữ liệu và đồng bộ hóa model
 // (async () => {

@@ -273,7 +273,7 @@ const allPositionGoals2 = [
                         // robotConfigs[key]['taskQueue'][0].indexActiveTask = 0;
                         await Task.updateFields(robotConfigs[key].taskQueue[0].taskId, new Date(), 'FINISH');
                         await SubTask.updateSubtasksStatusByTaskId(robotConfigs[key].taskQueue[0].taskId, true);
-                        queueRobots[`taskQueue_${key}`].resume();
+                        queueRobots[`${key}`].resume();
                     } else if (data === 'Waiting for goals') {
                     } else if (data === 'Detect Obstacle') {
                         Object.keys(robotConfigs)
@@ -551,6 +551,7 @@ class RobotController {
     };
     // [POST] /robot/sendTaskList
     createNewTask = async function (req, res) {
+        console.group('createNewTask');
         Logging.info('__autoPickRobotAndSendTaskList:');
 
         const { taskName, taskDescription, pathOptimization, autoGoHome, targetPointList: subTaskList } = req.body;
@@ -568,13 +569,15 @@ class RobotController {
         if (subTaskList.length > 0) {
             try {
                 // Tạo task và lưu vào cơ sở dữ liệu
+                const totalVolume = utilsFunction.calculateVolume(subTaskList);
                 const { id: taskId } = await Task.create({
                     taskName: taskName,
                     taskDescription: taskDescription || 'new task',
                     pathOptimization: pathOptimization,
                     autoGoHome: autoGoHome,
                     status: 'INITIALIZE',
-                    startTime: new Date()
+                    startTime: new Date(),
+                    totalVolume: totalVolume
                 });
 
                 const job = await addTaskToQueue({
@@ -584,7 +587,7 @@ class RobotController {
                     pathOptimization,
                     autoGoHome,
                     subTaskList,
-                    totalVolume: utilsFunction.calculateVolume(subTaskList)
+                    totalVolume
                 });
 
                 return res.status(200).json({
@@ -603,6 +606,7 @@ class RobotController {
                 message: 'Bad request'
             });
         }
+        console.groupEnd();
     };
     // [POST] /robot/createNewTargetPoint
     createNewTargetPoint = async function (req, res) {
