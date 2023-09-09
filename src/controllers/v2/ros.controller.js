@@ -1,6 +1,6 @@
 import Logging from '../../library/Logging';
 // import worker
-import { queueRobots, addTaskToQueueEsp, addTaskToQueue } from './bullmq';
+import { queueRobots, addTaskToQueueEsp, addTaskToQueue, addtaskToQueueMessage } from './bullmq';
 import { myWorker } from './worker.mainQueue';
 import { myWorkerEsp } from './worker.esp32';
 import { workerBacklog } from './worker.queueBacklog';
@@ -26,14 +26,17 @@ const SubTask = db.SubTask;
 const Task = db.Task;
 var currentMapId = 1;
 var totalCountTargetPoint = 0;
-const safetyZone_radius = 0.8; // [m]
-const dangerZone_radius = 0.6; // [m]
+const safetyZone_radius = 0.8 * 100; // [cm]
+const dangerZone_radius = 0.6 * 100; // [cm]
+const offset = 90; // [cm]
 global.GoalPoseArray = {};
 global.robotConfigs = {};
 // currentPose of all robot
 global.currentPose = {};
 // monitor status of all robots
 global.statusOfAllRobots = {};
+global.statusOfAllRobots = {};
+// global.previousStatus= {};
 // setTimeout(async function () {
 
 /**
@@ -267,26 +270,43 @@ const allPositionGoals2 = [
             // handle when new message from topic subcribe
             robotConfigs[key]['statusNav'].subscribe(async function (response) {
                 const { data } = response;
-                previousStatus = statusOfAllRobots[key];
+                const previousStatus = statusOfAllRobots[key];
                 if (previousStatus !== data) {
+                    console.log('🚀 ~ file: ros.controller.js:270 ~ data:', key, data);
+                    if (previousStatus === 'Detect Obstacle' && data.includes('navigate') && data.split('_')[2] === 'again') {
+                        Logging.info('trigger detect object at ' + key);
+                        const newJob = await addtaskToQueueMessage({
+                            robotId: key,
+                            activeGoalAgain: false,
+                            indexCurrentGoal: +data.split('_')[1]
+                        });
+                    }
                     if (data === 'navigation finish') {
                         // robotConfigs[key]['taskQueue'][0].indexActiveTask = 0;
                         await Task.updateFields(robotConfigs[key].taskQueue[0].taskId, new Date(), 'FINISH');
-                        await SubTask.updateSubtasksStatusByTaskId(robotConfigs[key].taskQueue[0].taskId, true);
+                        await SubTask.updateSubtasksStatusByTaskId(robotConfigs[key].taskQueue[0].taskId, robotConfigs[key].id, true);
+                        robotConfigs[key]['taskQueue'] = [{ indexActiveTask: 0, taskId: '', robotName: key }];
+                        socketIo.emit(`updateTaskQueue`, {
+                            robotName: key,
+                            taskQueueUpdate: robotConfigs[key]['taskQueue']
+                        });
                         queueRobots[`${key}`].resume();
                     } else if (data === 'Waiting for goals') {
                     } else if (data === 'Detect Obstacle') {
+                        console.group('Detect Obstacle');
                         Object.keys(robotConfigs)
                             .filter((currentKey) => currentKey != key)
                             .map((anotherKey) => {
                                 if (currentPose[anotherKey]) {
-                                    const distance = utilsFunction.calculateDistance(currentPose[key].position, currentPose[anotherKey].position);
+                                    const distance = utilsFunction.calculateDistance(currentPose[key].position, currentPose[anotherKey].position) - offset;
+                                    Logging.warning(`distance between ${anotherKey} and ${key} ${distance}`);
                                     if (distance < dangerZone_radius) {
-                                        Logging.warning(`Robot ${anotherKey} in dangerZone of ${key}`);
+                                        Logging.error(`Robot ${anotherKey} in dangerZone of ${key}`);
                                         if (robotConfigs[key].priority > robotConfigs[anotherKey].priority) {
+                                            Logging.info(`Active goal again ${anotherKey}`);
                                             const serviceClient = new ROSLIB.Service({
-                                                ros: robotConfigs[anotherKey].rosWebsocket,
-                                                name: `/${anotherKey}/move_base_sequence/activeGoalAgain`,
+                                                ros: robotConfigs[key].rosWebsocket,
+                                                name: `/${key}/move_base_sequence/activeGoalAgain`,
                                                 serviceType: 'move_base_sequence/activeGoalAgain'
                                             });
 
@@ -298,26 +318,14 @@ const allPositionGoals2 = [
                                         }
                                     }
                                 }
+                                console.groupEnd();
                             });
                     } else {
                         const headerPayload = data.split('_')[0];
-                        const currentTargetPoint = Number(data.split('_')[1]) + 1;
-                        if (headerPayload === 'navigatate to') {
+                        const currentTargetPoint = +data.split('_')[1] + 1;
+                        console.log('🚀 ~ file: ros.controller.js:306 ~ currentTargetPoint:', currentTargetPoint);
+                        if (headerPayload === 'navigate to') {
                             robotConfigs[key]['taskQueue'][0].indexActiveTask = currentTargetPoint;
-                            // if (previousStatus === 'Detect Obstacle') {
-                            //     // reactive detect obstacle feature
-                            //     const serviceClient = new ROSLIB.Service({
-                            //         ros: robotConfigs[key].rosWebsocket,
-                            //         name: `/${key}/move_base_sequence/activeGoalAgain`,
-                            //         serviceType: 'move_base_sequence/activeGoalAgain'
-                            //     });
-
-                            //     const request = new ROSLIB.ServiceRequest({ activeGoalAgain: false });
-
-                            //     serviceClient.callService(request, function (result) {
-                            //         console.log('Result for service call on ' + serviceClient.name + ': ' + JSON.stringify(result));
-                            //     });
-                            // }
                         } else if (headerPayload === 'Goal done' && currentTargetPoint === robotConfigs[key]['taskQueue'][0].indexActiveTask) {
                             const indexTaskFinish = robotConfigs[key]['taskQueue'][0].indexActiveTask;
                             try {
@@ -338,8 +346,12 @@ const allPositionGoals2 = [
             robotConfigs[key]['poseTopic'].subscribe(function (response) {
                 const x = ParseFloat(response.pose.pose.position.x, 2);
                 const y = ParseFloat(response.pose.pose.position.y, 2);
-                Logging.debug(`${robotConfigs[key].robotName} positionX: ${x} positionY: ${y}`);
-                robotConfigs[key].currentGoal = 'currentPose_' + key;
+                // Logging.debug(`${robotConfigs[key].robotName} positionX: ${x} positionY: ${y}`);
+                if (robotConfigs[key].currentGoal !== robotConfigs[key].initPoint) {
+                    const newPoint = 'currentPose_' + key;
+                    robotConfigs[key].currentGoal = newPoint;
+                    GoalPoseArray[newPoint] = response.pose.pose;
+                }
                 currentPose[key] = response.pose.pose;
                 socketIo.emit(`currentPose`, { robotId: key, currentPose });
             });
@@ -356,9 +368,9 @@ const allPositionGoals2 = [
         robotConfigs[key].rosWebsocket.connect(websocket);
 
         //Auto Reconnection for roslibjsx
-        // setInterval(function () {
-        //     robotConfigs[key].rosWebsocket.connect(websocket);
-        // }, 4000);
+        setInterval(function () {
+            robotConfigs[key].rosWebsocket.connect(websocket);
+        }, 4000);
     });
 })();
 
@@ -714,7 +726,7 @@ class RobotController {
      * @param {*} res
      * @returns
      */
-    // router.post('/robot/:id/add-new-goal', rosController.addNewGoalToTaskList);
+    // router.post('/robot/:robotId/add-new-goal', rosController.addNewGoalToTaskList);
     addNewGoalToTaskList = function (req, res) {
         const robotId = req.params.robotId;
         const { newGoal } = req.body;
@@ -762,7 +774,7 @@ class RobotController {
             });
         }
     };
-    // [POST] /robot/:id/send-task-list
+    // [POST] /robot/:robotId/send-task-list
     createNewTaskForOneRobot = function (req, res) {
         const robotId = req.params.robotId;
         const { taskList } = req.body;
@@ -830,7 +842,7 @@ class RobotController {
             });
         }
     };
-    // [POST] /robot/:id/reset-all-goals
+    // [POST] /robot/:robotId/reset-all-goals
     callServiceResetAllGoals(req, res) {
         console.log('🚀 ~ file: ros.controller.js:56 ~ RobotController ~ callServiceResetAllGoals ~ req:', req.params.robotId);
         const robotName = req.params.robotId;
@@ -871,7 +883,7 @@ class RobotController {
         }
     }
 
-    // [POST] /robot/:id/get-current-status
+    // [POST] /robot/:robotId/get-current-status
     callServiceGetCurrentStatus = function (req, res) {
         const robotId = req.params.robotId;
         if (robotId && robotConfigs.hasOwnProperty(robotId)) {
@@ -898,7 +910,7 @@ class RobotController {
             });
         }
     };
-    // [POST] /robot/:id/state/toggle-state
+    // [POST] /robot/:robotId/state/toggle-state
     callServiceToggleState = function (req, res) {
         Logging.info('callServiceToggleState success');
         const robotId = req.params.robotId;
@@ -929,7 +941,7 @@ class RobotController {
             });
         }
     };
-    // [POST] /robot/:id/state/set-state
+    // [POST] /robot/:robotId/state/set-state
     callServiceSetState = function (req, res) {
         const { state } = req.body;
         const robotId = req.params.robotId;
@@ -969,7 +981,7 @@ class RobotController {
         }
     };
 
-    // [GET]  /robot/:id/state/get-state
+    // [GET]  /robot/:robotId/state/get-state
     callServiceGetState = function (req, res) {
         const robotId = req.params.robotId;
         if (robotId && robotConfigs.hasOwnProperty(robotId)) {
@@ -986,6 +998,41 @@ class RobotController {
                 return res.status(200).json({
                     success: true,
                     serviceClient: serviceClient.name,
+                    message: result
+                });
+            });
+        } else {
+            return res.status(400).json({
+                errorCode: 400,
+                success: false,
+                message: 'Bad requsest'
+            });
+        }
+    };
+
+    // [POST]  /robot/:robotId/activeGoalAgain
+    callServiceActiveGoalAgain = async function (req, res) {
+        const robotId = req.params.robotId;
+        const { activeGoalAgain } = req.body;
+        Logging.info('callServiceActiveGoalAgain ' + robotId + ', ' + activeGoalAgain);
+        //
+
+        await addtaskToQueueMessage({ robotId, activeGoalAgain, indexCurrentGoal: 1 });
+        if (robotId && robotConfigs.hasOwnProperty(robotId)) {
+            const serviceClient = new ROSLIB.Service({
+                ros: robotConfigs[robotId].rosWebsocket,
+                name: robotId ? `/${robotId}/move_base_sequence/activeGoalAgain` : '/move_base_sequence/activeGoalAgain',
+                serviceType: 'move_base_sequence/activeGoalAgain'
+            });
+
+            const request = new ROSLIB.ServiceRequest({ activeGoalAgain });
+
+            serviceClient.callService(request, function (result) {
+                console.log('Result for service call on ' + serviceClient.name + ': ' + JSON.stringify(result));
+                return res.status(200).json({
+                    success: true,
+                    serviceClient: serviceClient.name,
+                    robotName: robotId,
                     message: result
                 });
             });

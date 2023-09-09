@@ -29,46 +29,6 @@ async function initialDataBase() {
      */
     const allPositionGoalMir = [
         {
-            pointName: 'point_1',
-            pointType: 'Goal point',
-            xCoordinate: 5.0,
-            yCoordinate: -10.0,
-            theta: -1.57,
-            mapId: 1
-        },
-        {
-            pointName: 'point_2',
-            pointType: 'Goal Point',
-            xCoordinate: 5.0,
-            yCoordinate: -23.0,
-            theta: -1.57,
-            mapId: 1
-        },
-        {
-            pointName: 'point_3',
-            pointType: 'Goal Point',
-            xCoordinate: -5.0,
-            yCoordinate: -23.0,
-            theta: -1.57,
-            mapId: 1
-        },
-        {
-            pointName: 'point_4',
-            pointType: 'Goal Point',
-            xCoordinate: -5.0,
-            yCoordinate: -10.0,
-            theta: -1.57,
-            mapId: 1
-        },
-        {
-            pointName: 'point_5',
-            pointType: 'Goal Point',
-            xCoordinate: -5.0,
-            yCoordinate: 7.8,
-            theta: -1.57,
-            mapId: 1
-        },
-        {
             pointName: 'home_1',
             pointType: 'Home Point',
             xCoordinate: 5.03,
@@ -89,6 +49,62 @@ async function initialDataBase() {
             pointType: 'Home Point',
             xCoordinate: 0.01,
             yCoordinate: 7.87,
+            theta: 0,
+            mapId: 1
+        },
+        {
+            pointName: 'point_1',
+            pointType: 'Goal point',
+            xCoordinate: 5.0,
+            yCoordinate: -10.0,
+            theta: -1.57,
+            mapId: 1
+        },
+        {
+            pointName: 'point_2',
+            pointType: 'Goal Point',
+            xCoordinate: 5.0,
+            yCoordinate: -23.0,
+            theta: -1.57,
+            mapId: 1
+        },
+        {
+            pointName: 'point_3',
+            pointType: 'Goal Point',
+            xCoordinate: -5.0,
+            yCoordinate: -23.0,
+            theta: 1.57,
+            mapId: 1
+        },
+        {
+            pointName: 'point_4',
+            pointType: 'Goal Point',
+            xCoordinate: -5.0,
+            yCoordinate: -10.0,
+            theta: 1.57,
+            mapId: 1
+        },
+        {
+            pointName: 'point_5',
+            pointType: 'Goal Point',
+            xCoordinate: -5.0,
+            yCoordinate: 7.8,
+            theta: 1.57,
+            mapId: 1
+        },
+        {
+            pointName: 'point_6',
+            pointType: 'Goal Point',
+            xCoordinate: 0.0,
+            yCoordinate: -15,
+            theta: 3.14,
+            mapId: 1
+        },
+        {
+            pointName: 'point_7',
+            pointType: 'Goal Point',
+            xCoordinate: 0.5,
+            yCoordinate: 12.5,
             theta: 0,
             mapId: 1
         }
@@ -231,7 +247,7 @@ async function initialDataBase() {
         await PositionGoal.bulkCreate(allPositionGoalMir);
         await PositionGoal.bulkCreate(allPositionGoals2);
     } catch (error) {
-        console.log('🚀 ~ file: position_goal.model.js:100 ~ module.exports= ~ error:', error);
+        console.log('🚀 app.jsr:', error.message);
     }
 }
 

@@ -20,17 +20,18 @@ const batch_jobs = async ({
     let queueRobotsFree = [];
     for (const key in queueRobots) {
         const checkkQueue = await queueRobots[key].isPaused();
-        console.log('🚀 ~ file: worker.queueBacklog.js:24 ~ checkkQueue:', key, checkkQueue);
+        // console.log('🚀 ~~ checkkQueue pause:', key, checkkQueue);
         if (!checkkQueue) {
             queueRobotsFree.push(key);
             // break;
         }
     }
-    console.log('🚀 ~ file: worker.mainQueue.js:55 ~ queueRobotsFree:', queueRobotsFree);
+    console.log('🚀 ~ queueRobotsFree:', queueRobotsFree);
     let totalVolume = 0;
     jobs_to_process.forEach((item) => {
         totalVolume += item.data.totalVolume;
     });
+    Logging.info('🚀 current ~ totalVolume: ' + totalVolume);
     if (queueRobotsFree.length > 0 && queueRobotsFree.length * 100 >= totalVolume) {
         return { jobs_to_process, delayedJob, totalVolume };
     } else {

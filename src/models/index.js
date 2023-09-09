@@ -74,6 +74,12 @@ const { Task, SubTask } = require('./Robot/taskList.model')(sequelize, Sequelize
 db.robot = require('./Robot/robot.model')(sequelize, Sequelize);
 db.Task = Task;
 db.SubTask = SubTask;
+// Quan hệ 1-nhiều giữa SubTask và position_goals
+db.position_goals.hasMany(db.SubTask, { as: 'subtasks', foreignKey: 'pointId' });
+db.SubTask.belongsTo(db.position_goals, {
+    foreignKey: 'pointId', // The field in SubtaskList that links to PositionGoals
+    as: 'position_goals' // An alias for the association (optional)
+});
 // Quan hệ 1-nhiều giữa Task và Subtask
 db.Task.hasMany(SubTask, { as: 'subtasks', foreignKey: 'taskId' });
 db.SubTask.belongsTo(Task, { as: 'tasks', foreignKey: 'taskId' });

@@ -89,6 +89,38 @@ function createRoutePath(previousSubTaskList, robotId) {
     // console.log('🚀 ~ file: utils.function.js:90 ~ createRoutePath ~ newSubTaskList:', newSubTaskList);
     return newSubTaskList;
 }
+
+function createRoutePathForMultiDepot(previousSubTaskList, robotIdArray) {
+    let newSubTaskList = JSON.parse(JSON.stringify(previousSubTaskList));
+    for (let i = robotIdArray.length - 1; i >= 0; i--) {
+        const robotId = robotIdArray[i];
+        if (robotConfigs[robotId].currentGoal === robotConfigs[robotId].initPoint) {
+            // Robot chua nhan nhiem vu dang o vi tri home hoac da thuc hien nhiem vu xong va tro ve home
+            newSubTaskList.unshift({ targetName: robotConfigs[robotId].initPoint, cargoVolume: 0, isDone: false });
+        } else {
+            newSubTaskList.unshift({ targetName: robotConfigs[robotId].currentGoal, cargoVolume: 0, isDone: false });
+        }
+    }
+    // console.log(GoalPoseArray);
+
+    // console.log('🚀 ~ file: utils.function.js:90 ~ createRoutePath ~ newSubTaskList:', newSubTaskList);
+    return newSubTaskList;
+}
+
+function createTSPMatrixForMultiDepot(goalTargetList, key) {
+    const n = goalTargetList.length;
+    const tspMatrix = Array.from({ length: n }, () => Array(n).fill(0.0));
+    const checkCurrent = 'currentPose_' + key;
+
+    for (let i = 0; i < n; i++) {
+        let firstPoint = GoalPoseArray[goalTargetList[i].targetName].position;
+        for (let j = 0; j < n; j++) {
+            const secondPoint = GoalPoseArray[goalTargetList[j].targetName].position;
+            tspMatrix[i][j] = calculateDistance(firstPoint, secondPoint);
+        }
+    }
+    return tspMatrix;
+}
 function createTSPMatrix(goalTargetList, key) {
     const n = goalTargetList.length;
     const tspMatrix = Array.from({ length: n }, () => Array(n).fill(0.0));
@@ -103,6 +135,7 @@ function createTSPMatrix(goalTargetList, key) {
     }
     return tspMatrix;
 }
+
 // calculate optimal path based on Greedy ALgorithms
 function findOptimalPath(tspMatrix) {
     const n = tspMatrix.length;
@@ -244,6 +277,8 @@ function tspDynamicProgramming(tspDistanceMatrix) {
 const utilsFunction = {
     tspDynamicProgramming,
     tspGreedyAlgorithm,
+    createRoutePathForMultiDepot,
+    createTSPMatrixForMultiDepot,
     mergeTask,
     calculateVolume,
     calculateDistance,

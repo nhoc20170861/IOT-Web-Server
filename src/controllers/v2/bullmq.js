@@ -1,4 +1,4 @@
-import { Queue } from 'bullmq';
+import { Queue, Worker } from 'bullmq';
 import Logging from '../../library/Logging';
 
 // initialize queueRobots
@@ -31,6 +31,7 @@ const queueBacklog = new Queue('queueBacklog', {
         port: 6379
     }
 });
+
 const addTaskToQueue = async function (data) {
     const { taskId } = data;
     const job = await mainQueue.add(`task_${taskId}`, data, {
@@ -71,4 +72,75 @@ const addTaskToQueueBackLog = async function (data) {
     return job;
 };
 
-export { queueRobots, queueBacklog, mainQueue, queueEsp, addTaskToQueue, addTaskToQueueEsp, addTaskToQueueBackLog };
+const addtaskToQueueMessage = async function (data) {
+    const { robotId, activeGoalAgain, indexCurrentGoal } = data;
+    const job = await queueMessage.add(`${indexCurrentGoal}_${robotId}_${Math.random(0, 1)}`, data, {
+        attempts: 0,
+        backoff: {
+            type: 'exponential',
+            delay: 5000
+        },
+        delay: 8000
+    });
+    return job;
+};
+
+// Handler trigger again detect obstacle feature
+const queueMessage = new Queue('queueMessage', {
+    connection: {
+        host: 'localhost',
+        port: 6379
+    }
+});
+export const myWorkerQueueMessage = new Worker(
+    'queueMessage',
+    async (job) => {
+        console.log(`wroker process job `, job.data);
+        const robotKey = job.data.robotId;
+        const serviceClient = new ROSLIB.Service({
+            ros: robotConfigs[robotKey].rosWebsocket,
+            name: `/${robotKey}/move_base_sequence/activeGoalAgain`,
+            serviceType: 'move_base_sequence/activeGoalAgain'
+        });
+
+        const request = new ROSLIB.ServiceRequest({ activeGoalAgain: false });
+        try {
+            serviceClient.callService(
+                request,
+                function (result) {
+                    console.log('Result for service call on ' + serviceClient.name + ': ' + JSON.stringify(result));
+                    if (result.goalIndex == job.data.indexCurrentGoal) {
+                        return result;
+                    } else {
+                        throw new Error(500);
+                    }
+                },
+                (error) => {
+                    console.log('🚀 ~ file: bullmq.js:117 ~ error:', error.message);
+                    throw new Error(error.message);
+                }
+            );
+        } catch (error) {
+            throw new Error(500);
+        }
+    },
+    {
+        connection: {
+            host: 'localhost',
+            port: 6379
+        },
+        autorun: true
+    }
+);
+myWorkerQueueMessage.on('completed', (job, value) => {
+    Logging.info(`${job.data.robotId}: Completed job with jobId ${job.id}, ${JSON.stringify(value)}`);
+});
+
+myWorkerQueueMessage.on('failed', (job, err) => {
+    Logging.warning(`${job.data.robotId}: Job ${job.id} failided with error: ${err.message} and retry with ${job.attemptsMade}`);
+});
+myWorkerQueueMessage.on('error', (err) => {
+    // log the error
+    console.error(err.message);
+});
+export { queueRobots, queueBacklog, mainQueue, queueEsp, queueMessage, addTaskToQueue, addTaskToQueueEsp, addTaskToQueueBackLog, addtaskToQueueMessage };

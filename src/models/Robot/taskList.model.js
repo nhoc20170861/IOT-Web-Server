@@ -122,9 +122,9 @@ module.exports = (sequelize, Sequelize) => {
     });
 
     // Cập nhật trường status của tất cả các bản ghi có cùng taskId
-    SubTask.updateSubtasksStatusByTaskId = async function (taskId, newStatus) {
+    SubTask.updateSubtasksStatusByTaskId = async function (taskId, robotId, newStatus) {
         try {
-            const [updatedCount, updatedSubtasks] = await SubTask.update({ isDone: newStatus }, { where: { taskId } });
+            const [updatedCount, updatedSubtasks] = await SubTask.update({ isDone: newStatus }, { where: { taskId, robotId } });
 
             console.log(`${updatedCount} subtasks updated successfully`);
         } catch (err) {

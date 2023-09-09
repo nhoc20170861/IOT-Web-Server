@@ -58,6 +58,7 @@ async function createWorkerRobots() {
                     // await task.save();
 
                     for (const subTask of job.data.subTaskList) {
+                        console.log('🚀 ~ file: worker.queueRobots.js:61 ~ subTask:', subTask);
                         await SubTask.create({
                             taskId: taskId,
                             robotId: robotConfigs[nameRobotWillCall].id,

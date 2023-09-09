@@ -152,10 +152,16 @@ export const myWorker = new Worker(
                 throw new Error('All robots are busy');
             }
         } else if (totalVolume > maxCapacityEachRobot && totalVolume <= maxVolumeCarry) {
-            console.group('totalVolume > maxCapacityEachRobot');
             try {
-                const routePath = utilsFunction.createRoutePath(orginSubTaskList, queueRobotsFree[robotFreeNumber - 1]);
-                const tspDistanceMatrix = utilsFunction.createTSPMatrix(routePath, queueRobotsFree[robotFreeNumber - 1]);
+                console.group('totalVolume > maxCapacityEachRobot');
+                //const routePath = utilsFunction.createRoutePathForMultiDepot(orginSubTaskList,queueRobotsFree[robotFreeNumber - 1]);
+                //console.log('🚀 ~ file: worker.mainQueue.js:158 ~ routePath:', routePath);
+                //const tspDistanceMatrix = utilsFunction.createTSPMatrixForMul(routePath, queueRobotsFree[robotFreeNumber - 1]);
+
+                const routePath = utilsFunction.createRoutePathForMultiDepot(orginSubTaskList, queueRobotsFree);
+                console.log('🚀 ~ file: worker.mainQueue.js:158 ~ routePath:', routePath);
+                const tspDistanceMatrix = utilsFunction.createTSPMatrixForMultiDepot(routePath);
+                //console.log('🚀 ~ file: worker.mainQueue.js:164 ~ tspDistanceMatrix:', tspDistanceMatrix);
                 // distanceMatrix: [
                 //     [0, 2232, 1026, 3294, 3443, 1994, 741, 2571],
                 //     [2232, 0, 1780, 1640, 1300, 1000, 2366, 698],
@@ -166,15 +172,21 @@ export const myWorker = new Worker(
                 //     [741, 2366, 659, 3698, 3657, 2429, 0, 2862],
                 //     [2571, 698, 2347, 946, 908, 746, 2862, 0]
                 // ],
-                const demanLoads = orginSubTaskList.map((item, index) => {
+                const demanLoads = routePath.map((item, index) => {
                     return item.cargoVolume;
                 });
+                const multiDepots = queueRobotsFree.map((item, index) => {
+                    return index;
+                });
+                console.log('🚀 ~ file: worker.mainQueue.js:179 ~ multiDepots:', multiDepots);
                 const data = {
                     distanceMatrix: tspDistanceMatrix,
-                    demands: [0, ...demanLoads],
+                    demands: demanLoads,
                     vehicleCapacities: new Array(robotFreeNumber).fill(maxCapacityEachRobot),
                     vehicleNumber: robotFreeNumber,
-                    depot: 0
+                    startPoints: multiDepots,
+                    endPoints: multiDepots
+                    //depot: 0
                 };
                 const response = await fetch('http://localhost:8080/vehicleCapacity', {
                     method: 'POST',
@@ -185,27 +197,26 @@ export const myWorker = new Worker(
                 });
                 const result = await response.json();
                 // console.log('🚀 ~ response:', result);
+                // throw new Error('Can not find solution');
                 if (!result.error) {
                     const robotArray = [];
-                    Object.keys(result.vehicleLoads).forEach((key, index) => {
-                        if (result.vehicleLoads[key] !== 0) {
-                            robotArray.push(+key);
-                        }
-                    });
-                    console.log('🚀 ~ robotArray ~ robotArray:', robotArray);
                     const createNewMultiJob = {};
 
                     Object.keys(result.vehicleLoads).forEach((key) => {
                         const nameRobot = 'mir' + key;
                         if (result.vehicleLoads[key] !== 0 && !createNewMultiJob.hasOwnProperty(nameRobot)) {
+                            robotArray.push(+key);
                             createNewMultiJob[nameRobot] = {};
                             createNewMultiJob[nameRobot]['subTaskList'] = [];
                             const length = result.vehicleRoutes[key].length;
                             result.vehicleRoutes[key].forEach((destinationInfo, index) => {
                                 if (index !== 0 && index !== length - 1) {
-                                    createNewMultiJob[nameRobot]['subTaskList'].push(orginSubTaskList[destinationInfo.destination - 1]);
+                                    createNewMultiJob[nameRobot]['subTaskList'].push(routePath[destinationInfo.destination]);
                                 }
                             });
+                            if (job.data.autoGoHome) {
+                                createNewMultiJob[nameRobot]['subTaskList'].push(routePath[+key - 1]);
+                            }
                             createNewMultiJob[nameRobot]['taskId'] = taskId;
                             createNewMultiJob[nameRobot]['nameRobotWillCall'] = nameRobot;
                         }
@@ -223,19 +234,19 @@ export const myWorker = new Worker(
                             delay: 1000
                         });
                     }
+                    console.groupEnd();
                     return Object.keys(createNewMultiJob);
                 } else {
-                    throw new Error('Can not find solution');
+                    throw new Error(500);
                 }
             } catch (error) {
-                console.log('🚀 worker.mainQueue.js:230 ~ error:', error.message);
+                console.log('🚀totalVolume > maxCapacityEachRobot ~ error:', error.message);
+                throw new Error(500);
             }
-            console.groupEnd();
         } else {
             addTaskToQueueBackLog(job.data);
             throw new Error('OverCapacity');
         }
-        console.groupEnd();
     },
     {
         connection: {
@@ -267,8 +278,15 @@ myWorker.on('completed', (job, robotName) => {
     Logging.info(`myWorker Completed job with jobId ${job.data.taskId}`);
 });
 // Cấu hình retry cho job thất bại
-myWorker.on('failed', (job, err) => {
-    let messageErr = err.message + ` Job ${job.id} will be moved to backlog`;
+myWorker.on('failed', async (job, err) => {
+    //console.log('🚀 ~ file: worker.mainQueue.js:283 ~ myWorker.on ~ job:', job.data);
+    let messageErr = '';
+    if (err.message === '500') {
+        messageErr = 'Can not finđ solution, cancel taskId ' + job.data.taskId;
+        await Task.updateFields(job.data.taskId, new Date(), `CANCEL`, 'CAN NOT FOUNT SOLUTION');
+    } else {
+        messageErr = err.message + ` Job ${job.data.taskId} will be moved to backlog`;
+    }
 
     socketIo.emit('WorkerNotify', {
         type: 'AssignTask',
@@ -276,7 +294,7 @@ myWorker.on('failed', (job, err) => {
         retry: job.attemptsMade,
         message: messageErr
     });
-    Logging.warning(`Main worker, Job ${job.id}: ${err.message} and retry with ${job.attemptsMade}`);
+    Logging.warning(`Main worker, Job ${job.data.taskId}: ${err.message} and retry with ${job.attemptsMade}`);
 
     // if (job.attemptsMade < 3) {
     //     // Retry lại job sau 5, 10 và 15 giây (tăng dần theo cấp số nhân)
