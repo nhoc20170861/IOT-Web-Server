@@ -3,7 +3,7 @@ import Logging from '../../library/Logging';
 
 // initialize queueRobots
 const queueRobots = {};
-for (let i = 1; i <= 3; i++) {
+for (let i = 1; i <= 4; i++) {
     queueRobots[`mir${i}`] = new Queue(`mir${i}`, {
         connection: {
             host: 'localhost',
@@ -32,15 +32,15 @@ const queueBacklog = new Queue('queueBacklog', {
     }
 });
 
-const addTaskToQueue = async function (data) {
+const addTaskToQueue = async function (data, delay = 5000, delayBackoff = 5000) {
     const { taskId } = data;
     const job = await mainQueue.add(`task_${taskId}`, data, {
         attempts: 0,
         backoff: {
             type: 'exponential',
-            delay: 5000
+            delay: delayBackoff
         },
-        delay: 5000
+        delay: delay
     });
     // Get the size of the mainQueue
     const sizeQueue = await mainQueue.count();
@@ -111,8 +111,6 @@ export const myWorkerQueueMessage = new Worker(
                     console.log('Result for service call on ' + serviceClient.name + ': ' + JSON.stringify(result));
                     if (result.goalIndex == job.data.indexCurrentGoal) {
                         return result;
-                    } else {
-                        throw new Error(500);
                     }
                 },
                 (error) => {
@@ -121,7 +119,7 @@ export const myWorkerQueueMessage = new Worker(
                 }
             );
         } catch (error) {
-            throw new Error(500);
+            throw new Error('Error Active Goal Again');
         }
     },
     {

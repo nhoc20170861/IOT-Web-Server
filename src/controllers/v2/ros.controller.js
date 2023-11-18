@@ -14,6 +14,7 @@ workerBacklog.run();
 // myWorkerRobot2.run();
 // myWorkerRobot3.run();
 import path from 'path';
+import { tryCatch } from 'bullmq';
 const jsonfile = require('jsonfile');
 // Required ROSlib and Ros API Dependencies
 global.ROSLIB = require('roslib');
@@ -293,7 +294,7 @@ const allPositionGoals2 = [
                         queueRobots[`${key}`].resume();
                     } else if (data === 'Waiting for goals') {
                     } else if (data === 'Detect Obstacle') {
-                        console.group('Detect Obstacle');
+                        //console.group('Detect Obstacle');
                         Object.keys(robotConfigs)
                             .filter((currentKey) => currentKey != key)
                             .map((anotherKey) => {
@@ -305,8 +306,8 @@ const allPositionGoals2 = [
                                         if (robotConfigs[key].priority > robotConfigs[anotherKey].priority) {
                                             Logging.info(`Active goal again ${anotherKey}`);
                                             const serviceClient = new ROSLIB.Service({
-                                                ros: robotConfigs[key].rosWebsocket,
-                                                name: `/${key}/move_base_sequence/activeGoalAgain`,
+                                                ros: robotConfigs[anotherKey].rosWebsocket,
+                                                name: `/${anotherKey}/move_base_sequence/activeGoalAgain`,
                                                 serviceType: 'move_base_sequence/activeGoalAgain'
                                             });
 
@@ -318,7 +319,7 @@ const allPositionGoals2 = [
                                         }
                                     }
                                 }
-                                console.groupEnd();
+                                // console.groupEnd();
                             });
                     } else {
                         const headerPayload = data.split('_')[0];
@@ -329,9 +330,18 @@ const allPositionGoals2 = [
                         } else if (headerPayload === 'Goal done' && currentTargetPoint === robotConfigs[key]['taskQueue'][0].indexActiveTask) {
                             const indexTaskFinish = robotConfigs[key]['taskQueue'][0].indexActiveTask;
                             try {
-                                robotConfigs[key]['taskQueue'][indexTaskFinish].isDone = true;
-                                robotConfigs[key].currentGoal = robotConfigs[key]['taskQueue'][indexTaskFinish].targetName;
-                            } catch (error) {}
+                                if (indexTaskFinish > robotConfigs[key]['taskQueue'].length) {
+                                } else {
+                                    if (data.split('_')[2] && data.split('_')[2] == 'abort') {
+                                        robotConfigs[key]['taskQueue'][indexTaskFinish].isDone = false;
+                                    } else {
+                                        robotConfigs[key]['taskQueue'][indexTaskFinish].isDone = true;
+                                    }
+                                    robotConfigs[key].currentGoal = robotConfigs[key]['taskQueue'][indexTaskFinish].targetName;
+                                }
+                            } catch (error) {
+                                console.log(error.message);
+                            }
                         }
                     }
                     statusOfAllRobots[key] = data;
@@ -457,8 +467,7 @@ class RobotController {
             //     pathOptimization: false,
             //     subTaskList
             // });
-
-            const jobEsp = await addTaskToQueue({
+            const jobData = {
                 taskId,
                 taskName: `task_${stationId}`,
                 taskDescription: `task_${stationId}`,
@@ -466,7 +475,8 @@ class RobotController {
                 autoGoHome: false,
                 subTaskList,
                 totalVolume: utilsFunction.calculateVolume(subTaskList)
-            });
+            };
+            const jobEsp = await addTaskToQueue(jobData);
 
             return res.status(200).json({
                 success: true,
@@ -501,7 +511,7 @@ class RobotController {
      * @returns
      */
     // [POST] /robot/resetAllTaskQueue
-    resetAllTaskQueue = function (req, res) {
+    resetAllTaskQueue = async function (req, res) {
         Logging.info('🚀 ~ ~ resetAllTaskQueue');
 
         let allTaskQueues = {};
@@ -513,6 +523,9 @@ class RobotController {
             statusOfAllRobots[key] = 'free';
         });
 
+        for (const key in queueRobots) {
+            await queueRobots[key].resume();
+        }
         return res.status(200).json({
             success: true,
             message: 'Reset all task mainQueue succes',
@@ -563,7 +576,7 @@ class RobotController {
     };
     // [POST] /robot/sendTaskList
     createNewTask = async function (req, res) {
-        console.group('createNewTask');
+        //console.group('createNewTask');
         Logging.info('__autoPickRobotAndSendTaskList:');
 
         const { taskName, taskDescription, pathOptimization, autoGoHome, targetPointList: subTaskList } = req.body;
@@ -591,8 +604,7 @@ class RobotController {
                     startTime: new Date(),
                     totalVolume: totalVolume
                 });
-
-                const job = await addTaskToQueue({
+                const jobData = {
                     taskId: taskId,
                     taskName,
                     taskDescription,
@@ -600,7 +612,8 @@ class RobotController {
                     autoGoHome,
                     subTaskList,
                     totalVolume
-                });
+                };
+                const job = await addTaskToQueue(jobData);
 
                 return res.status(200).json({
                     success: true,
@@ -618,7 +631,7 @@ class RobotController {
                 message: 'Bad request'
             });
         }
-        console.groupEnd();
+        //console.groupEnd();
     };
     // [POST] /robot/createNewTargetPoint
     createNewTargetPoint = async function (req, res) {
@@ -843,26 +856,36 @@ class RobotController {
         }
     };
     // [POST] /robot/:robotId/reset-all-goals
-    callServiceResetAllGoals(req, res) {
+    callServiceResetAllGoals = async function (req, res) {
         console.log('🚀 ~ file: ros.controller.js:56 ~ RobotController ~ callServiceResetAllGoals ~ req:', req.params.robotId);
         const robotName = req.params.robotId;
         if (robotName && robotConfigs.hasOwnProperty(robotName)) {
+            //======================================
+            await queueRobots[robotName].resume();
+            let taskQueueReset = [];
+            robotConfigs[robotName].taskQueue = [{ indexActiveTask: 0, taskId: '', robotName: robotName }];
+            taskQueueReset = robotConfigs[robotName].taskQueue;
+            statusOfAllRobots[robotName] = 'free';
+            //======================================
             const serviceClient = new ROSLIB.Service({
                 ros: robotConfigs[robotName].rosWebsocket,
                 name: `/${robotName}/move_base_sequence/reset`,
                 serviceType: 'move_base_sequence/reset'
             });
-
             const request = new ROSLIB.ServiceRequest({});
-
-            serviceClient.callService(request, function (result) {
+            return res.status(200).json({
+                success: 'success',
+                serviceClient: serviceClient.name,
+                message: 'Reset all goals successfully',
+                robotName,
+                taskQueueReset,
+                statusOfAllRobots
+            });
+            serviceClient.callService(request, async function (result) {
                 console.log('Result for service call ' + robotName + ' on ' + serviceClient.name + ': ' + JSON.stringify(result));
                 let taskQueueReset = [];
-
-                if (robotConfigs.hasOwnProperty(robotName)) {
-                    robotConfigs[robotName].taskQueue = [{ indexActiveTask: 0, taskId: '', robotName: robotName }];
-                    taskQueueReset = robotConfigs[robotName].taskQueue;
-                }
+                robotConfigs[robotName].taskQueue = [{ indexActiveTask: 0, taskId: '', robotName: robotName }];
+                taskQueueReset = robotConfigs[robotName].taskQueue;
                 statusOfAllRobots[robotName] = 'free';
 
                 return res.status(200).json({
@@ -881,7 +904,7 @@ class RobotController {
                 message: 'Bad requsest'
             });
         }
-    }
+    };
 
     // [POST] /robot/:robotId/get-current-status
     callServiceGetCurrentStatus = function (req, res) {

@@ -7,13 +7,17 @@ const db = require('../../models');
 const Task = db.Task;
 const SubTask = db.SubTask;
 // calculate poseArray and send to robot
-function calculatePoseArrayAndSend(orderPath, nameRobotWillCall) {
+async function calculatePoseArrayAndSend(orderPath, nameRobotWillCall) {
     let poseArray = [];
     poseArray = orderPath.map((task, index) => {
         return {
             ...GoalPoseArray[task.targetName]
         };
     });
+
+    let lastEle = poseArray.pop();
+    poseArray.push(GoalPoseArray['point_8']); // thêm điểm trung gian
+    poseArray.push(lastEle);
 
     const TargetGoal = new ROSLIB.Topic({
         ros: robotConfigs[nameRobotWillCall].rosWebsocket,
@@ -38,7 +42,7 @@ async function createWorkerRobots() {
             key,
             async (job) => {
                 try {
-                    console.group('queueRobots' + key);
+                    // console.group('queueRobots' + key);
                     console.log(`🚀 ~  ~ ${key}~ jobRobot:`, job.data);
                     const taskId = job.data.taskId;
                     const nameRobotWillCall = job.data.nameRobotWillCall; // cập nhập task và lưu vào cơ sở dữ liệu
@@ -58,7 +62,7 @@ async function createWorkerRobots() {
                     // await task.save();
 
                     for (const subTask of job.data.subTaskList) {
-                        console.log('🚀 ~ file: worker.queueRobots.js:61 ~ subTask:', subTask);
+                        // console.log('🚀 ~ file: worker.queueRobots.js:61 ~ subTask:', subTask);
                         await SubTask.create({
                             taskId: taskId,
                             robotId: robotConfigs[nameRobotWillCall].id,
@@ -74,8 +78,9 @@ async function createWorkerRobots() {
                         taskQueueUpdate: robotConfigs[nameRobotWillCall]['taskQueue']
                     });
                     // console.log('🚀 ~ file: worker.queueRobots.js:58 ~ robotConfigs:', robotConfigs[job.data.nameRobotWillCall].taskQueue);
-                    calculatePoseArrayAndSend(job.data.subTaskList, nameRobotWillCall);
-                    console.groupEnd();
+                    await calculatePoseArrayAndSend(job.data.subTaskList, nameRobotWillCall);
+                    await Task.updateFields(taskId, new Date(), `BEGIN`, '', false);
+                    //console.groupEnd();
                     return 'success';
                 } catch (error) {
                     console.log(`🚀 ~ ~ ${key}~ error:`, error);

@@ -7,35 +7,10 @@ const db = require('../../models');
 const Task = db.Task;
 const SubTask = db.SubTask;
 global.maxCapacityEachRobot = 100;
-class QueueJS {
-    constructor() {
-        this.items = {};
-        this.frontIndex = 0;
-        this.backIndex = 0;
-    }
-    enqueue(item) {
-        this.items[this.backIndex] = item;
-        this.backIndex++;
-        return item + ' inserted';
-    }
-    dequeue() {
-        const item = this.items[this.frontIndex];
-        delete this.items[this.frontIndex];
-        this.frontIndex++;
-        return item;
-    }
-    peek() {
-        return this.items[this.frontIndex];
-    }
-    get printQueue() {
-        return this.items;
-    }
-}
 
 export const myWorker = new Worker(
     'taskQueue',
     async (job) => {
-        console.group();
         console.log(`main wroker process job `, job.data);
         const taskId = job.data.taskId;
         let tspDistanceMatrix = [];
@@ -43,6 +18,7 @@ export const myWorker = new Worker(
         const listRobotFree = Object.keys(statusOfAllRobots).filter((key) => {
             return statusOfAllRobots[key] === 'navigation finish' || statusOfAllRobots[key] === 'free' || statusOfAllRobots[key] === 'Waiting for goals';
         });
+        console.log('🚀 ~ file: worker.mainQueue.js:23 ~ listRobotFree:', listRobotFree);
         let queueRobotsFree = [];
         for (const key in queueRobots) {
             // console.log(key);
@@ -56,11 +32,12 @@ export const myWorker = new Worker(
         const robotFreeNumber = queueRobotsFree.length;
         const totalVolume = utilsFunction.calculateVolume(job.data.subTaskList);
         const maxVolumeCarry = maxCapacityEachRobot * robotFreeNumber;
+        console.log('🚀 ~ file: worker.mainQueue.js:59 ~ maxVolumeCarry:', maxVolumeCarry);
         const orginSubTaskList = job.data.subTaskList;
 
         if (totalVolume <= maxCapacityEachRobot) {
-            if (queueRobotsFree.length > 0 || robotFreeNumber >= 1) {
-                console.group('totalVolume <= maxCapacityEachRobot');
+            if (robotFreeNumber >= 1) {
+                // console.group('totalVolume <= maxCapacityEachRobot');
                 let nameRobotWillCall = '';
                 let newSubTaskList = [];
                 let minTotalDistance = Infinity;
@@ -70,14 +47,20 @@ export const myWorker = new Worker(
 
                 const originOrderPath = Array.from({ length: orginSubTaskList.length + 1 }, (_, index) => index);
                 if (job.data.autoGoHome) originOrderPath.push(0);
-                Logging.debug(`🚀 before algorithm, orderPath: ` + originOrderPath.join(' -> '));
+
+                // Logging.debug(`🚀 before algorithm, orderPath: ` + originOrderPath.join(' -> '));
+                const orderPathWithtargetName = job.data.subTaskList.map((item) => item.targetName);
+                Logging.debug(`🚀 before algorithm, orderPath: ` + orderPathWithtargetName.join(' -> '));
 
                 queueRobotsFree.map((key) => {
                     routePath = utilsFunction.createRoutePath(orginSubTaskList, key);
                     tspDistanceMatrix = utilsFunction.createTSPMatrix(routePath, key);
-                    // console.log('🚀 ~ file: worker.mainQueue.js:29 ~ .map ~ tspDistanceMatrix:', tspDistanceMatrix);
+                    // console.log('🚀 ~ file: worker.mainQueue.js:81 ~ queueRobotsFree.map ~ tspDistanceMatrix:', tspDistanceMatrix);
+
                     let optimalOrderPath = [];
+
                     if (job.data.pathOptimization) {
+                        console.time('Execution time');
                         if (orginSubTaskList.length < 7) {
                             const result = utilsFunction.tspGreedyAlgorithm(tspDistanceMatrix);
                             optimalOrderPath = result.path;
@@ -87,6 +70,7 @@ export const myWorker = new Worker(
                             optimalOrderPath = result.path;
                             totalDistance = result.totalDistance;
                         }
+                        console.timeEnd('Execution time');
                         // Logging.debug(`Optimal path for ${key} ` + optimalOrderPath.join(' -> '));
                     } else {
                         totalDistance = utilsFunction.calculateTotalDistance(tspDistanceMatrix, originOrderPath);
@@ -103,20 +87,23 @@ export const myWorker = new Worker(
                 Logging.info(`🚀 ~ nameRobotWillCall: ${nameRobotWillCall}`);
 
                 if (job.data.pathOptimization) {
-                    Logging.debug(`Optimal path ${nameRobotWillCall}: ` + optimalOrderPathOfRobotWillCall.join(' -> '));
                     newSubTaskList = utilsFunction.createOptimalOrderPath(routePath, optimalOrderPathOfRobotWillCall);
+
+                    const orderPathOptimalWithtargetName = newSubTaskList.map((item) => item.targetName);
+                    Logging.debug(`🚀 after algorithm, orderPath for ${nameRobotWillCall}: ` + orderPathOptimalWithtargetName.join(' -> '));
+
                     const firstEleOfArray = newSubTaskList.shift();
                     if (!job.data.autoGoHome) {
                         const lastEleOfArray = newSubTaskList.pop();
                     }
                     console.log('🚀  newSubTaskList after alogithm:', newSubTaskList);
                 } else {
-                    Logging.debug(`NotOptimal path ${nameRobotWillCall}: ` + originOrderPath.join(' -> '));
                     newSubTaskList = utilsFunction.createOptimalOrderPath(routePath, originOrderPath);
+                    Logging.debug(`NotOptimal path ${nameRobotWillCall}: ` + originOrderPath.join(' -> '));
                     const firstEleOfArray = newSubTaskList.shift();
                     console.log('🚀 newSubTaskList without alogithm:', newSubTaskList);
                 }
-
+                //console.groupEnd();
                 try {
                     // Tạo task và lưu vào cơ sở dữ liệu
                     // const { id: taskId } = await Task.create({
@@ -144,7 +131,6 @@ export const myWorker = new Worker(
                 } catch (error) {
                     console.log(' ~ error:', error);
                 }
-                console.groupEnd();
 
                 return nameRobotWillCall;
             } else {
@@ -153,15 +139,17 @@ export const myWorker = new Worker(
             }
         } else if (totalVolume > maxCapacityEachRobot && totalVolume <= maxVolumeCarry) {
             try {
-                console.group('totalVolume > maxCapacityEachRobot');
-                //const routePath = utilsFunction.createRoutePathForMultiDepot(orginSubTaskList,queueRobotsFree[robotFreeNumber - 1]);
-                //console.log('🚀 ~ file: worker.mainQueue.js:158 ~ routePath:', routePath);
-                //const tspDistanceMatrix = utilsFunction.createTSPMatrixForMul(routePath, queueRobotsFree[robotFreeNumber - 1]);
+                //console.group('maxVolumeCarry > totalVolume > maxCapacityEachRobot');
+                // one depots
+                // const routePath = utilsFunction.createRoutePath(orginSubTaskList, queueRobotsFree[robotFreeNumber - 1]);
+                // console.log('🚀 ~ file: worker.mainQueue.js:158 ~ routePath:', routePath);
+                // const tspDistanceMatrix = utilsFunction.createTSPMatrix(routePath, queueRobotsFree[robotFreeNumber - 1]);
+                // console.log('🚀 ~ file: worker.mainQueue.js:167 ~ tspDistanceMatrix:', tspDistanceMatrix);
 
                 const routePath = utilsFunction.createRoutePathForMultiDepot(orginSubTaskList, queueRobotsFree);
                 console.log('🚀 ~ file: worker.mainQueue.js:158 ~ routePath:', routePath);
                 const tspDistanceMatrix = utilsFunction.createTSPMatrixForMultiDepot(routePath);
-                //console.log('🚀 ~ file: worker.mainQueue.js:164 ~ tspDistanceMatrix:', tspDistanceMatrix);
+
                 // distanceMatrix: [
                 //     [0, 2232, 1026, 3294, 3443, 1994, 741, 2571],
                 //     [2232, 0, 1780, 1640, 1300, 1000, 2366, 698],
@@ -175,18 +163,19 @@ export const myWorker = new Worker(
                 const demanLoads = routePath.map((item, index) => {
                     return item.cargoVolume;
                 });
-                const multiDepots = queueRobotsFree.map((item, index) => {
+                const postitionDepotList = queueRobotsFree.map((item, index) => {
                     return index;
                 });
-                console.log('🚀 ~ file: worker.mainQueue.js:179 ~ multiDepots:', multiDepots);
+                console.log('🚀 ~ file: worker.mainQueue.js:179 ~ postitionDepotList:', postitionDepotList);
                 const data = {
                     distanceMatrix: tspDistanceMatrix,
                     demands: demanLoads,
                     vehicleCapacities: new Array(robotFreeNumber).fill(maxCapacityEachRobot),
                     vehicleNumber: robotFreeNumber,
-                    startPoints: multiDepots,
-                    endPoints: multiDepots
-                    //depot: 0
+                    startPoints: postitionDepotList,
+                    endPoints: postitionDepotList,
+                    depot: 0,
+                    multiDepots: true
                 };
                 const response = await fetch('http://localhost:8080/vehicleCapacity', {
                     method: 'POST',
@@ -196,14 +185,16 @@ export const myWorker = new Worker(
                     body: JSON.stringify(data)
                 });
                 const result = await response.json();
-                // console.log('🚀 ~ response:', result);
-                // throw new Error('Can not find solution');
+                console.log('🚀 ~ file: worker.mainQueue.js:188 ~ result:', result);
+                //console.groupEnd();
                 if (!result.error) {
                     const robotArray = [];
                     const createNewMultiJob = {};
 
                     Object.keys(result.vehicleLoads).forEach((key) => {
-                        const nameRobot = 'mir' + key;
+                        const indexArray = key - 1;
+                        const nameRobot = queueRobotsFree[indexArray];
+                        console.log('🚀 ~ file: worker.mainQueue.js:196 ~ Object.keys ~ nameRobot:', nameRobot);
                         if (result.vehicleLoads[key] !== 0 && !createNewMultiJob.hasOwnProperty(nameRobot)) {
                             robotArray.push(+key);
                             createNewMultiJob[nameRobot] = {};
@@ -215,14 +206,17 @@ export const myWorker = new Worker(
                                 }
                             });
                             if (job.data.autoGoHome) {
-                                createNewMultiJob[nameRobot]['subTaskList'].push(routePath[+key - 1]);
+                                // createNewMultiJob[nameRobot]['subTaskList'].push(routePath[+key - 1]);
+                                // createNewMultiJob[nameRobot]['subTaskList'].push(routePath[0]);
+                                createNewMultiJob[nameRobot]['subTaskList'].push({ targetName: robotConfigs[nameRobot].initPoint, cargoVolume: 0, isDone: false });
                             }
                             createNewMultiJob[nameRobot]['taskId'] = taskId;
                             createNewMultiJob[nameRobot]['nameRobotWillCall'] = nameRobot;
+                            console.log('🚀 ~ file: worker.mainQueue.js:223 ~', createNewMultiJob[nameRobot]['subTaskList']);
                         }
                     });
                     Task.setRobots(taskId, robotArray);
-                    console.log('🚀 ~ createNewJob:', createNewMultiJob);
+                    // console.log('🚀 ~ createNewJob:', createNewMultiJob);
 
                     for (const key in createNewMultiJob) {
                         const jobAssignToMultiRobot = await queueRobots[key].add(`task_${taskId}_${key}`, createNewMultiJob[key], {
@@ -234,7 +228,6 @@ export const myWorker = new Worker(
                             delay: 1000
                         });
                     }
-                    console.groupEnd();
                     return Object.keys(createNewMultiJob);
                 } else {
                     throw new Error(500);
@@ -282,7 +275,7 @@ myWorker.on('failed', async (job, err) => {
     //console.log('🚀 ~ file: worker.mainQueue.js:283 ~ myWorker.on ~ job:', job.data);
     let messageErr = '';
     if (err.message === '500') {
-        messageErr = 'Can not finđ solution, cancel taskId ' + job.data.taskId;
+        messageErr = 'Can not find solution, cancel taskId ' + job.data.taskId;
         await Task.updateFields(job.data.taskId, new Date(), `CANCEL`, 'CAN NOT FOUNT SOLUTION');
     } else {
         messageErr = err.message + ` Job ${job.data.taskId} will be moved to backlog`;
@@ -294,7 +287,7 @@ myWorker.on('failed', async (job, err) => {
         retry: job.attemptsMade,
         message: messageErr
     });
-    Logging.warning(`Main worker, Job ${job.data.taskId}: ${err.message} and retry with ${job.attemptsMade}`);
+    Logging.warning(`Main worker, Job ${job.data.taskId}: ${messageErr}`);
 
     // if (job.attemptsMade < 3) {
     //     // Retry lại job sau 5, 10 và 15 giây (tăng dần theo cấp số nhân)

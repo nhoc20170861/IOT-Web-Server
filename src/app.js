@@ -8,6 +8,7 @@ import express from 'express';
 import session from 'express-session';
 import Pusher from 'pusher';
 import cookieParser from 'cookie-parser';
+import helmet from 'helmet';
 const { authJwt } = require('./middlewares');
 const { createBullBoard } = require('@bull-board/api');
 const { BullMQAdapter } = require('@bull-board/api/bullMQAdapter');
@@ -31,25 +32,33 @@ async function initialDataBase() {
         {
             pointName: 'home_1',
             pointType: 'Home Point',
-            xCoordinate: 5.03,
-            yCoordinate: 9.94,
-            theta: 0,
+            xCoordinate: 0.0,
+            yCoordinate: 10.0,
+            theta: -1.57,
             mapId: 1
         },
         {
             pointName: 'home_2',
             pointType: 'Home Point',
-            xCoordinate: 0.0,
-            yCoordinate: 9.96,
-            theta: 0,
+            xCoordinate: 1.0,
+            yCoordinate: 10.0,
+            theta: -1.57,
             mapId: 1
         },
         {
             pointName: 'home_3',
             pointType: 'Home Point',
-            xCoordinate: 0.01,
-            yCoordinate: 7.87,
-            theta: 0,
+            xCoordinate: -1.0,
+            yCoordinate: 10,
+            theta: -1.57,
+            mapId: 1
+        },
+        {
+            pointName: 'home_4',
+            pointType: 'Home Point',
+            xCoordinate: -3.0,
+            yCoordinate: 10,
+            theta: -1.57,
             mapId: 1
         },
         {
@@ -95,19 +104,163 @@ async function initialDataBase() {
         {
             pointName: 'point_6',
             pointType: 'Goal Point',
+            xCoordinate: 5.0,
+            yCoordinate: 7.8,
+            theta: 1.57,
+            mapId: 1
+        },
+        {
+            pointName: 'point_7',
+            pointType: 'Goal Point',
             xCoordinate: 0.0,
             yCoordinate: -15,
             theta: 3.14,
             mapId: 1
         },
         {
-            pointName: 'point_7',
+            pointName: 'point_8',
             pointType: 'Goal Point',
             xCoordinate: 0.5,
             yCoordinate: 12.5,
             theta: 0,
             mapId: 1
         }
+        // {
+        //     pointName: 'ortool_0',
+        //     pointType: 'Home Point',
+        //     xCoordinate: 456,
+        //     yCoordinate: 320,
+        //     theta: 0,
+        //     mapId: 1
+        // },
+        // {
+        //     pointName: 'ortool_1',
+        //     pointType: 'Location',
+        //     xCoordinate: 228,
+        //     yCoordinate: 0,
+        //     theta: 0,
+        //     mapId: 1
+        // },
+        // {
+        //     pointName: 'ortool_2',
+        //     pointType: 'Location',
+        //     xCoordinate: 912,
+        //     yCoordinate: 0,
+        //     theta: 0,
+        //     mapId: 1
+        // },
+        // {
+        //     pointName: 'ortool_3',
+        //     pointType: 'Location',
+        //     xCoordinate: 0,
+        //     yCoordinate: 80,
+        //     theta: 0,
+        //     mapId: 1
+        // },
+        // {
+        //     pointName: 'ortool_4',
+        //     pointType: 'Location',
+        //     xCoordinate: 114,
+        //     yCoordinate: 80,
+        //     theta: 0,
+        //     mapId: 1
+        // },
+        // {
+        //     pointName: 'ortool_5',
+        //     pointType: 'Location',
+        //     xCoordinate: 570,
+        //     yCoordinate: 160,
+        //     theta: 0,
+        //     mapId: 1
+        // },
+        // {
+        //     pointName: 'ortool_6',
+        //     pointType: 'Location',
+        //     xCoordinate: 798,
+        //     yCoordinate: 160,
+        //     theta: 0,
+        //     mapId: 1
+        // },
+        // {
+        //     pointName: 'ortool_7',
+        //     pointType: 'Location',
+        //     xCoordinate: 342,
+        //     yCoordinate: 240,
+        //     theta: 0,
+        //     mapId: 1
+        // },
+        // {
+        //     pointName: 'ortool_8',
+        //     pointType: 'Location',
+        //     xCoordinate: 684,
+        //     yCoordinate: 240,
+        //     theta: 0,
+        //     mapId: 1
+        // },
+        // {
+        //     pointName: 'ortool_9',
+        //     pointType: 'Location',
+        //     xCoordinate: 570,
+        //     yCoordinate: 400,
+        //     theta: 0,
+        //     mapId: 1
+        // },
+        // {
+        //     pointName: 'ortool_10',
+        //     pointType: 'Location',
+        //     xCoordinate: 912,
+        //     yCoordinate: 400,
+        //     theta: 0,
+        //     mapId: 1
+        // },
+        // {
+        //     pointName: 'ortool_11',
+        //     pointType: 'Location',
+        //     xCoordinate: 114,
+        //     yCoordinate: 480,
+        //     theta: 0,
+        //     mapId: 1
+        // },
+        // {
+        //     pointName: 'ortool_12',
+        //     pointType: 'Location',
+        //     xCoordinate: 228,
+        //     yCoordinate: 480,
+        //     theta: 0,
+        //     mapId: 1
+        // },
+        // {
+        //     pointName: 'ortool_13',
+        //     pointType: 'Location',
+        //     xCoordinate: 342,
+        //     yCoordinate: 560,
+        //     theta: 0,
+        //     mapId: 1
+        // },
+        // {
+        //     pointName: 'ortool_14',
+        //     pointType: 'Location',
+        //     xCoordinate: 684,
+        //     yCoordinate: 560,
+        //     theta: 0,
+        //     mapId: 1
+        // },
+        // {
+        //     pointName: 'ortool_15',
+        //     pointType: 'Location',
+        //     xCoordinate: 0,
+        //     yCoordinate: 640,
+        //     theta: 0,
+        //     mapId: 1
+        // },
+        // {
+        //     pointName: 'ortool_16',
+        //     pointType: 'Location',
+        //     xCoordinate: 798,
+        //     yCoordinate: 640,
+        //     theta: 0,
+        //     mapId: 1
+        // }
     ];
 
     /**
@@ -201,6 +354,13 @@ async function initialDataBase() {
             initPoint: 'home_3',
             ip: '192.168.1.117',
             portWebSocket: 9090
+        },
+        {
+            robotName: 'mir4',
+            robotType: 'Mir100',
+            initPoint: 'home_4',
+            ip: '192.168.1.117',
+            portWebSocket: 9090
         }
     ];
 
@@ -252,7 +412,9 @@ async function initialDataBase() {
 }
 
 const app = express();
-export const port_server = SERVER_PORT;
+
+// Use Helmet!
+app.use(helmet.crossOriginResourcePolicy({ policy: 'cross-origin' }));
 
 // template engine with express-handlebars
 const { create } = require('express-handlebars');
@@ -313,7 +475,13 @@ const bullBoard = createBullBoard({
 });
 app.use('/queueDashBoard', [], serverAdapter.getRouter());
 
+//================= test load ================
+app.get('/autocannon', (req, res) => {
+    res.send('Hello world!');
+});
+
 // initialize Server and socket
+const port_server = SERVER_PORT;
 const server = require('http').Server(app);
 // create global socketIo
 global.socketIo = require('socket.io')(server, {

@@ -47,7 +47,7 @@ module.exports = (sequelize, Sequelize) => {
         }
     });
     // Phương thức cập nhật trạng thái statusTask và finsihTime của nhiệm vụ
-    Task.updateFields = async function (taskId, finishTime, statusTask, taskDescription = '') {
+    Task.updateFields = async function (taskId, timeUpdate, statusTask, taskDescription = '', isUpdateFinishTime = true) {
         try {
             // Tìm nhiệm vụ có id tương ứng
             const task = await Task.findByPk(taskId);
@@ -57,7 +57,11 @@ module.exports = (sequelize, Sequelize) => {
             }
 
             // Cập nhật các trường trong đối tượng fieldsToUpdate
-            task['finishTime'] = finishTime;
+            if (isUpdateFinishTime) {
+                task['finishTime'] = timeUpdate;
+            } else {
+                task['startTime'] = timeUpdate;
+            }
             task['statusTask'] = statusTask;
             if (taskDescription !== '') {
                 task['taskDescription'] = taskDescription;
