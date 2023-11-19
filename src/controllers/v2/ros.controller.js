@@ -589,7 +589,7 @@ class RobotController {
                 message: 'Bad request'
             });
         }
-        console.log('🚀~ RobotController ~ subTaskList:', subTaskList);
+        // console.log('🚀~ RobotController ~ subTaskList:', subTaskList);
 
         if (subTaskList.length > 0) {
             try {

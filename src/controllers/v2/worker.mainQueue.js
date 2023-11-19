@@ -139,44 +139,78 @@ export const myWorker = new Worker(
             }
         } else if (totalVolume > maxCapacityEachRobot && totalVolume <= maxVolumeCarry) {
             try {
-                //console.group('maxVolumeCarry > totalVolume > maxCapacityEachRobot');
                 // one depots
-                // const routePath = utilsFunction.createRoutePath(orginSubTaskList, queueRobotsFree[robotFreeNumber - 1]);
+                const routePath = utilsFunction.createRoutePath(orginSubTaskList, queueRobotsFree[robotFreeNumber - 1]);
+                const tspDistanceMatrix = utilsFunction.createTSPMatrix(routePath, queueRobotsFree[robotFreeNumber - 1]);
+
+                // multi depots
+                // const routePath = utilsFunction.createRoutePathForMultiDepot(orginSubTaskList, queueRobotsFree);
+                // const tspDistanceMatrix = utilsFunction.createTSPMatrixForMultiDepot(routePath);
+
                 // console.log('🚀 ~ file: worker.mainQueue.js:158 ~ routePath:', routePath);
-                // const tspDistanceMatrix = utilsFunction.createTSPMatrix(routePath, queueRobotsFree[robotFreeNumber - 1]);
                 // console.log('🚀 ~ file: worker.mainQueue.js:167 ~ tspDistanceMatrix:', tspDistanceMatrix);
-
-                const routePath = utilsFunction.createRoutePathForMultiDepot(orginSubTaskList, queueRobotsFree);
-                console.log('🚀 ~ file: worker.mainQueue.js:158 ~ routePath:', routePath);
-                const tspDistanceMatrix = utilsFunction.createTSPMatrixForMultiDepot(routePath);
-
-                // distanceMatrix: [
-                //     [0, 2232, 1026, 3294, 3443, 1994, 741, 2571],
-                //     [2232, 0, 1780, 1640, 1300, 1000, 2366, 698],
-                //     [1026, 1780, 0, 3238, 3080, 2042, 659, 2347],
-                //     [3294, 1640, 3238, 0, 1000, 1300, 3698, 946],
-                //     [3443, 1300, 3080, 1000, 0, 1640, 3657, 908],
-                //     [1994, 1000, 2042, 1300, 1640, 0, 2429, 746],
-                //     [741, 2366, 659, 3698, 3657, 2429, 0, 2862],
-                //     [2571, 698, 2347, 946, 908, 746, 2862, 0]
-                // ],
                 const demanLoads = routePath.map((item, index) => {
                     return item.cargoVolume;
                 });
-                const postitionDepotList = queueRobotsFree.map((item, index) => {
-                    return index;
-                });
-                console.log('🚀 ~ file: worker.mainQueue.js:179 ~ postitionDepotList:', postitionDepotList);
                 const data = {
                     distanceMatrix: tspDistanceMatrix,
                     demands: demanLoads,
                     vehicleCapacities: new Array(robotFreeNumber).fill(maxCapacityEachRobot),
                     vehicleNumber: robotFreeNumber,
-                    startPoints: postitionDepotList,
-                    endPoints: postitionDepotList,
                     depot: 0,
-                    multiDepots: true
+                    multiDepots: false
                 };
+                /**
+                 * @desc data example for testing
+                 */
+                // const data = {
+                //     distanceMatrix: [
+                //         [0, 393, 557, 515, 418, 196, 378, 139, 242, 139, 463, 378, 279, 266, 331, 557, 468],
+                //         [393, 0, 684, 242, 139, 378, 592, 266, 515, 526, 792, 493, 480, 571, 722, 679, 857],
+                //         [557, 684, 0, 916, 802, 378, 196, 618, 331, 526, 400, 931, 836, 799, 605, 1114, 650],
+                //         [515, 242, 916, 0, 114, 576, 802, 378, 702, 654, 967, 416, 460, 589, 836, 560, 975],
+                //         [418, 139, 802, 114, 0, 463, 689, 279, 592, 557, 860, 400, 416, 531, 745, 571, 884],
+                //         [196, 378, 378, 576, 463, 0, 228, 242, 139, 240, 418, 557, 468, 460, 416, 745, 531],
+                //         [378, 592, 196, 802, 689, 228, 0, 463, 139, 331, 266, 755, 654, 607, 416, 931, 480],
+                //         [139, 266, 618, 378, 279, 242, 463, 0, 342, 279, 592, 331, 266, 320, 468, 526, 607],
+                //         [242, 515, 331, 702, 592, 139, 139, 342, 0, 196, 279, 618, 515, 468, 320, 792, 416],
+                //         [139, 526, 526, 654, 557, 240, 331, 279, 196, 0, 342, 463, 351, 279, 196, 618, 331],
+                //         [463, 792, 400, 967, 860, 418, 266, 592, 279, 342, 0, 802, 689, 592, 279, 943, 266],
+                //         [378, 493, 931, 416, 400, 557, 755, 331, 618, 463, 802, 0, 114, 242, 576, 196, 702],
+                //         [279, 480, 836, 460, 416, 468, 654, 266, 515, 351, 689, 114, 0, 139, 463, 279, 592],
+                //         [266, 571, 799, 589, 531, 460, 607, 320, 468, 279, 592, 242, 139, 0, 342, 351, 463],
+                //         [331, 722, 605, 836, 745, 416, 416, 468, 320, 196, 279, 576, 463, 342, 0, 689, 139],
+                //         [557, 679, 1114, 560, 571, 745, 931, 526, 792, 618, 943, 196, 279, 351, 689, 0, 798],
+                //         [468, 857, 650, 975, 884, 531, 480, 607, 416, 331, 266, 702, 592, 463, 139, 798, 0]
+                //     ],
+                //     demands: [0, 1, 1, 2, 4, 2, 4, 8, 8, 1, 2, 1, 2, 4, 4, 8, 8],
+                //     vehicleCapacities: [15, 15, 15, 15],
+                //     vehicleNumber: 4,
+                //     depot: 0,
+                //     multiDepots: false
+                // };
+
+                const originOrderPath = Array.from({ length: routePath.length }, (_, index) => index);
+                console.log('🚀 ~ file: worker.mainQueue.js:149 ~ originOrderPath:', originOrderPath);
+
+                const postitionDepotList = queueRobotsFree.map((item, index) => {
+                    return index;
+                });
+                console.log('🚀 ~ file: worker.mainQueue.js:179 ~ postitionDepotList:', postitionDepotList);
+
+                if (data.multiDepots == true) {
+                    data.startPoints = postitionDepotList;
+                    data.endPoints = postitionDepotList;
+                }
+
+                /**
+                 *  Algorthm nCar
+                 */
+                // const result = utilsFunction.nCar(originOrderPath, 15, data);
+
+                /**
+                 *  Google Or-tools API for JAVA
+                 */
                 const response = await fetch('http://localhost:8080/vehicleCapacity', {
                     method: 'POST',
                     headers: {
@@ -185,8 +219,8 @@ export const myWorker = new Worker(
                     body: JSON.stringify(data)
                 });
                 const result = await response.json();
-                console.log('🚀 ~ file: worker.mainQueue.js:188 ~ result:', result);
-                //console.groupEnd();
+                console.log('🚀result CVRP:', result);
+
                 if (!result.error) {
                     const robotArray = [];
                     const createNewMultiJob = {};
@@ -194,20 +228,23 @@ export const myWorker = new Worker(
                     Object.keys(result.vehicleLoads).forEach((key) => {
                         const indexArray = key - 1;
                         const nameRobot = queueRobotsFree[indexArray];
-                        console.log('🚀 ~ file: worker.mainQueue.js:196 ~ Object.keys ~ nameRobot:', nameRobot);
+                        console.log('🚀 ~ nameRobot assigned:', nameRobot);
                         if (result.vehicleLoads[key] !== 0 && !createNewMultiJob.hasOwnProperty(nameRobot)) {
                             robotArray.push(+key);
                             createNewMultiJob[nameRobot] = {};
                             createNewMultiJob[nameRobot]['subTaskList'] = [];
                             const length = result.vehicleRoutes[key].length;
                             result.vehicleRoutes[key].forEach((destinationInfo, index) => {
+                                console.log('🚀 ~ file: worker.mainQueue.js:207 ~ result.vehicleRoutes[key].forEach ~ destinationInfo:', destinationInfo);
                                 if (index !== 0 && index !== length - 1) {
                                     createNewMultiJob[nameRobot]['subTaskList'].push(routePath[destinationInfo.destination]);
                                 }
                             });
                             if (job.data.autoGoHome) {
+                                // multi depot with google or-tools
                                 // createNewMultiJob[nameRobot]['subTaskList'].push(routePath[+key - 1]);
-                                // createNewMultiJob[nameRobot]['subTaskList'].push(routePath[0]);
+
+                                // algorithm nCar for one depot
                                 createNewMultiJob[nameRobot]['subTaskList'].push({ targetName: robotConfigs[nameRobot].initPoint, cargoVolume: 0, isDone: false });
                             }
                             createNewMultiJob[nameRobot]['taskId'] = taskId;

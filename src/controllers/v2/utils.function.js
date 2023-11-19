@@ -141,6 +141,23 @@ function createTSPMatrixForMultiDepot(goalTargetList, key) {
     }
     return tspMatrix;
 }
+
+/**
+ *
+ * @param {*} goalTargetList
+ * @param {*} key
+ * @returns distanceMatrix example for one depot
+ */
+// distanceMatrix: [
+//     [0, 2232, 1026, 3294, 3443, 1994, 741, 2571],
+//     [2232, 0, 1780, 1640, 1300, 1000, 2366, 698],
+//     [1026, 1780, 0, 3238, 3080, 2042, 659, 2347],
+//     [3294, 1640, 3238, 0, 1000, 1300, 3698, 946],
+//     [3443, 1300, 3080, 1000, 0, 1640, 3657, 908],
+//     [1994, 1000, 2042, 1300, 1640, 0, 2429, 746],
+//     [741, 2366, 659, 3698, 3657, 2429, 0, 2862],
+//     [2571, 698, 2347, 946, 908, 746, 2862, 0]
+// ],
 function createTSPMatrix(goalTargetList, key) {
     const n = goalTargetList.length;
     const tspMatrix = Array.from({ length: n }, () => Array(n).fill(0.0));
@@ -335,17 +352,14 @@ function tspGreedyAlgorithmNcar(T, dataCVRP) {
     }
     // return start point
     const lastNodeInTour = path[path.length - 1];
-    totalDistance += data.distanceMatrix[lastNodeInTour][0];
+    totalDistance += dataCVRP.distanceMatrix[lastNodeInTour][0];
     path.push(T[0]);
 
     return { path, totalDistance };
 }
 
 function findNearestNeighbor(currentNode, N_T_rest, prevDemends, C, dataCVRP) {
-    // console.log(
-    //   "🚀 ~ file: CVRP.js:80 ~ restrictedNearestNeighbor ~ prevDemends:",
-    //   prevDemends
-    // );
+    // console.log('🚀 ~ file: CVRP.js:80 ~ restrictedNearestNeighbor ~ prevDemends:', prevDemends);
     let output = 0;
     let minDistance = Infinity;
     const N_T_lentgh = N_T_rest.length;
@@ -367,43 +381,37 @@ function findNearestNeighbor(currentNode, N_T_rest, prevDemends, C, dataCVRP) {
 }
 
 function optimalRouteForOneVehicle(N, C, dataCVRP) {
-    let p_cost_min = Infinity;
-
-    let T_min = [];
-    let T_min_ = [];
+    let minCost = Infinity;
+    let rest_N = [];
     let demand_T = 0;
     let prevNode = 0;
-    let pathOptimal = [];
-    let totalCost = 0;
-    for (i = 1; i < N.length; i++) {
-        console.group(colorize(`cluster ${i}`).red);
+    let orderPath = [];
+    for (let i = 1; i < N.length; i++) {
+        // console.group(colorize(`cluster ${i}`).red);
         let N_T = [0];
         let N_T_rest = [...N];
         prevNode = N[i];
         N_T.push(prevNode);
-        // console.log("origin N: ", N);
-        // console.log("🚀 ~ file: CVRP.js:103 ~ optimalRouteForOneVehicle ~ N_T:", N_T);
+        // console.log('origin input set N: ', N);
 
         const index = N_T_rest.indexOf(prevNode);
         if (index > -1) {
             // only splice array when item is found
             N_T_rest.splice(index, 1); // 2nd parameter means remove one item only
         }
-        // console.log("🚀 ~ file: CVRP.js:107 ~r ~ N_T_rest:", N_T_rest);
+        //console.log('🚀 ~ file: CVRP.js:107 ~r ~ N_T_rest:', N_T_rest);
 
         demand_T = dataCVRP.demands[prevNode];
 
         while (demand_T <= C) {
-            // console.log(
-            //   "====================================================================================="
-            // );
-            const nextNode = findNearestNeighbor(prevNode, N_T_rest, demand_T, C);
+            // console.log('=====================================================================================');
+            const nextNode = findNearestNeighbor(prevNode, N_T_rest, demand_T, C, dataCVRP);
             if (nextNode == 0) {
                 break;
             }
             demand_T += dataCVRP.demands[nextNode];
             N_T.push(nextNode);
-            // console.log("🚀 ~ file: CVRP.js:132 ~ feasibleRoute ~ N_T:", N_T);
+            // console.log('🚀 ~ file: CVRP.js:132 ~ feasibleRoute ~ N_T:', N_T);
 
             const index = N_T_rest.indexOf(nextNode);
             if (index > -1) {
@@ -411,55 +419,53 @@ function optimalRouteForOneVehicle(N, C, dataCVRP) {
                 N_T_rest.splice(index, 1); // 2nd parameter means remove one item only
             }
             prevNode = nextNode;
-            // console.log(
-            //   "🚀 ~ file: CVRP.js:134 ~ feasibleRoute ~ N_T_rest:",
-            //   N_T_rest
-            // );
+            // console.log('🚀 ~ file: CVRP.js:134 ~ feasibleRoute ~ N_T_rest:', N_T_rest);
         }
-        const { path, totalDistance } = tspGreedyAlgorithmNcar(N_T_rest, dataCVRP);
+        const { path, totalDistance: cost } = tspGreedyAlgorithmNcar(N_T, dataCVRP);
 
-        const p = totalDistance;
-        // console.log("🚀 ~ eulerCycle: N_T", p_N_T);
-        // console.log("🚀 ~ eulerCycle: N_T_rest", p_N_T_t);
         console.groupEnd();
-        if (p < p_cost_min) {
-            p_cost_min = p;
-            T_min = N_T;
-            T_min_ = N_T_rest;
-            pathOptimal = path;
-            totalCost = totalDistance;
+        if (cost < minCost) {
+            minCost = cost;
+            rest_N = N_T_rest;
+            orderPath = path;
         }
     }
-    return { T_min, T_min_, demand_T, pathOptimal, totalCost };
+    return { rest_N, demand_T, orderPath, minCost };
 }
 function nCar(V, C, dataCVRP) {
     let N = V;
-    let vehicle_count = 0;
-    let cost_total = 0;
-    let R_list = {};
+    let vehicleCount = 0;
+    let totalCost = 0;
+    let vehicleRoutes = {};
     let vehicleLoads = {};
     let vehicleTravelDistances = {};
     while (N.length > 1) {
-        let { T_min: T, T_min_: T_, demand_T, pathOptimal, totalCost } = optimalRouteForOneVehicle(N, C, dataCVRP);
-        // console.log("🚀 ~ file: CVRP.js:189 ~ nCar ~ T:", T);
-        R_list[vehicle_count + 1] = pathOptimal;
-        vehicleLoads[vehicle_count + 1] = demand_T;
-        vehicleTravelDistances[vehicle_count + 1] = totalCost;
-        // console.log("🚀 ~ file: CVRP.js:242 ~ nCar ~ R_list:", R_list);
-        vehicle_count += 1;
-        cost_total += totalCost;
-        N = T_;
+        let { rest_N, demand_T, orderPath, minCost } = optimalRouteForOneVehicle(N, C, dataCVRP);
+        vehicleCount += 1;
+        Logging.debug(`🚀  ~ nCar robot ${vehicleCount} ~ orderPath: ${orderPath}`);
+        vehicleRoutes[vehicleCount] = [];
+        orderPath.forEach((item, index) => {
+            vehicleRoutes[vehicleCount].push({
+                destination: orderPath[index],
+                cargoVolume: dataCVRP.demands[index]
+            });
+        });
+
+        vehicleLoads[vehicleCount] = demand_T;
+        vehicleTravelDistances[vehicleCount] = minCost;
+        totalCost += minCost;
+        N = rest_N;
     }
-    if (Object.keys(R_list).length > 0) {
+    if (Object.keys(vehicleRoutes).length > 0) {
         return {
-            routes: R_list,
-            vehicles: vehicle_count,
-            totalCost: cost_total,
+            vehicleRoutes,
+            vehicles: vehicleCount,
+            totalDistance: totalCost,
             vehicleLoads: vehicleLoads,
             vehicleTravelDistances
         };
     } else {
-        return 'can not find optimal';
+        return { error: true };
     }
 }
 
