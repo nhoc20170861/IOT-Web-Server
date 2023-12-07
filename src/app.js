@@ -532,42 +532,42 @@ socketIo.on('connection', function (socket) {
 });
 
 // Kiểm tra xem kết nối cơ sở dữ liệu đã thành công hay chưa
-// (async () => {
-//     try {
-//         await db.sequelize.authenticate();
-//         Logging.info('Database connection is ready.');
-//         // Đồng bộ hóa model với cơ sở dữ liệu
-//         await db.sequelize.sync();
+(async () => {
+    try {
+        await db.sequelize.authenticate();
+        Logging.info('Database connection is ready.');
+        // Đồng bộ hóa model với cơ sở dữ liệu
+        await db.sequelize.sync();
 
-//         // starting server
-//         server.listen(port_server, () => {
-//             Logging.info(`⚡️[server]: Server is running at http://localhost:${port_server}`);
-//         });
+        // starting server
+        server.listen(port_server, () => {
+            Logging.info(`⚡️[server]: Server is running at http://localhost:${port_server}`);
+        });
 
-//         // create connection between clientMqtt and server thourgh socket
-//     } catch (error) {
-//         console.error('Unable to connect to the database:', error);
-//     }
-// })();
+        // create connection between clientMqtt and server thourgh socket
+    } catch (error) {
+        console.error('Unable to connect to the database:', error);
+    }
+})();
 
 // force: true will drop the table if it already exists
-db.sequelize
-    .query('SET FOREIGN_KEY_CHECKS = 0')
-    .then(function () {
-        return db.sequelize.sync({ force: true });
-    })
-    .then(function () {
-        return db.sequelize.query('SET FOREIGN_KEY_CHECKS = 1');
-    })
-    .then(
-        function () {
-            console.log('Drop and Resync Database with { force: true }');
-            initialDataBase();
-        },
-        function (err) {
-            console.log(err);
-        }
-    );
+// db.sequelize
+//     .query('SET FOREIGN_KEY_CHECKS = 0')
+//     .then(function () {
+//         return db.sequelize.sync({ force: true });
+//     })
+//     .then(function () {
+//         return db.sequelize.query('SET FOREIGN_KEY_CHECKS = 1');
+//     })
+//     .then(
+//         function () {
+//             console.log('Drop and Resync Database with { force: true }');
+//             initialDataBase();
+//         },
+//         function (err) {
+//             console.log(err);
+//         }
+//     );
 
 // _________________________start https server ___________________________________
 // const https = require('https');
