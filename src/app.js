@@ -428,10 +428,6 @@ app.engine('hbs', hbs.engine);
 app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, 'resources/views'));
 
-// Start server
-
-app.use(cors());
-
 // parse requests of content-type - application/json
 app.use(express.json());
 
@@ -439,6 +435,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(cookieParser()); // cookie parser middleware
+
+// Start server
+app.use(cors());
 
 app.use(
     session({
@@ -451,10 +450,6 @@ app.use(
 
 // Use static file
 app.use(express.static(path.join(__dirname, 'public')));
-
-// Router init
-import routes from './routes';
-app.use('/', routes);
 
 // create dashboard mainQueue
 import { mainQueue, queueEsp, queueRobots, queueBacklog } from './controllers/v2/bullmq.js';
@@ -475,19 +470,80 @@ const bullBoard = createBullBoard({
 });
 app.use('/queueDashBoard', [], serverAdapter.getRouter());
 
+// Router init
+import routes from './routes';
+app.use('/', routes);
+
 //================= test load ================
 app.get('/autocannon', (req, res) => {
     res.send('Hello world!');
 });
 
+// Kiểm tra xem kết nối cơ sở dữ liệu đã thành công hay chưa
+(async () => {
+    try {
+        await db.sequelize.authenticate();
+        Logging.info('Database connection is ready.');
+        // Đồng bộ hóa model với cơ sở dữ liệu
+        await db.sequelize.sync();
+
+        // create connection between clientMqtt and server thourgh socket
+    } catch (error) {
+        console.error('Unable to connect to the database:', error);
+    }
+})();
+
+// force: true will drop the table if it already exists
+// db.sequelize
+//     .query('SET FOREIGN_KEY_CHECKS = 0')
+//     .then(function () {
+//         return db.sequelize.sync({ force: true });
+//     })
+//     .then(function () {
+//         return db.sequelize.query('SET FOREIGN_KEY_CHECKS = 1');
+//     })
+//     .then(
+//         function () {
+//             console.log('Drop and Resync Database with { force: true }');
+//             initialDataBase();
+//         },
+//         function (err) {
+//             console.log(err);
+//         }
+//     );
+
+// _________________________start http server ___________________________________
 // initialize Server and socket
 const port_server = SERVER_PORT;
-const server = require('http').Server(app);
-// create global socketIo
-global.socketIo = require('socket.io')(server, {
+// const server = require('http').Server(app);
+// // create global socketIo
+// global.socketIo = require('socket.io')(server, {
+//     cors: {
+//         origin: '*'
+//     }
+// });
+// // starting server
+// server.listen(port_server, () => {
+//     Logging.info(`⚡️[server]: Server is running at http://localhost:${port_server}`);
+// });
+
+// _________________________start https server ___________________________________
+const https = require('https');
+const fs = require('fs');
+
+const https_options = {
+    ca: fs.readFileSync(path.join(__dirname, 'ca_bundle.crt')),
+    key: fs.readFileSync(path.join(__dirname, 'private.key')),
+    cert: fs.readFileSync(path.join(__dirname, 'certificate.crt'))
+};
+const httpsServer = https.createServer(https_options, app);
+global.socketIo = require('socket.io')(httpsServer, {
     cors: {
         origin: '*'
     }
+});
+httpsServer.listen(port_server, () => {
+    console.log(`App listening at https://localhost:${port_server}`);
 });
 
 socketIo.on('connection', function (socket) {
@@ -530,60 +586,6 @@ socketIo.on('connection', function (socket) {
     //     });
     // });
 });
-
-// Kiểm tra xem kết nối cơ sở dữ liệu đã thành công hay chưa
-(async () => {
-    try {
-        await db.sequelize.authenticate();
-        Logging.info('Database connection is ready.');
-        // Đồng bộ hóa model với cơ sở dữ liệu
-        await db.sequelize.sync();
-
-        // starting server
-        server.listen(port_server, () => {
-            Logging.info(`⚡️[server]: Server is running at http://localhost:${port_server}`);
-        });
-
-        // create connection between clientMqtt and server thourgh socket
-    } catch (error) {
-        console.error('Unable to connect to the database:', error);
-    }
-})();
-
-// force: true will drop the table if it already exists
-// db.sequelize
-//     .query('SET FOREIGN_KEY_CHECKS = 0')
-//     .then(function () {
-//         return db.sequelize.sync({ force: true });
-//     })
-//     .then(function () {
-//         return db.sequelize.query('SET FOREIGN_KEY_CHECKS = 1');
-//     })
-//     .then(
-//         function () {
-//             console.log('Drop and Resync Database with { force: true }');
-//             initialDataBase();
-//         },
-//         function (err) {
-//             console.log(err);
-//         }
-//     );
-
-// _________________________start https server ___________________________________
-// const https = require('https');
-// const fs = require('fs');
-
-// const https_options = {
-//     ca: fs.readFileSync(path.join(__dirname, 'ca_bundle.crt')),
-//     key: fs.readFileSync(path.join(__dirname, 'private.key')),
-//     cert: fs.readFileSync(path.join(__dirname, 'certificate.crt'))
-// };
-// const httpsServer = https.createServer(https_options, app);
-// var io = require("socket.io")(httpsServer);
-// httpsServer.listen(port_server, () => {
-//     console.log(`App listening at https://localhost:${port_server}`);
-// })
-
 import ApiTuya from './service/tuyaPlaform';
 const apiTuya = new ApiTuya();
 
@@ -600,7 +602,6 @@ var device_current = 1;
 
 // config connection mqtt broker
 import clientMqtt from './configs';
-import { tryCatch } from 'bullmq';
 
 // defined subscribe and publish topic
 const topic_pub = 'nhoc20170861/mqtt';
