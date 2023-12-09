@@ -1,286 +1,104 @@
+<div class='home-content'>
+    <div class='overview-boxes'>
+        <div class='box'>
+            <div class='right-side'>
+                <div class='box-topic'>Battery</div>
+                <div class='number' id='bat'>0</div>
 
-    <div class="home-content">
-        <div class="overview-boxes">
-            <div class="box">
-                <div class="right-side">
-                    <div class="box-topic">Battery</div>
-                    <div class="number" id="bat">0</div>
-
-                    <div class="indicator">
-                        <i class="bx bx-up-arrow-alt"></i>
-                        <span class="text" id="bat_log">Waiting for client update</span>
-                    </div>
+                <div class='indicator'>
+                    <i class='bx bx-up-arrow-alt'></i>
+                    <span class='text' id='bat_log'>Waiting for client update</span>
                 </div>
+            </div>
 
-                <i class="iconify data battery" data-icon="emojione:battery"></i>
-            </div>
-            <div class="box">
-                <div class="right-side">
-                    <div class="box-topic">PM2.5</div>
-                    <div class="number" id="pm2_5">0</div>
-                    <span> &#181;m/m3</span>
-                    <div class="indicator">
-                        <i class="bx bx-up-arrow-alt"></i>
-                        <span class="text" id="pm2_5_log">Waiting for client update</span>
-                    </div>
-                </div>
-                <img class="iconify data pm2_5" src="..//images/pm2_5.icon.png" alt="" />
-
-            </div>
-            <div class="box">
-                <div class="right-side">
-                    <div class="box-topic">Temperature</div>
-                    <div class="number" id="temp">0 </div>
-                    <div class="indicator">
-                        <i class="bx bx-up-arrow-alt"></i>
-                        <span class="text" id="temp_log">Waiting for client update</span>
-                    </div>
-                </div>
-                <i class="iconify data temperature" data-icon="fluent:temperature-24-filled"></i>
-            </div>
-            <div class="box">
-                <div class="right-side">
-                    <div class="box-topic">Humidity</div>
-                    <div class="number" id="humi">0</div>
-                    <div class="indicator">
-                        <i class="bx bx-up-arrow-alt"></i>
-                        <span class="text" id="humi_log">Waiting for client update</span>
-                    </div>
-                </div>
-                <i class="iconify data humidity" data-icon="iwwa:humidity"></i>
-
-            </div>
+            <i class='iconify data battery' data-icon='emojione:battery'></i>
         </div>
-        <div class="sales-boxes">
-            <div class="recent-sales box">
-                <div id="loader" class="loader" style="display: none;"></div>
-                <canvas id="weatherChart" width="647" height="323"
-                    style="display: block; box-sizing: border-box; height: 323px; width: 647px;"></canvas>
-
-            </div>
-            <style>
-                .loader,
-                .loader:after {
-                    border-radius: 50%;
-                    width: 10em;
-                    height: 10em;
-                }
-
-                .loader {
-                    margin: 60px auto;
-                    font-size: 10px;
-                    position: relative;
-                    text-indent: -9999em;
-                    border-top: 1.1em solid rgba(82, 0, 115, 0.2);
-                    border-right: 1.1em solid rgba(82, 0, 115, 0.2);
-                    border-bottom: 1.1em solid rgba(82, 0, 115, 0.2);
-                    border-left: 1.1em solid #520073;
-                    -webkit-transform: translateZ(0);
-                    -ms-transform: translateZ(0);
-                    transform: translateZ(0);
-                    -webkit-animation: load8 1.1s infinite linear;
-                    animation: load8 1.1s infinite linear;
-                }
-
-                #weatherChart {
-                    height: 80% !important;
-                    width: 95% !important;
-                    margin: 0 auto;
-                }
-            </style>
-            <div class="top-sales box">
-                <div class="title">Weather forecast</div>
-                <link rel="stylesheet" href="/css/dashboard/weather-box.css" />
-
-                <div class="main-content">
-                    <article class="widget">
-
-                        <div class="search-box">
-                            <form id="weatherLocation"><input placeholder="location..." type="text" />
-                                <button>Seach</button>
-
-                            </form>
-                        </div>
-                        <div class="weatherIcon">
-                            <i class="wi wi-day-cloudy"></i>
-                        </div>
-                        <div class="weatherInfo">
-                            <div class="weatherData">
-                                <div class="temperature"><span></span></div>
-                                <div class="humidity"><span></span></div>
-                            </div>
-                            <div class="description">
-                                <div class="weatherCondition"></div>
-                                <div class="place"></div>
-                            </div>
-                        </div>
-                        <div class="date"></div>
-                    </article>
+        <div class='box'>
+            <div class='right-side'>
+                <div class='box-topic'>PM2.5</div>
+                <div class='number' id='pm2_5'>0</div>
+                <span> &#181;m/m3</span>
+                <div class='indicator'>
+                    <i class='bx bx-up-arrow-alt'></i>
+                    <span class='text' id='pm2_5_log'>Waiting for client update</span>
                 </div>
             </div>
+            <img class='iconify data pm2_5' src='/images/pm2_5.icon.png' alt='' />
+
         </div>
-    <a href ="/dashboard/data" style="display: block; margin: 10px; padding-left: 20px">Back...</a>
+        <div class='box'>
+            <div class='right-side'>
+                <div class='box-topic'>Temperature</div>
+                <div class='number' id='temp'>0 </div>
+                <div class='indicator'>
+                    <i class='bx bx-up-arrow-alt'></i>
+                    <span class='text' id='temp_log'>Waiting for client update</span>
+                </div>
+            </div>
+            <i class='iconify data temperature' data-icon='fluent:temperature-24-filled'></i>
+        </div>
+        <div class='box'>
+            <div class='right-side'>
+                <div class='box-topic'>Humidity</div>
+                <div class='number' id='humi'>0</div>
+                <div class='indicator'>
+                    <i class='bx bx-up-arrow-alt'></i>
+                    <span class='text' id='humi_log'>Waiting for client update</span>
+                </div>
+            </div>
+            <i class='iconify data humidity' data-icon='iwwa:humidity'></i>
+
+        </div>
     </div>
-    
+    <div class='sales-boxes'>
+        <div class='recent-sales box'>
+            <div id='loader' class='loader' style='display: none;'></div>
+            <canvas id='weatherChart' width='647' height='323' style='display: block; box-sizing: border-box; height: 323px; width: 647px;'></canvas>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://js.pusher.com/4.0/pusher.min.js"></script>
-<script>
-    $(document).ready(function(){
-        if(!$("#data").hasClass('active')){
-            $("#data").addClass('active');
-        }
-    })
-</script>
-<script>
-    // Using IIFE for Implementing Module Pattern to keep the Local Space for the JS Variables
-    (function () {
-        // Enable pusher logging - don't include this in production
-        Pusher.logToConsole = true;
+        </div>
+        <style>
+            .loader, .loader:after { border-radius: 50%; width: 10em; height: 10em; } .loader { margin: 60px auto; font-size: 10px; position: relative; text-indent: -9999em; border-top: 1.1em solid
+            rgba(82, 0, 115, 0.2); border-right: 1.1em solid rgba(82, 0, 115, 0.2); border-bottom: 1.1em solid rgba(82, 0, 115, 0.2); border-left: 1.1em solid #520073; -webkit-transform:
+            translateZ(0); -ms-transform: translateZ(0); transform: translateZ(0); -webkit-animation: load8 1.1s infinite linear; animation: load8 1.1s infinite linear; } #weatherChart { height: 80%
+            !important; width: 95% !important; margin: 0 auto; }
+        </style>
+        <div class='top-sales box'>
+            <div class='title'>Weather forecast</div>
+            <link rel='stylesheet' href='/css/dashboard/weather-box.css' />
 
-        var serverUrl = "/",
-            members = [],
-            pusher = new Pusher('97de8deb68d2953718df', {
-                cluster: 'ap1',
-                encrypted: true
-            }),
-            channel, weatherChartRef;
+            <div class='main-content'>
+                <article class='widget'>
 
-        function showEle(elementId) {
-            document.getElementById(elementId).style.display = 'flex';
-        }
+                    <div class='search-box'>
+                        <form id='weatherLocation'><input placeholder='location...' type='text' />
+                            <button>Seach</button>
 
-        function hideEle(elementId) {
-            document.getElementById(elementId).style.display = 'none';
-        }
+                        </form>
+                    </div>
+                    <div class='weatherIcon'>
+                        <i class='wi wi-day-cloudy'></i>
+                    </div>
+                    <div class='weatherInfo'>
+                        <div class='weatherData'>
+                            <div class='temperature'><span></span></div>
+                            <div class='humidity'><span></span></div>
+                        </div>
+                        <div class='description'>
+                            <div class='weatherCondition'></div>
+                            <div class='place'></div>
+                        </div>
+                    </div>
+                    <div class='date'></div>
+                </article>
+            </div>
+        </div>
+    </div>
+    <a href='/v1/dashboard/data' style='display: block; margin: 10px; padding-left: 20px'>Back...</a>
+</div>
 
-        function ajax(url, method, payload, successCallback) {
-            var xhr = new XMLHttpRequest();
-            xhr.open(method, url, true);
-            xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState != 4 || xhr.status != 200) return;
-                successCallback(xhr.responseText);
-            };
-            xhr.send(JSON.stringify(payload));
-        }
+<script src='https://cdn.jsdelivr.net/npm/chart.js'></script>
+<script src='https://js.pusher.com/4.0/pusher.min.js'></script>
 
-
-        function renderWeatherChart(weatherData) {
-            var ctx = document.getElementById("weatherChart").getContext("2d");
-            var options = {};
-            weatherChartRef = new Chart(ctx, {
-                type: "line",
-                data: weatherData,
-                options: options
-            });
-        }
-
-        var chartConfig = {
-            labels: [],
-            datasets: [
-                {
-                    label: "AQI Index",
-                    fill: false,
-                    lineTension: 0.1,
-                    backgroundColor: "rgba(75,192,192,0.4)",
-                    borderColor: "rgba(75,192,192,1)",
-                    borderCapStyle: 'butt',
-                    borderDash: [],
-                    borderDashOffset: 0.0,
-                    borderJoinStyle: 'miter',
-                    pointBorderColor: "rgba(75,192,192,1)",
-                    pointBackgroundColor: "#fff",
-                    pointBorderWidth: 1,
-                    pointHoverRadius: 5,
-                    pointHoverBackgroundColor: "rgba(75,192,192,1)",
-                    pointHoverBorderColor: "rgba(220,220,220,1)",
-                    pointHoverBorderWidth: 2,
-                    pointRadius: 1,
-                    pointHitRadius: 10,
-                    data: [],
-                    spanGaps: false,
-                }
-            ]
-        };
-
-        ajax("/getDataSensor/1", "GET", {}, onFetchTempSuccess);
-
-        function onFetchTempSuccess(response) {
-            hideEle("loader");
-            var respData = JSON.parse(response);
-            console.log(respData)
-            chartConfig.labels = respData.dataPoints.map(dataPoint => dataPoint.time);
-            //chartConfig.labels.push(respData.humidity);
-            chartConfig.datasets[0].data = respData.dataPoints.map(dataPoint => dataPoint.value);
-            //chartConfig.datasets[0].data.push(respData.pm2_5);
-            renderWeatherChart(chartConfig)
-        }
-
-        channel = pusher.subscribe('device1-pm2_5-chart');
-        channel.bind('new-pm2_5', function (data) {
-            var newTempData = data.dataPoint;
-            console.log(newTempData);
-            if (weatherChartRef.data.labels.length > 15) {
-                weatherChartRef.data.labels.shift();
-                weatherChartRef.data.datasets[0].data.shift();
-            }
-            weatherChartRef.data.labels.push(newTempData.time);
-            weatherChartRef.data.datasets[0].data.push(newTempData.value);
-            weatherChartRef.update();
-        });
-
-        /* TEMP CODE FOR TESTING */
-        var dummyTime = 1500;
-        setInterval(function () {
-        
-            ajax("/addDataSensor/1" , "GET", {}, () => { });
-            
-        }, 5000);
-
-    })();
-</script>
-<script> 
-    const month = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    const day = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fir", "Sat"]
-    $(document).ready(function(){
-
-    /*socket.on("Server-sent-data", function (data) {
-        if (data.humi != 0)  {
-            $("#humi").text(data.humi + " %");
-            $("#humi_log").text(data.time);
-            $("#temp").text(data.temp + " " + String.fromCharCode(176));
-            $("#temp_log").text(data.time);
-            $("#pm2_5").text(data.pm2_5);
-            $("#pm2_5_log").text(data.time);
-            $("#bat").text(data.bat + " %");
-            $("#bat_log").text(data.time);
-        }
-     })*/
-        setInterval(async () => {
-            await socket.emit("device1-sent-data", "1");
-            await socket.on("Server-sent-device1", function (data) {
-                if (data.humidity != 0)  {
-                //Get time when recieve data
-                    let now = new Date(Date.now());
-                    let formatted = day[now.getDay()] + " " + now.getDate() + ", " + month[now.getMonth()]
-                    + "  " + now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
-                    data.time = formatted;
-                    $("#humi").text(data.humidity + " %");
-                    $("#humi_log").text(data.time);
-                    $("#temp").text(data.temperature + " " + String.fromCharCode(176));
-                    $("#temp_log").text(data.time);
-                    $("#pm2_5").text(data.pm2_5);
-                    $("#pm2_5_log").text(data.time);
-                    $("#bat").text(data.battery + " %");
-                    $("#bat_log").text(data.time);
-                }
-            });
-        }, 5000);
-    }) 
-
-
-      
-</script>
-<script src="https://code.iconify.design/2/2.1.2/iconify.min.js"></script>
-<script src="/script/weather.js"></script>
+<script src='https://code.iconify.design/2/2.1.2/iconify.min.js'></script>
+<script src='/script/weather.js'></script>
+<script src='/script/pusher.js'></script>

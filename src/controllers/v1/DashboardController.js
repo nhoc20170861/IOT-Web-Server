@@ -202,8 +202,9 @@ module.exports.getWeather = (req, res) => {
             const temperature = weatherData.main.temp;
             const humidity = weatherData.main.humidity;
             const description = weatherData.weather[0].description;
+            const cityName = weatherData.name + ', ' + weatherData.sys.country;
 
-            res.send({
+            return res.send({
                 temperature,
                 humidity,
                 description,

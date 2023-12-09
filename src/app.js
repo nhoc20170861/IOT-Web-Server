@@ -600,18 +600,15 @@ var device_current = 1;
 
 // config connection mqtt broker
 import clientMqtt from './configs';
+import { tryCatch } from 'bullmq';
 
 // defined subscribe and publish topic
 const topic_pub = 'nhoc20170861/mqtt';
 const topic_pub1 = 'nhoc20170861/lamp';
-var topic_sub_ar = ['nhoc20170861/data/device1', 'nhoc20170861/data/device2'];
 
 // subscribe topic
 clientMqtt.on('connect', () => {
     Logging.info('Client mqtt Connected');
-    clientMqtt.subscribe(topic_sub_ar, () => {
-        console.log(`Subscribe to topic '${topic_sub_ar}'`);
-    });
 });
 
 // console.log message received from mqtt broker
@@ -690,29 +687,42 @@ app.post('/dashboard/admin/deleteDevice', function (req, res) {
 });
 
 // create new device
-app.post('/dashboard/admin/createDevice', function (req, res) {
-    const { name_device, topic_device } = req.body;
-    if (!name_device || !topic_device) {
+app.post('/dashboard/admin/createDevice', async function (req, res) {
+    try {
+        const { name_device, topic_device } = req.body;
+        console.log('🚀 ~ file: app.js:697 ~ req.body;:', req.body);
+        if (!name_device || !topic_device) {
+            throw new Error('Invalid input');
+        }
+
+        const device = await Device.create({
+            deviceName: name_device,
+            topic: topic_device,
+            deviceType: 'default'
+        });
+
+        if (device) {
+            console.log('device id= ' + device.id);
+            let new_topic_sub = 'nhoc20170861' + device.topic;
+
+            clientMqtt.subscribe(new_topic_sub, () => {
+                console.log(`Subscribe to topic '${new_topic_sub}'`);
+            });
+
+            return res.send({
+                message: 'Create success, device witd id =' + device.id
+            });
+        } else {
+            throw new Error('Something is wrong');
+        }
+    } catch (error) {
+        console.log('🚀 ~ file: app.js:722 ~ error:', error.message);
         return res.send({
+            success: false,
+            errorCode: 500,
             message: 'Create not success'
         });
     }
-
-    Device.create({
-        name: name_device,
-        topic: topic_device
-    }).then((device) => {
-        console.log('device id= ' + device.id);
-        let new_topic_sub = 'nhoc20170861/data/device' + device.id;
-
-        clientMqtt.subscribe(new_topic_sub, () => {
-            console.log(`Subscribe to topic '${new_topic_sub}'`);
-        });
-
-        return res.send({
-            message: 'Create success, device witd id =' + device.id
-        });
-    });
 });
 
 const pusher = new Pusher({

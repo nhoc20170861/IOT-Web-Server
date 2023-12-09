@@ -1,30 +1,24 @@
+<div class='home-content'>
+    <p style='display: block; margin: 10px; padding: 10px 20px ; '>Select device you want to view</p>
+    <div class='overview-boxes'>
 
-
-    <div class="home-content">
-        <p style="display: block; margin: 10px; padding: 10px 20px ; ">Select device you want to view</p>
-        <div class="overview-boxes">
-         
-         {{#each list_devices}}
-            <div class="box">
-                <div class="right-side">
-                    <div class="box-topic">
-                        <a href= "data/device{{this.id}}"> <label>Device:  </label> <span>{{this.name}}</span>   </a>
+        {{#each list_devices}}
+            <div class='box'>
+                <div class='right-side'>
+                    <div class='box-topic'>
+                        <a href='data/device{{this.id}}'> <label>Device: </label> <span>{{this.deviceName}}</span> </a>
                     </div>
-                    <div class="number" id="bat">id:  {{this.id}}</div>
-                    <div class="indicator">
-                        <i class="bx bx-up-arrow-alt"></i>
-                        <span class="text" >topic: {{this.topic}}</span>
+                    <div class='number' id='bat'>id: {{this.id}}</div>
+                    <div class='indicator'>
+                        <i class='bx bx-up-arrow-alt'></i>
+                        <span class='text'>topic: {{this.topic}}</span>
                     </div>
                 </div>
             </div>
         {{/each}}
-         </div>
     </div>
+</div>
 
 <script>
-    $(document).ready(function(){
-        if(!$("#data").hasClass('active')){
-            $("#data").addClass('active');
-        }
-    })
+    $(document).ready(function(){ if(!$("#data").hasClass('active')){ $("#data").addClass('active'); } })
 </script>
