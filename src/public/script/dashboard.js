@@ -24,7 +24,7 @@ window.onclick = function (event) {
 };
 
 // var socket = io("https://localhost:8443"); // for https server
-var socket = io('http://localhost:3000'); // for http server
+var socket = io(); // for same doamin server
 var receive_data = {};
 
 $(document).ready(function () {
