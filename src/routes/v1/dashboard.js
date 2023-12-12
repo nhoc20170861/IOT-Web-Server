@@ -13,7 +13,7 @@ router.get('/data/:slug', [authJwt.verifyToken], dashboardController.getDataDeta
 router.get('/product', [authJwt.verifyToken], dashboardController.getProduct);
 router.get('/knowledge', [authJwt.verifyToken], dashboardController.getKnowledge);
 // router.get('/team', [authJwt.verifyToken], dashboardController.getTeam);
-router.get('/robot', [authJwt.verifyToken], dashboardController.getRobotGui);
+// router.get('/robot', [authJwt.verifyToken], dashboardController.getRobotGui);
 router.get('/controller', [authJwt.verifyToken], dashboardController.getController);
 router.post('/weather/show', dashboardController.getWeather);
 

@@ -34,6 +34,8 @@ global.GoalPoseArray = {};
 global.robotConfigs = {};
 // currentPose of all robot
 global.currentPose = {};
+// currentPath of all robot
+const pathGlobal = {};
 // monitor status of all robots
 global.statusOfAllRobots = {};
 global.statusOfAllRobots = {};
@@ -263,6 +265,14 @@ const allPositionGoals2 = [
             name: '/' + robotConfigs[key].robotName + '/amcl_pose',
             messageType: 'geometry_msgs/PoseWithCovarianceStamped'
         });
+
+        robotConfigs[key]['pathTopic'] = '/move_base_node/robot_global_plan';
+
+        robotConfigs[key]['pathGlobalTopic'] = new ROSLIB.Topic({
+            ros: ros,
+            name: '/' + robotConfigs[key].robotName + robotConfigs[key].pathTopic,
+            messageType: 'nav_msgs/Path'
+        });
         // xử lý event khi ros connected
         robotConfigs[key].rosWebsocket.on('connection', function () {
             Logging.info(`Connected to websocket ros ${robotConfigs[key].robotName} server`);
@@ -364,6 +374,11 @@ const allPositionGoals2 = [
                 }
                 currentPose[key] = response.pose.pose;
                 socketIo.emit(`currentPose`, { robotId: key, currentPose });
+            });
+
+            robotConfigs[key]['pathGlobalTopic'].subscribe(function (path) {
+                pathGlobal[key] = path;
+                socketIo.emit(`pathGlobalTopic`, { robotId: key, pathGlobal });
             });
         });
 

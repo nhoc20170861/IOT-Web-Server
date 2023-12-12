@@ -515,36 +515,36 @@ app.get('/autocannon', (req, res) => {
 // _________________________start http server ___________________________________
 // initialize Server and socket
 const port_server = SERVER_PORT;
-// const server = require('http').Server(app);
-// // create global socketIo
-// global.socketIo = require('socket.io')(server, {
-//     cors: {
-//         origin: '*'
-//     }
-// });
-// // starting server
-// server.listen(port_server, () => {
-//     Logging.info(`⚡️[server]: Server is running at http://localhost:${port_server}`);
-// });
-
-// _________________________start https server ___________________________________
-const https = require('https');
-const fs = require('fs');
-
-const https_options = {
-    ca: fs.readFileSync(path.join(__dirname, 'ca_bundle.crt')),
-    key: fs.readFileSync(path.join(__dirname, 'private.key')),
-    cert: fs.readFileSync(path.join(__dirname, 'certificate.crt'))
-};
-const httpsServer = https.createServer(https_options, app);
-global.socketIo = require('socket.io')(httpsServer, {
+const server = require('http').Server(app);
+// create global socketIo
+global.socketIo = require('socket.io')(server, {
     cors: {
         origin: '*'
     }
 });
-httpsServer.listen(port_server, () => {
-    console.log(`App listening at https://localhost:${port_server}`);
+// starting server
+server.listen(port_server, () => {
+    Logging.info(`⚡️[server]: Server is running at http://localhost:${port_server}`);
 });
+
+// _________________________start https server ___________________________________
+// const https = require('https');
+// const fs = require('fs');
+
+// const https_options = {
+//     ca: fs.readFileSync(path.join(__dirname, 'ca_bundle.crt')),
+//     key: fs.readFileSync(path.join(__dirname, 'private.key')),
+//     cert: fs.readFileSync(path.join(__dirname, 'certificate.crt'))
+// };
+// const httpsServer = https.createServer(https_options, app);
+// global.socketIo = require('socket.io')(httpsServer, {
+//     cors: {
+//         origin: '*'
+//     }
+// });
+// httpsServer.listen(8443, () => {
+//     console.log(`App listening at https://localhost:8443`);
+// });
 
 socketIo.on('connection', function (socket) {
     Logging.info('🚀 New socket client connected ' + socket.id);
