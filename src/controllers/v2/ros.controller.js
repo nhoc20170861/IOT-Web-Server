@@ -269,7 +269,7 @@ const allPositionGoals2 = [
         robotConfigs[key]['pathTopic'] = '/move_base_node/robot_global_plan';
 
         robotConfigs[key]['pathGlobalTopic'] = new ROSLIB.Topic({
-            ros: ros,
+            ros: robotConfigs[key].rosWebsocket,
             name: '/' + robotConfigs[key].robotName + robotConfigs[key].pathTopic,
             messageType: 'nav_msgs/Path'
         });
