@@ -395,7 +395,7 @@ const allPositionGoals2 = [
         //Auto Reconnection for roslibjsx
         setInterval(function () {
             robotConfigs[key].rosWebsocket.connect(websocket);
-        }, 4000);
+        }, 60 * 1000);
     });
 })();
 

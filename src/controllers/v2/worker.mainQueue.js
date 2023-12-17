@@ -23,7 +23,7 @@ export const myWorker = new Worker(
         for (const key in queueRobots) {
             // console.log(key);
             const checkkQueue = await queueRobots[key].isPaused();
-            if (!checkkQueue) {
+            if (!checkkQueue && robotConfigs[key].isConnected) {
                 queueRobotsFree.push(key);
                 //break;
             }
