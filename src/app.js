@@ -452,7 +452,7 @@ app.use(
 app.use(express.static(path.join(__dirname, 'public')));
 
 // create dashboard mainQueue
-import { mainQueue, queueEsp, queueRobots, queueBacklog } from './controllers/v2/bullmq.js';
+import { mainQueue, queueEsp, queueBacklog } from './controllers/v2/bullmq.js';
 const serverAdapter = new ExpressAdapter();
 serverAdapter.setBasePath('/queueDashBoard');
 const queueAdapter = new BullMQAdapter(mainQueue, { allowRetries: true, readOnlyMode: false });

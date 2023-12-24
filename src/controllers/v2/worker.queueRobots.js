@@ -1,11 +1,13 @@
-import { Worker } from 'bullmq';
+import { Worker, Queue } from 'bullmq';
 import Logging from '../../library/Logging';
-import { mainQueue, queueEsp, queueRobots, addTaskToQueue, addTaskToQueueEsp } from './bullmq';
 import utilsFunction from './utils.function';
 // import module handle database
 const db = require('../../models');
 const Task = db.Task;
 const SubTask = db.SubTask;
+// initialize queueRobots
+global.queueRobots = {};
+global.myWorkerRobots = {};
 // calculate poseArray and send to robot
 async function calculatePoseArrayAndSend(orderPath, nameRobotWillCall) {
     let poseArray = [];
@@ -34,10 +36,19 @@ async function calculatePoseArrayAndSend(orderPath, nameRobotWillCall) {
 
     TargetGoal.publish(targetGoalMessage);
 }
-const myWorkerRobots = {};
-async function createWorkerRobots() {
-    for (const key in queueRobots) {
+
+async function createQueueRobots(key) {
+    if (!queueRobots.hasOwnProperty(key)) {
+        queueRobots[key] = new Queue(key, {
+            connection: {
+                host: 'localhost',
+                port: 6379
+            }
+        });
+
         await queueRobots[key].resume();
+    }
+    if (!myWorkerRobots.hasOwnProperty(key)) {
         myWorkerRobots[key] = new Worker(
             key,
             async (job) => {
@@ -108,7 +119,17 @@ async function createWorkerRobots() {
             console.error(err.message);
         });
     }
-}
-createWorkerRobots();
 
-export default myWorkerRobots;
+    console.log('RobotController ~ .then ~ queueRobots:', Object.keys(queueRobots));
+    console.log('robotController ~ .then ~ myWorkerRobots:', Object.keys(myWorkerRobots));
+}
+async function removeQueueRobot(robotId) {
+    queueRobots[robotId] = null;
+    delete queueRobots[robotId];
+    console.log(queueRobots);
+    myWorkerRobots[robotId] = null;
+    delete myWorkerRobots[robotId];
+    console.log('RobotController ~ .then ~ queueRobots:', Object.keys(queueRobots));
+    console.log('robotController ~ .then ~ myWorkerRobots:', Object.keys(myWorkerRobots));
+}
+export { createQueueRobots, removeQueueRobot };

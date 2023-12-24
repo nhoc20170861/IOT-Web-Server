@@ -1,6 +1,6 @@
 import { Worker } from 'bullmq';
 import Logging from '../../library/Logging';
-import { queueRobots, addTaskToQueueBackLog } from './bullmq';
+import { addTaskToQueueBackLog } from './bullmq';
 import utilsFunction from './utils.function';
 // import module handle database
 const db = require('../../models');
@@ -20,6 +20,8 @@ export const myWorker = new Worker(
         });
         console.log('🚀 ~ file: worker.mainQueue.js:23 ~ listRobotFree:', listRobotFree);
         let queueRobotsFree = [];
+
+        console.log('🚀 ~ file: worker.mainQueue.js:25 ~ queueRobots:', Object.keys(queueRobots));
         for (const key in queueRobots) {
             // console.log(key);
             const checkkQueue = await queueRobots[key].isPaused();

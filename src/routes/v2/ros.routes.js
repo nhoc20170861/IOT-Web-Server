@@ -50,4 +50,5 @@ router.post('/robot/:robotId/state/toggle-state', rosController.callServiceToggl
 router.post('/robot/:robotId/state/set-state', rosController.callServiceSetState);
 router.get('/robot/:robotId/state/get-state', rosController.callServiceGetState);
 router.post('/robot/:robotId/activeGoalAgain', rosController.callServiceActiveGoalAgain);
+router.post('/robot/:robotId/connected', rosController.registerRobot);
 export default router;

@@ -1,17 +1,6 @@
 import { Queue, Worker } from 'bullmq';
 import Logging from '../../library/Logging';
 
-// initialize queueRobots
-const queueRobots = {};
-for (let i = 1; i <= 4; i++) {
-    queueRobots[`mir${i}`] = new Queue(`mir${i}`, {
-        connection: {
-            host: 'localhost',
-            port: 6379
-        }
-    });
-}
-
 const mainQueue = new Queue('taskQueue', {
     connection: {
         host: 'localhost',
@@ -141,4 +130,4 @@ myWorkerQueueMessage.on('error', (err) => {
     // log the error
     console.error(err.message);
 });
-export { queueRobots, queueBacklog, mainQueue, queueEsp, queueMessage, addTaskToQueue, addTaskToQueueEsp, addTaskToQueueBackLog, addtaskToQueueMessage };
+export { queueBacklog, mainQueue, queueEsp, queueMessage, addTaskToQueue, addTaskToQueueEsp, addTaskToQueueBackLog, addtaskToQueueMessage };
