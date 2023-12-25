@@ -18,7 +18,7 @@ async function calculatePoseArrayAndSend(orderPath, nameRobotWillCall) {
     });
 
     let lastEle = poseArray.pop();
-    poseArray.push(GoalPoseArray['point_8']); // thêm điểm trung gian
+    // poseArray.push(GoalPoseArray['point_8']); // thêm điểm trung gian
     poseArray.push(lastEle);
 
     const TargetGoal = new ROSLIB.Topic({

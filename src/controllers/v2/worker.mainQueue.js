@@ -208,19 +208,19 @@ export const myWorker = new Worker(
                 /**
                  *  Algorthm nCar
                  */
-                // const result = utilsFunction.nCar(originOrderPath, 15, data);
+                const result = utilsFunction.nCar(originOrderPath, maxCapacityEachRobot, data);
 
                 /**
                  *  Google Or-tools API for JAVA
                  */
-                const response = await fetch('http://localhost:8080/vehicleCapacity', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                });
-                const result = await response.json();
+                // const response = await fetch('http://localhost:8080/vehicleCapacity', {
+                //     method: 'POST',
+                //     headers: {
+                //         'Content-Type': 'application/json'
+                //     },
+                //     body: JSON.stringify(data)
+                // });
+                // const result = await response.json();
                 console.log('🚀result CVRP:', result);
 
                 if (!result.error) {

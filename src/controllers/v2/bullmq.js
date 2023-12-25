@@ -1,6 +1,6 @@
 import { Queue, Worker } from 'bullmq';
 import Logging from '../../library/Logging';
-
+import { removeQueueRobot } from './worker.queueRobots';
 const mainQueue = new Queue('taskQueue', {
     connection: {
         host: 'localhost',
@@ -62,14 +62,15 @@ const addTaskToQueueBackLog = async function (data) {
 };
 
 const addtaskToQueueMessage = async function (data) {
-    const { robotId, activeGoalAgain, indexCurrentGoal } = data;
-    const job = await queueMessage.add(`${indexCurrentGoal}_${robotId}_${Math.random(0, 1)}`, data, {
+    const robotId  = data.robotId;
+    console.log("🚀 ~ file: bullmq.js:66 ~ addtaskToQueueMessage ~ data:", data)
+    const job = await queueMessage.add(`${robotId}_${Math.random(0, 1)}`, data, {
         attempts: 0,
         backoff: {
             type: 'exponential',
             delay: 5000
         },
-        delay: 8000
+        delay: 5000
     });
     return job;
 };
@@ -84,31 +85,42 @@ const queueMessage = new Queue('queueMessage', {
 export const myWorkerQueueMessage = new Worker(
     'queueMessage',
     async (job) => {
-        console.log(`wroker process job `, job.data);
-        const robotKey = job.data.robotId;
-        const serviceClient = new ROSLIB.Service({
-            ros: robotConfigs[robotKey].rosWebsocket,
-            name: `/${robotKey}/move_base_sequence/activeGoalAgain`,
-            serviceType: 'move_base_sequence/activeGoalAgain'
-        });
+        const { robotId, messageType } = job.data;
+        if (messageType === '1') {
+            const serviceClient = new ROSLIB.Service({
+                ros: robotConfigs[robotId].rosWebsocket,
+                name: `/${robotId}/move_base_sequence/activeGoalAgain`,
+                serviceType: 'move_base_sequence/activeGoalAgain'
+            });
 
-        const request = new ROSLIB.ServiceRequest({ activeGoalAgain: false });
-        try {
-            serviceClient.callService(
-                request,
-                function (result) {
-                    console.log('Result for service call on ' + serviceClient.name + ': ' + JSON.stringify(result));
-                    if (result.goalIndex == job.data.indexCurrentGoal) {
-                        return result;
+            const request = new ROSLIB.ServiceRequest({ activeGoalAgain: false });
+            try {
+                serviceClient.callService(
+                    request,
+                    function (result) {
+                        console.log('Result for service call on ' + serviceClient.name + ': ' + JSON.stringify(result));
+                        if (result.goalIndex == job.data.indexCurrentGoal) {
+                            return result;
+                        }
+                    },
+                    (error) => {
+                        const msg = error.message || "Call service fail"
+                        console.log(": bullmq.js:108 ~ msg:", msg)
                     }
-                },
-                (error) => {
-                    console.log('🚀 ~ file: bullmq.js:117 ~ error:', error.message);
-                    throw new Error(error.message);
+                );
+            } catch (error) {
+                throw new Error('Error Active Goal Again');
+            }
+        } else {
+            try {
+                if (robotConfigs.hasOwnProperty(robotId)) {
+                    robotConfigs[robotId] = null;
+                    delete robotConfigs[robotId];
                 }
-            );
-        } catch (error) {
-            throw new Error('Error Active Goal Again');
+                if (queueRobots.hasOwnProperty(robotId)) removeQueueRobot(robotId);
+            } catch (error) {
+                console.log('robotController ~ .then ~ error:', error.message);
+            }
         }
     },
     {
@@ -120,11 +132,11 @@ export const myWorkerQueueMessage = new Worker(
     }
 );
 myWorkerQueueMessage.on('completed', (job, value) => {
-    Logging.info(`${job.data.robotId}: Completed job with jobId ${job.id}, ${JSON.stringify(value)}`);
+    Logging.info(`myWorkerQueueMessage: Completed job with jobId ${job.id} with ${job.data.robotId}`);
 });
 
 myWorkerQueueMessage.on('failed', (job, err) => {
-    Logging.warning(`${job.data.robotId}: Job ${job.id} failided with error: ${err.message} and retry with ${job.attemptsMade}`);
+    Logging.warning(`myWorkerQueueMessage: Job ${job.id} failided with error: ${err.message} and retry with ${job.attemptsMade}`);
 });
 myWorkerQueueMessage.on('error', (err) => {
     // log the error

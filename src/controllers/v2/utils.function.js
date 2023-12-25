@@ -106,7 +106,7 @@ function createRoutePath(previousSubTaskList, robotId) {
             newSubTaskList.unshift({ targetName: robotConfigs[robotId].currentGoal, cargoVolume: 0, isDone: false });
         }
     }
-    // console.log('🚀 ~ file: utils.function.js:90 ~ createRoutePath ~ newSubTaskList:', newSubTaskList);
+    console.log('🚀 ~ file: utils.function.js:90 ~ createRoutePath ~ newSubTaskList:', newSubTaskList);
     return newSubTaskList;
 }
 

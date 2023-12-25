@@ -15,6 +15,7 @@ const { BullMQAdapter } = require('@bull-board/api/bullMQAdapter');
 const { ExpressAdapter } = require('@bull-board/express');
 import { SERVER_PORT } from './configs';
 import Logging from './library/Logging';
+import {ParseFloat} from './controllers/v2/ros.controller'
 // connect db mysql
 import db from './models';
 
@@ -359,6 +360,27 @@ async function initialDataBase() {
             robotName: 'mir4',
             robotType: 'Mir100',
             initPoint: 'home_4',
+            ip: '192.168.1.117',
+            portWebSocket: 9090
+        },
+        {
+            robotName: 'tb3_0',
+            robotType: 'Mir100',
+            initPoint: 'home_1',
+            ip: '192.168.1.117',
+            portWebSocket: 9090
+        },
+        {
+            robotName: 'tb3_1',
+            robotType: 'Mir100',
+            initPoint: 'home_2',
+            ip: '192.168.1.117',
+            portWebSocket: 9090
+        },
+        {
+            robotName: 'tb3_2',
+            robotType: 'Mir100',
+            initPoint: 'home_3',
             ip: '192.168.1.117',
             portWebSocket: 9090
         }
