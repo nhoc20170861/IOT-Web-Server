@@ -15,7 +15,7 @@ const { BullMQAdapter } = require('@bull-board/api/bullMQAdapter');
 const { ExpressAdapter } = require('@bull-board/express');
 import { SERVER_PORT } from './configs';
 import Logging from './library/Logging';
-import {ParseFloat} from './controllers/v2/ros.controller'
+import { ParseFloat } from './controllers/v2/ros.controller';
 // connect db mysql
 import db from './models';
 
