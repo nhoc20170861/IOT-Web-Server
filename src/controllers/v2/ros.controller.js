@@ -331,7 +331,7 @@ class RobotController {
             allTaskQueues[key] = robotConfigs[key].taskQueue;
         });
         Object.keys(statusOfAllRobots).forEach((key) => {
-            statusOfAllRobots[key] = 'free';
+            if (robotConfigs.isConnected) statusOfAllRobots[key] = 'free';
         });
 
         for (const key in queueRobots) {
@@ -353,6 +353,7 @@ class RobotController {
                 allTaskQueues[key] = robotConfigs[key].taskQueue;
             }
         });
+        allTaskQueues = utilsFunction.sortObject(allTaskQueues);
         console.log('🚀 RobotController ~ allTaskQueues:', allTaskQueues);
         return res.status(200).json({
             success: true,
@@ -373,12 +374,12 @@ class RobotController {
     // [GET] /robot/getRobotConfigs
     getRobotConfigs = function (req, res) {
         Logging.debug('🚀 ~ ~ getRobotConfigs');
-        const robotConfigsFilter = {};
+        var robotConfigsFilter = {};
         // console.log('🚀 ~ file: ros.controller.js:497 ~ RobotController ~ Object.keys ~ robotConfigs:', robotConfigs);
         Object.keys(robotConfigs).forEach((key) => {
             robotConfigsFilter[key] = { robotName: key, isConnected: robotConfigs[key].isConnected };
         });
-
+        robotConfigsFilter = utilsFunction.sortObject(robotConfigsFilter);
         return res.status(200).json({
             success: true,
             message: 'Get Robot Configs successfully',
@@ -993,10 +994,10 @@ async function createRobotInstance(robot, key, initPoint) {
         Logging.info(`Robot disconnect ${robotConfigs[key].robotName} through websocket`);
         robotConfigs[key].isConnected = false;
         statusOfAllRobots[key] = 'disconnected';
-        const newJob = await addtaskToQueueMessage({
-            messageType: '2', // remove robot
-            robotId: key
-        });
+        // const newJob = await addtaskToQueueMessage({
+        //     messageType: '2', // remove robot
+        //     robotId: key
+        // });
     });
 
     robotConfigs[key].rosWebsocket.on('error', function (error) {

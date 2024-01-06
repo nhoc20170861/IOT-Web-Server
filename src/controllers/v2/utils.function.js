@@ -469,6 +469,20 @@ function nCar(V, C, dataCVRP) {
     }
 }
 
+function sortObject(obj) {
+    let sorted = {};
+    let str = [];
+    let key;
+    sorted = Object.keys(obj)
+        .sort()
+        .reduce((accumulator, key) => {
+            accumulator[key] = obj[key];
+
+            return accumulator;
+        }, {});
+    return sorted;
+}
+
 const utilsFunction = {
     nCar,
     tspDynamicProgramming,
@@ -484,7 +498,8 @@ const utilsFunction = {
     createOptimalOrderPath,
     calculateTotalDistance,
     createRoutePath,
-    waitforme
+    waitforme,
+    sortObject
 };
 
 export default utilsFunction;

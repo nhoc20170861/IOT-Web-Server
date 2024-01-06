@@ -62,8 +62,8 @@ const addTaskToQueueBackLog = async function (data) {
 };
 
 const addtaskToQueueMessage = async function (data) {
-    const robotId  = data.robotId;
-    console.log("🚀 ~ file: bullmq.js:66 ~ addtaskToQueueMessage ~ data:", data)
+    const robotId = data.robotId;
+    console.log('🚀 ~ file: bullmq.js:66 ~ addtaskToQueueMessage ~ data:', data);
     const job = await queueMessage.add(`${robotId}_${Math.random(0, 1)}`, data, {
         attempts: 0,
         backoff: {
@@ -104,8 +104,8 @@ export const myWorkerQueueMessage = new Worker(
                         }
                     },
                     (error) => {
-                        const msg = error.message || "Call service fail"
-                        console.log(": bullmq.js:108 ~ msg:", msg)
+                        const msg = error.message || 'Call service fail';
+                        console.log(': bullmq.js:108 ~ msg:', msg);
                     }
                 );
             } catch (error) {
