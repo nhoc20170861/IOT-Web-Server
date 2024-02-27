@@ -507,7 +507,15 @@ app.get('/autocannon', (req, res) => {
         await db.sequelize.authenticate();
         Logging.info('Database connection is ready.');
         // Đồng bộ hóa model với cơ sở dữ liệu
-        await db.sequelize.sync();
+        await db.sequelize
+            .sync()
+            .then(() => {
+                console.log('Created new table successfully!');
+                initialDataBase();
+            })
+            .catch((error) => {
+                console.error('Unable to create table : ', error);
+            });
 
         // create connection between clientMqtt and server thourgh socket
     } catch (error) {

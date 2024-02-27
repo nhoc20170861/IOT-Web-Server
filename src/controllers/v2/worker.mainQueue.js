@@ -24,8 +24,9 @@ export const myWorker = new Worker(
         console.log('🚀 ~ file: worker.mainQueue.js:25 ~ queueRobots:', Object.keys(queueRobots));
         for (const key in queueRobots) {
             // console.log(key);
-            const checkkQueue = await queueRobots[key].isPaused();
-            if (!checkkQueue && robotConfigs[key].isConnected) {
+            const checkQueue = await queueRobots[key].isPaused();
+            //if (!checkkQueue && robotConfigs[key].isConnected) {
+            if (!checkQueue) {
                 queueRobotsFree.push(key);
                 //break;
             }
@@ -208,19 +209,19 @@ export const myWorker = new Worker(
                 /**
                  *  Algorthm nCar
                  */
-                const result = utilsFunction.nCar(originOrderPath, maxCapacityEachRobot, data);
+                // const result = utilsFunction.nCar(originOrderPath, maxCapacityEachRobot, data);
 
                 /**
                  *  Google Or-tools API for JAVA
                  */
-                // const response = await fetch('http://localhost:8080/vehicleCapacity', {
-                //     method: 'POST',
-                //     headers: {
-                //         'Content-Type': 'application/json'
-                //     },
-                //     body: JSON.stringify(data)
-                // });
-                // const result = await response.json();
+                const response = await fetch('http://localhost:8080/vehicleCapacity', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
                 console.log('🚀result CVRP:', result);
 
                 if (!result.error) {
