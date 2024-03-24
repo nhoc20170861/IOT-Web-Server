@@ -1,10 +1,10 @@
 import { Worker } from 'bullmq';
-import Logging from '../../library/Logging';
-import { queueRobots, mainQueue, addTaskToQueue, queueBacklog } from './bullmq';
+import Logging from '../../../library/Logging';
+import { queueRobots, mainQueue, addTaskToQueue, queueBacklog } from './initMsgQueue';
 import utilsFunction from './utils.function';
 import { delay } from 'lodash';
 // import module handle database
-const db = require('../../models');
+const db = require('../../../models');
 const Task = db.Task;
 const SubTask = db.SubTask;
 

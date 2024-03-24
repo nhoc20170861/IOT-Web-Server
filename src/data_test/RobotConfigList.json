@@ -1,0 +1,51 @@
+[
+    {
+        "robotName": "mir1",
+        "robotType": "Mir100",
+        "initPoint": "home_1",
+        "ip": "192.168.1.117",
+        "portWebSocket": 9090
+    },
+    {
+        "robotName": "mir2",
+        "robotType": "Mir100",
+        "initPoint": "home_2",
+        "ip": "192.168.1.117",
+        "portWebSocket": 9090
+    },
+    {
+        "robotName": "mir3",
+        "robotType": "Mir100",
+        "initPoint": "home_3",
+        "ip": "192.168.1.117",
+        "portWebSocket": 9090
+    },
+    {
+        "robotName": "mir4",
+        "robotType": "Mir100",
+        "initPoint": "home_4",
+        "ip": "192.168.1.117",
+        "portWebSocket": 9090
+    },
+    {
+        "robotName": "tb3_0",
+        "robotType": "Mir100",
+        "initPoint": "home_1",
+        "ip": "192.168.1.117",
+        "portWebSocket": 9090
+    },
+    {
+        "robotName": "tb3_1",
+        "robotType": "Mir100",
+        "initPoint": "home_2",
+        "ip": "192.168.1.117",
+        "portWebSocket": 9090
+    },
+    {
+        "robotName": "tb3_2",
+        "robotType": "Mir100",
+        "initPoint": "home_3",
+        "ip": "192.168.1.117",
+        "portWebSocket": 9090
+    }
+]

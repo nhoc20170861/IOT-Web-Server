@@ -5,17 +5,15 @@ import dotenv from 'dotenv';
 dotenv.config();
 import cors from 'cors';
 import express from 'express';
+const spdy = require('spdy');
 import session from 'express-session';
-import Pusher from 'pusher';
 import cookieParser from 'cookie-parser';
+const fs = require('fs');
 import helmet from 'helmet';
 const { authJwt } = require('./middlewares');
-const { createBullBoard } = require('@bull-board/api');
-const { BullMQAdapter } = require('@bull-board/api/bullMQAdapter');
-const { ExpressAdapter } = require('@bull-board/express');
-import { SERVER_PORT } from './configs';
+
 import Logging from './library/Logging';
-import { ParseFloat } from './controllers/v2/ros.controller';
+
 // connect db mysql
 import db from './models';
 
@@ -29,362 +27,6 @@ async function initialDataBase() {
     /**
      * @brief bộ dữ liệu cho Mir
      */
-    const allPositionGoalMir = [
-        {
-            pointName: 'home_1',
-            pointType: 'Home Point',
-            xCoordinate: 0.0,
-            yCoordinate: 10.0,
-            theta: -1.57,
-            mapId: 1
-        },
-        {
-            pointName: 'home_2',
-            pointType: 'Home Point',
-            xCoordinate: 1.0,
-            yCoordinate: 10.0,
-            theta: -1.57,
-            mapId: 1
-        },
-        {
-            pointName: 'home_3',
-            pointType: 'Home Point',
-            xCoordinate: -1.0,
-            yCoordinate: 10,
-            theta: -1.57,
-            mapId: 1
-        },
-        {
-            pointName: 'home_4',
-            pointType: 'Home Point',
-            xCoordinate: -3.0,
-            yCoordinate: 10,
-            theta: -1.57,
-            mapId: 1
-        },
-        {
-            pointName: 'point_1',
-            pointType: 'Goal point',
-            xCoordinate: 5.0,
-            yCoordinate: -10.0,
-            theta: -1.57,
-            mapId: 1
-        },
-        {
-            pointName: 'point_2',
-            pointType: 'Goal Point',
-            xCoordinate: 5.0,
-            yCoordinate: -23.0,
-            theta: -1.57,
-            mapId: 1
-        },
-        {
-            pointName: 'point_3',
-            pointType: 'Goal Point',
-            xCoordinate: -5.0,
-            yCoordinate: -23.0,
-            theta: 1.57,
-            mapId: 1
-        },
-        {
-            pointName: 'point_4',
-            pointType: 'Goal Point',
-            xCoordinate: -5.0,
-            yCoordinate: -10.0,
-            theta: 1.57,
-            mapId: 1
-        },
-        {
-            pointName: 'point_5',
-            pointType: 'Goal Point',
-            xCoordinate: -5.0,
-            yCoordinate: 7.8,
-            theta: 1.57,
-            mapId: 1
-        },
-        {
-            pointName: 'point_6',
-            pointType: 'Goal Point',
-            xCoordinate: 5.0,
-            yCoordinate: 7.8,
-            theta: 1.57,
-            mapId: 1
-        },
-        {
-            pointName: 'point_7',
-            pointType: 'Goal Point',
-            xCoordinate: 0.0,
-            yCoordinate: -15,
-            theta: 3.14,
-            mapId: 1
-        },
-        {
-            pointName: 'point_8',
-            pointType: 'Goal Point',
-            xCoordinate: 0.5,
-            yCoordinate: 12.5,
-            theta: 0,
-            mapId: 1
-        }
-        // {
-        //     pointName: 'ortool_0',
-        //     pointType: 'Home Point',
-        //     xCoordinate: 456,
-        //     yCoordinate: 320,
-        //     theta: 0,
-        //     mapId: 1
-        // },
-        // {
-        //     pointName: 'ortool_1',
-        //     pointType: 'Location',
-        //     xCoordinate: 228,
-        //     yCoordinate: 0,
-        //     theta: 0,
-        //     mapId: 1
-        // },
-        // {
-        //     pointName: 'ortool_2',
-        //     pointType: 'Location',
-        //     xCoordinate: 912,
-        //     yCoordinate: 0,
-        //     theta: 0,
-        //     mapId: 1
-        // },
-        // {
-        //     pointName: 'ortool_3',
-        //     pointType: 'Location',
-        //     xCoordinate: 0,
-        //     yCoordinate: 80,
-        //     theta: 0,
-        //     mapId: 1
-        // },
-        // {
-        //     pointName: 'ortool_4',
-        //     pointType: 'Location',
-        //     xCoordinate: 114,
-        //     yCoordinate: 80,
-        //     theta: 0,
-        //     mapId: 1
-        // },
-        // {
-        //     pointName: 'ortool_5',
-        //     pointType: 'Location',
-        //     xCoordinate: 570,
-        //     yCoordinate: 160,
-        //     theta: 0,
-        //     mapId: 1
-        // },
-        // {
-        //     pointName: 'ortool_6',
-        //     pointType: 'Location',
-        //     xCoordinate: 798,
-        //     yCoordinate: 160,
-        //     theta: 0,
-        //     mapId: 1
-        // },
-        // {
-        //     pointName: 'ortool_7',
-        //     pointType: 'Location',
-        //     xCoordinate: 342,
-        //     yCoordinate: 240,
-        //     theta: 0,
-        //     mapId: 1
-        // },
-        // {
-        //     pointName: 'ortool_8',
-        //     pointType: 'Location',
-        //     xCoordinate: 684,
-        //     yCoordinate: 240,
-        //     theta: 0,
-        //     mapId: 1
-        // },
-        // {
-        //     pointName: 'ortool_9',
-        //     pointType: 'Location',
-        //     xCoordinate: 570,
-        //     yCoordinate: 400,
-        //     theta: 0,
-        //     mapId: 1
-        // },
-        // {
-        //     pointName: 'ortool_10',
-        //     pointType: 'Location',
-        //     xCoordinate: 912,
-        //     yCoordinate: 400,
-        //     theta: 0,
-        //     mapId: 1
-        // },
-        // {
-        //     pointName: 'ortool_11',
-        //     pointType: 'Location',
-        //     xCoordinate: 114,
-        //     yCoordinate: 480,
-        //     theta: 0,
-        //     mapId: 1
-        // },
-        // {
-        //     pointName: 'ortool_12',
-        //     pointType: 'Location',
-        //     xCoordinate: 228,
-        //     yCoordinate: 480,
-        //     theta: 0,
-        //     mapId: 1
-        // },
-        // {
-        //     pointName: 'ortool_13',
-        //     pointType: 'Location',
-        //     xCoordinate: 342,
-        //     yCoordinate: 560,
-        //     theta: 0,
-        //     mapId: 1
-        // },
-        // {
-        //     pointName: 'ortool_14',
-        //     pointType: 'Location',
-        //     xCoordinate: 684,
-        //     yCoordinate: 560,
-        //     theta: 0,
-        //     mapId: 1
-        // },
-        // {
-        //     pointName: 'ortool_15',
-        //     pointType: 'Location',
-        //     xCoordinate: 0,
-        //     yCoordinate: 640,
-        //     theta: 0,
-        //     mapId: 1
-        // },
-        // {
-        //     pointName: 'ortool_16',
-        //     pointType: 'Location',
-        //     xCoordinate: 798,
-        //     yCoordinate: 640,
-        //     theta: 0,
-        //     mapId: 1
-        // }
-    ];
-
-    /**
-     * @brief bộ dữ liệu cho Turtelbot3 map house
-     */
-    const allPositionGoals2 = [
-        {
-            pointName: 'point_1',
-            pointType: 'Goal point',
-            xCoordinate: -4.06,
-            yCoordinate: 3.5,
-            theta: 0,
-            mapId: 2
-        },
-        {
-            pointName: 'point_2',
-            pointType: 'Goal Point',
-            xCoordinate: -4.05,
-            yCoordinate: 1.1,
-            theta: 0,
-            mapId: 2
-        },
-        {
-            pointName: 'point_3',
-            pointType: 'Goal Point',
-            xCoordinate: 0.47,
-            yCoordinate: 0.32,
-            theta: 0,
-            mapId: 2
-        },
-        {
-            pointName: 'point_4',
-            pointType: 'Goal Point',
-            xCoordinate: 4.63,
-            yCoordinate: 3.7,
-            theta: 0,
-            mapId: 2
-        },
-        {
-            pointName: 'point_5',
-            pointType: 'Goal Point',
-            xCoordinate: 4.55,
-            yCoordinate: 0.74,
-            theta: 0,
-            mapId: 2
-        },
-        {
-            pointName: 'home_1',
-            pointType: 'Home Point',
-            xCoordinate: -6.62,
-            yCoordinate: 4.0,
-            theta: 0,
-            mapId: 2
-        },
-        {
-            pointName: 'home_2',
-            pointType: 'Home Point',
-            xCoordinate: -6.62,
-            yCoordinate: 3.25,
-            theta: 0,
-            mapId: 2
-        },
-        {
-            pointName: 'home_3',
-            pointType: 'Home Point',
-            xCoordinate: -6.62,
-            yCoordinate: 2.5,
-            theta: 0,
-            mapId: 2
-        }
-    ];
-
-    const RobotConfigList = [
-        {
-            robotName: 'mir1',
-            robotType: 'Mir100',
-            initPoint: 'home_1',
-            ip: '192.168.1.117',
-            portWebSocket: 9090
-        },
-        {
-            robotName: 'mir2',
-            robotType: 'Mir100',
-            initPoint: 'home_2',
-            ip: '192.168.1.117',
-            portWebSocket: 9090
-        },
-        {
-            robotName: 'mir3',
-            robotType: 'Mir100',
-            initPoint: 'home_3',
-            ip: '192.168.1.117',
-            portWebSocket: 9090
-        },
-        {
-            robotName: 'mir4',
-            robotType: 'Mir100',
-            initPoint: 'home_4',
-            ip: '192.168.1.117',
-            portWebSocket: 9090
-        },
-        {
-            robotName: 'tb3_0',
-            robotType: 'Mir100',
-            initPoint: 'home_1',
-            ip: '192.168.1.117',
-            portWebSocket: 9090
-        },
-        {
-            robotName: 'tb3_1',
-            robotType: 'Mir100',
-            initPoint: 'home_2',
-            ip: '192.168.1.117',
-            portWebSocket: 9090
-        },
-        {
-            robotName: 'tb3_2',
-            robotType: 'Mir100',
-            initPoint: 'home_3',
-            ip: '192.168.1.117',
-            portWebSocket: 9090
-        }
-    ];
 
     const RoleList = [
         {
@@ -401,33 +43,23 @@ async function initialDataBase() {
         }
     ];
 
-    const MapList = [
-        {
-            id: 1,
-            mapName: 'Map Hospital AWS',
-            mapImageSrc: 'images/maps/map_hospital.png',
-            mapConfigSrc: 'map_hospital.json'
-        },
-        {
-            id: 2,
-            mapName: 'Map House Turtlebot3',
-            mapImageSrc: 'images/maps/map_house.png',
-            mapConfigSrc: 'map_house.json'
-        },
-        {
-            id: 3,
-            mapName: 'Map World Turtlebot3',
-            mapImageSrc: 'images/maps/map_world.png',
-            mapConfigSrc: 'map_world.json'
-        }
-    ];
-
+    const filePath = path.join(__dirname, `./data_test/`);
+    // List of JSON files to combine
+    const fileNames = ['RobotConfigList.json', 'MapList.json', 'allPositionGoalMir.json'];
+    const dataInputs = [];
+    // Read and combine JSON files
+    fileNames.forEach((fileName) => {
+        const fileContent = fs.readFileSync(filePath + fileName, 'utf-8');
+        const jsonData = JSON.parse(fileContent);
+        dataInputs.push(jsonData);
+    });
+    console.log('🚀 ~ fileNames.forEach ~ dataInputs:', dataInputs);
     try {
-        await Map.bulkCreate(MapList);
         await Role.bulkCreate(RoleList);
-        await Robot.bulkCreate(RobotConfigList);
-        await PositionGoal.bulkCreate(allPositionGoalMir);
-        await PositionGoal.bulkCreate(allPositionGoals2);
+        await Robot.bulkCreate(dataInputs[0]);
+        await Map.bulkCreate(dataInputs[1]);
+        await PositionGoal.bulkCreate(dataInputs[2]);
+        // await PositionGoal.bulkCreate(allPositionGoals2);
     } catch (error) {
         console.log('🚀 app.jsr:', error.message);
     }
@@ -474,7 +106,11 @@ app.use(
 app.use(express.static(path.join(__dirname, 'public')));
 
 // create dashboard mainQueue
-import { mainQueue, queueEsp, queueBacklog } from './controllers/v2/bullmq.js';
+import { mainQueue, queueEsp, queueBacklog } from './controllers/v2/messageQueue/initMsgQueue.js';
+// bullmq dashboard
+const { createBullBoard } = require('@bull-board/api');
+const { BullMQAdapter } = require('@bull-board/api/bullMQAdapter');
+const { ExpressAdapter } = require('@bull-board/express');
 const serverAdapter = new ExpressAdapter();
 serverAdapter.setBasePath('/queueDashBoard');
 const queueAdapter = new BullMQAdapter(mainQueue, { allowRetries: true, readOnlyMode: false });
@@ -525,9 +161,9 @@ app.get('/autocannon', (req, res) => {
 //         return db.sequelize.query('SET FOREIGN_KEY_CHECKS = 1');
 //     })
 //     .then(
-//         function () {
+//         async function () {
 //             console.log('Drop and Resync Database with { force: true }');
-//             initialDataBase();
+//             await initialDataBase();
 //         },
 //         function (err) {
 //             console.log(err);
@@ -536,8 +172,22 @@ app.get('/autocannon', (req, res) => {
 
 // _________________________start http server ___________________________________
 // initialize Server and socket
+import { SERVER_PORT } from './configs';
 const port_server = SERVER_PORT;
-const server = require('http').Server(app);
+const https_options = {
+    // ca: fs.readFileSync(path.join(__dirname, '/ssl/ca_bundle.crt')),
+    key: fs.readFileSync(path.join(__dirname, '/ssl/private.key')),
+    cert: fs.readFileSync(path.join(__dirname, '/ssl/selfsigned.crt'))
+};
+const useSSL = !!process.env.SSL;
+function createServer() {
+    if (!useSSL) {
+        const http = require('http');
+        return http.createServer(app);
+    }
+    return spdy.createServer(https_options, app); // start webserver wiit http2
+}
+const server = createServer();
 // create global socketIo
 global.socketIo = require('socket.io')(server, {
     cors: {
@@ -546,18 +196,12 @@ global.socketIo = require('socket.io')(server, {
 });
 // starting server
 server.listen(port_server, () => {
-    Logging.info(`⚡️[server]: Server is running at http://localhost:${port_server}`);
+    Logging.info(`⚡️[server]: App listening on port ${port_server}`);
+    Logging.info(`SSL ${useSSL ? 'enabled' : 'disabled'}`);
 });
 
 // _________________________start https server ___________________________________
 // const https = require('https');
-// const fs = require('fs');
-
-// const https_options = {
-//     ca: fs.readFileSync(path.join(__dirname, 'ca_bundle.crt')),
-//     key: fs.readFileSync(path.join(__dirname, 'private.key')),
-//     cert: fs.readFileSync(path.join(__dirname, 'certificate.crt'))
-// };
 // const httpsServer = https.createServer(https_options, app);
 // global.socketIo = require('socket.io')(httpsServer, {
 //     cors: {
@@ -571,294 +215,6 @@ server.listen(port_server, () => {
 socketIo.on('connection', function (socket) {
     Logging.info('🚀 New socket client connected ' + socket.id);
     socket.on('disconnect', function () {});
-
-    //server listen data from client1
-    // socket.on('device1-sent-data', function (id_device) {
-    //     // after listning data, server emit this data to another clientMqtt
-    //     DataSensor.findOne({
-    //         where: {
-    //             deviceId: parseInt(id_device)
-    //         },
-    //         order: [['createdAt', 'DESC']]
-    //     }).then((data_sensor) => {
-    //         if (data_sensor == null) {
-    //             data_sensor = {
-    //                 humidity: 0,
-    //                 temperature: 0,
-    //                 time: 0,
-    //                 pm2_5: 0,
-    //                 battery: 0
-    //             };
-    //         }
-    //         console.log(data_sensor);
-    //         socket.emit('Server-sent-device1', data_sensor);
-    //     });
-    // });
-
-    // //server listen data from client2
-    // socket.on('device2-sent-data', function (id_device) {
-    //     // after listning data, server emit this data to another clientMqtt
-    //     DataSensor.findOne({
-    //         where: {
-    //             deviceId: parseInt(id_device)
-    //         },
-    //         order: [['createdAt', 'DESC']]
-    //     }).then((data_sensor) => {
-    //         socket.emit('Server-sent-device2', data_sensor);
-    //     });
-    // });
-});
-import ApiTuya from './service/tuyaPlaform';
-const apiTuya = new ApiTuya();
-
-// variable data stored
-var data = {
-    humi: 0,
-    temp: 0,
-    bat: 0,
-    pm2_5: 0,
-    time: ''
-};
-
-var device_current = 1;
-
-// config connection mqtt broker
-import clientMqtt from './configs';
-
-// defined subscribe and publish topic
-const topic_pub = 'nhoc20170861/mqtt';
-const topic_pub1 = 'nhoc20170861/lamp';
-
-// subscribe topic
-clientMqtt.on('connect', () => {
-    Logging.info('Client mqtt Connected');
-});
-
-// console.log message received from mqtt broker
-var count = 0;
-
-clientMqtt.on('message', (topic_sub, payload) => {
-    flag = true;
-    console.log('Received Message:', topic_sub, payload.toString());
-    const id_device = parseInt(topic_sub.slice(-1));
-
-    const data_sensor = JSON.parse(payload.toString());
-
-    console.log(data);
-    DataSensor.create({
-        humidity: data_sensor.humi,
-        temperature: data_sensor.temp,
-        pm2_5: data_sensor.pm2_5,
-        battery: data_sensor.bat,
-        deviceId: id_device
-    }).then((data_sensor) => {
-        count = data_sensor.id;
-        console.log(data_sensor.id);
-    });
-});
-
-clientMqtt.on('connect', () => {
-    clientMqtt.publish(topic_pub, 'nodejs mqtt connect', { qos: 2, retain: false }, (error) => {
-        if (error) {
-            console.error(error);
-        }
-    });
-});
-
-// make api
-app.post('/dashboard/controller/lamp', async (req, res) => {
-    let mode = req.body.lamp_mode;
-
-    const commands = [{ code: 'switch_1', value: mode == 'ON' ? true : false }];
-    console.log('🚀 ~ file: app.js:234 ~ app.post ~ commands:', commands);
-
-    // send commands to tuya
-    const device_id = 'ebdd31ffb97ec2b5a05bpc';
-    await apiTuya.sendCommands(device_id, commands);
-    // public to MQTT Broker
-    clientMqtt.publish(topic_pub1, mode);
-    console.log(mode);
-});
-
-app.get('/dashboard/controller/lamp_stutus', async (req, res) => {
-    // send commands to tuya
-    const device_id = 'ebdd31ffb97ec2b5a05bpc';
-    const response = await apiTuya.getDeviceStatus(device_id);
-    console.log('🚀 ~ file: app.js:246 ~ app.get ~ response:', response);
-    return res.status(200).json(response);
-});
-
-app.post('/dashboard/controller/lamp_timer', (req, res) => {
-    let mode = req.body;
-    // public to MQTT Broker
-    clientMqtt.publish(topic_pub1, mode);
-    console.log(mode);
-});
-app.post('/dashboard/admin/deleteDevice', function (req, res) {
-    let id_device = req.body.id_device;
-    Device.destroy({ where: { id: id_device } })
-        .then(() => {
-            let topic_unsub = 'nhoc20170861/data/device' + id_device.toString();
-            clientMqtt.unsubscribe(topic_unsub, () => {
-                console.log(`Subscribe to topic '${topic_unsub}'`);
-            });
-            return res.send({ message: 'Delete device success' });
-        })
-        .catch((err) => {
-            return res.status(500).send({ message: err.message });
-        });
-});
-
-// create new device
-app.post('/dashboard/admin/createDevice', async function (req, res) {
-    try {
-        const { name_device, topic_device } = req.body;
-        console.log('🚀 ~ file: app.js:697 ~ req.body;:', req.body);
-        if (!name_device || !topic_device) {
-            throw new Error('Invalid input');
-        }
-
-        const device = await Device.create({
-            deviceName: name_device,
-            topic: topic_device,
-            deviceType: 'default'
-        });
-
-        if (device) {
-            console.log('device id= ' + device.id);
-            let new_topic_sub = 'nhoc20170861' + device.topic;
-
-            clientMqtt.subscribe(new_topic_sub, () => {
-                console.log(`Subscribe to topic '${new_topic_sub}'`);
-            });
-
-            return res.send({
-                message: 'Create success, device witd id =' + device.id
-            });
-        } else {
-            throw new Error('Something is wrong');
-        }
-    } catch (error) {
-        console.log('🚀 ~ file: app.js:722 ~ error:', error.message);
-        return res.send({
-            success: false,
-            errorCode: 500,
-            message: 'Create not success'
-        });
-    }
-});
-
-const pusher = new Pusher({
-    appId: '1361115',
-    key: '97de8deb68d2953718df',
-    secret: '3d164b6ac64e193c8936',
-    cluster: 'ap1',
-    useTLS: true
-});
-var currentTime = '';
-var SensorData_device1 = {
-    device: '1',
-    unit: 'none',
-    dataPoints: [
-        {
-            time: '',
-            value: 0
-        }
-    ]
-};
-
-var SensorData_device2 = {
-    device: '2',
-    unit: 'none',
-    dataPoints: [
-        {
-            time: '',
-            value: 0
-        }
-    ]
-};
-app.get('/getDataSensor/:id', function (req, res) {
-    let id_device = parseInt(req.params.id);
-    if (id_device == 1) {
-        console.log(SensorData_device1);
-        res.send(SensorData_device1);
-    }
-    if (id_device == 2) {
-        console.log(SensorData_device2);
-        res.send(SensorData_device2);
-    }
-});
-
-app.get('/addDataSensor/1', function (req, res) {
-    //let id_device = req.params.id;
-    let id_device = 1;
-    DataSensor.findOne({
-        where: {
-            deviceId: parseInt(id_device)
-        },
-        order: [['createdAt', 'DESC']]
-    })
-
-        .then((data_sensor) => {
-            console.log(SensorData_device1);
-            let now = new Date(Date.now());
-            currentTime = now.getDate() + '/' + (now.getMonth() + 1) + '  ' + now.getHours() + ':' + now.getMinutes() + ':' + now.getSeconds();
-            let newDataPoint = {
-                time: currentTime,
-                value: data_sensor.dataValues.pm2_5
-            };
-            // remove first element
-            if (SensorData_device1.dataPoints.length > 15) {
-                SensorData_device1.dataPoints.shift();
-            }
-            SensorData_device1.dataPoints.push(newDataPoint);
-            //console.log(SensorData);
-            pusher.trigger('device1-pm2_5-chart', 'new-pm2_5', {
-                dataPoint: newDataPoint
-            });
-            res.send({ success: true });
-        })
-        .catch(() => {
-            res.send({
-                success: false,
-                errorMessage: 'Invalid Query Paramaters, required - temperature & time.'
-            });
-        });
-});
-app.get('/addDataSensor/2', function (req, res) {
-    let id_device = 2;
-    DataSensor.findOne({
-        where: {
-            deviceId: parseInt(id_device)
-        },
-        order: [['createdAt', 'DESC']]
-    })
-
-        .then((data_sensor) => {
-            console.log(SensorData_device1);
-            let now = new Date(Date.now());
-            currentTime = now.getDate() + '/' + (now.getMonth() + 1) + '  ' + now.getHours() + ':' + now.getMinutes() + ':' + now.getSeconds();
-            let newDataPoint = {
-                time: currentTime,
-                value: data_sensor.dataValues.pm2_5
-            };
-            // remove first element
-            if (SensorData_device1.dataPoints.length > 15) {
-                SensorData_device1.dataPoints.shift();
-            }
-            SensorData_device1.dataPoints.push(newDataPoint);
-            //console.log(SensorData);
-            pusher.trigger('device2-pm2_5-chart', 'new-pm2_5', {
-                dataPoint: newDataPoint
-            });
-            res.send({ success: true });
-        })
-        .catch(() => {
-            res.send({
-                success: false,
-                errorMessage: 'Invalid Query Paramaters, required - temperature & time.'
-            });
-        });
 });
 
 app.get('*', function (req, res) {

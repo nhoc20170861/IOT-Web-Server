@@ -1,0 +1,98 @@
+[
+    {
+        "pointName": "home_1",
+        "pointType": "Home Point",
+        "xCoordinate": 1,
+        "yCoordinate": 10,
+        "theta": -1.57,
+        "mapId": 1
+    },
+    {
+        "pointName": "home_2",
+        "pointType": "Home Point",
+        "xCoordinate": 3,
+        "yCoordinate": 10,
+        "theta": -1.57,
+        "mapId": 1
+    },
+    {
+        "pointName": "home_3",
+        "pointType": "Home Point",
+        "xCoordinate": -1,
+        "yCoordinate": 10,
+        "theta": -1.57,
+        "mapId": 1
+    },
+    {
+        "pointName": "home_4",
+        "pointType": "Home Point",
+        "xCoordinate": -3,
+        "yCoordinate": 10,
+        "theta": -1.57,
+        "mapId": 1
+    },
+    {
+        "pointName": "point_1",
+        "pointType": "Goal point",
+        "xCoordinate": 5,
+        "yCoordinate": -10,
+        "theta": -1.57,
+        "mapId": 1
+    },
+    {
+        "pointName": "point_2",
+        "pointType": "Goal Point",
+        "xCoordinate": 5,
+        "yCoordinate": -23,
+        "theta": -1.57,
+        "mapId": 1
+    },
+    {
+        "pointName": "point_3",
+        "pointType": "Goal Point",
+        "xCoordinate": -5,
+        "yCoordinate": -23,
+        "theta": 1.57,
+        "mapId": 1
+    },
+    {
+        "pointName": "point_4",
+        "pointType": "Goal Point",
+        "xCoordinate": -5,
+        "yCoordinate": -10,
+        "theta": 1.57,
+        "mapId": 1
+    },
+    {
+        "pointName": "point_5",
+        "pointType": "Goal Point",
+        "xCoordinate": -5,
+        "yCoordinate": 7.8,
+        "theta": 1.57,
+        "mapId": 1
+    },
+    {
+        "pointName": "point_6",
+        "pointType": "Goal Point",
+        "xCoordinate": 5,
+        "yCoordinate": 7.8,
+        "theta": 1.57,
+        "mapId": 1
+    },
+    {
+        "pointName": "point_7",
+        "pointType": "Goal Point",
+        "xCoordinate": 0,
+        "yCoordinate": -15,
+        "theta": 3.14,
+        "mapId": 1
+    },
+    {
+        "pointName": "point_8",
+        "pointType": "Goal Point",
+        "xCoordinate": 0.5,
+        "yCoordinate": 12.5,
+        "theta": 0,
+        "mapId": 1
+    }
+]

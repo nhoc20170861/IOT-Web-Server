@@ -1,0 +1,20 @@
+[
+    {
+        "id": 1,
+        "mapName": "Map Hospital AWS",
+        "mapImageSrc": "images/maps/map_hospital.png",
+        "mapConfigSrc": "map_hospital.json"
+    },
+    {
+        "id": 2,
+        "mapName": "Map House Turtlebot3",
+        "mapImageSrc": "images/maps/map_house.png",
+        "mapConfigSrc": "map_house.json"
+    },
+    {
+        "id": 3,
+        "mapName": "Map World Turtlebot3",
+        "mapImageSrc": "images/maps/map_world.png",
+        "mapConfigSrc": "map_world.json"
+    }
+]

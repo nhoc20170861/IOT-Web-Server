@@ -1,4 +1,4 @@
-var fetchWeather = '/v1/dashboard/weather/show';
+var fetchWeather = '/v1/dashboard//weather-data';
 
 const weatherForm = document.querySelector('#weatherLocation');
 const search = document.querySelector('input');
@@ -23,7 +23,7 @@ weatherForm.addEventListener('submit', (event) => {
     humiElement.textContent = '...';
     weatherCondition.textContent = '';
     const locationApi = fetchWeather + '?address=' + search.value;
-    fetch(locationApi, { method: 'POST' }).then((response) => {
+    fetch(locationApi, { method: 'GET' }).then((response) => {
         console.log('🚀 ~ file: weather.js:27 ~ fetch ~ response:', response);
         response.json().then((data) => {
             if (data.error) {

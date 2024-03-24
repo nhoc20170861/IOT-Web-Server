@@ -1,8 +1,8 @@
 import { Worker, Queue } from 'bullmq';
-import Logging from '../../library/Logging';
+import Logging from '../../../library/Logging';
 import utilsFunction from './utils.function';
 // import module handle database
-const db = require('../../models');
+const db = require('../../../models');
 const Task = db.Task;
 const SubTask = db.SubTask;
 // initialize queueRobots

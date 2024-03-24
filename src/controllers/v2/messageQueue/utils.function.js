@@ -1,6 +1,6 @@
 // utils function
 
-import Logging from '../../library/Logging';
+import Logging from '../../../library/Logging';
 const colorize = (...args) => ({
     black: `\x1b[30m${args.join(' ')}`,
     red: `\x1b[31m${args.join(' ')}`,

@@ -1,5 +1,7 @@
 import dotenv from 'dotenv';
-
+import Pusher from 'pusher';
+import path from 'path';
+const fs = require('fs');
 dotenv.config();
 
 export const SERVER_PORT = process.env.PORT_SERVER;
@@ -41,19 +43,41 @@ export const tuyaConfig = {
 
 // config mqtt broker
 import mqtt from 'mqtt';
+const protocol = 'mqtt';
+// const path_mqtt = '/quan3.pham';
 const host_mqtt = process.env.HOST_MQTT;
 const port_mqtt = process.env.PORT_MQTT;
 const clientId = `mqtt_${Math.random().toString(16).slice(3)}`;
 
 // connect to mqtt broker
-const connectUrl = `mqtt://${host_mqtt}:${port_mqtt}`;
+
+const connectUrl = `${protocol}://${host_mqtt}:${port_mqtt}`;
+console.log(connectUrl);
 const clientMqtt = mqtt.connect(connectUrl, {
     clientId,
     clean: true,
     connectTimeout: 4000,
-    username: 'nhoc20170861',
-    password: 'nhoc20170861',
+    username: process.env.MQTT_USERNAME,
+    password: process.env.MQTT_PASSWORĐ,
+    // Enable the SSL/TLS, whether a client verifies the server's certificate chain and host name
+    rejectUnauthorized: true,
+    // If you are using Two-way authentication, you need to pass the CA, client certificate, and client private key.
+    ca: fs.readFileSync(path.join(__dirname, '../ssl/broker.emqx.io-ca.crt')),
     reconnectPeriod: 2000
 });
-console.log(connectUrl);
+
+clientMqtt.on('error', (error) => {
+    console.error('connection failed', error);
+});
+clientMqtt.on('reconnect', (error) => {
+    console.error('reconnect failed', error);
+});
 export default clientMqtt;
+
+export const pusher = new Pusher({
+    appId: '1361115',
+    key: '97de8deb68d2953718df',
+    secret: '3d164b6ac64e193c8936',
+    cluster: 'ap1',
+    useTLS: true
+});

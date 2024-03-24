@@ -1,9 +1,9 @@
 import { Worker } from 'bullmq';
-import Logging from '../../library/Logging';
-import { addTaskToQueueBackLog } from './bullmq';
+import Logging from '../../../library/Logging';
+import { addTaskToQueueBackLog } from './initMsgQueue';
 import utilsFunction from './utils.function';
 // import module handle database
-const db = require('../../models');
+const db = require('../../../models');
 const Task = db.Task;
 const SubTask = db.SubTask;
 global.maxCapacityEachRobot = 100;

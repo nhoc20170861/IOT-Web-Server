@@ -1,19 +1,16 @@
+import path from 'path';
 import Logging from '../../library/Logging';
 // import worker
-import { addTaskToQueueEsp, addTaskToQueue, addtaskToQueueMessage } from './bullmq';
-import { myWorker } from './worker.mainQueue';
-import { myWorkerEsp } from './worker.esp32';
-import { workerBacklog } from './worker.queueBacklog';
-import { createQueueRobots } from './worker.queueRobots';
-import utilsFunction from './utils.function';
+import { addTaskToQueueEsp, addTaskToQueue, addtaskToQueueMessage } from './messageQueue/initMsgQueue';
+import { myWorker } from './messageQueue/worker.mainQueue';
+import { myWorkerEsp } from './messageQueue/worker.esp32';
+import { workerBacklog } from './messageQueue/worker.queueBacklog';
+import { createQueueRobots } from './messageQueue/worker.queueRobots';
+import utilsFunction from './messageQueue/utils.function';
 
 myWorker.run();
 myWorkerEsp.run();
 workerBacklog.run();
-// myWorkerRobot1.run();
-// myWorkerRobot2.run();
-// myWorkerRobot3.run();
-import path from 'path';
 const jsonfile = require('jsonfile');
 // Required ROSlib and Ros API Dependencies
 global.ROSLIB = require('roslib');
@@ -240,6 +237,7 @@ class RobotController {
             });
         });
     };
+
     /**
      * @breif api for esp32
      */
@@ -255,7 +253,6 @@ class RobotController {
             ];
 
             // Tạo task và lưu vào cơ sở dữ liệu
-
             const { id: taskId } = await Task.create({
                 taskName: `task_${stationId}`,
                 taskDescription: `task_${stationId}`,

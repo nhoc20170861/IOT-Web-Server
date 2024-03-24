@@ -1,0 +1,138 @@
+[
+    {
+        "pointName": "ortool_0",
+        "pointType": "Home Point",
+        "xCoordinate": 456,
+        "yCoordinate": 320,
+        "theta": 0,
+        "mapId": 1
+    },
+    {
+        "pointName": "ortool_1",
+        "pointType": "Location",
+        "xCoordinate": 228,
+        "yCoordinate": 0,
+        "theta": 0,
+        "mapId": 1
+    },
+    {
+        "pointName": "ortool_2",
+        "pointType": "Location",
+        "xCoordinate": 912,
+        "yCoordinate": 0,
+        "theta": 0,
+        "mapId": 1
+    },
+    {
+        "pointName": "ortool_3",
+        "pointType": "Location",
+        "xCoordinate": 0,
+        "yCoordinate": 80,
+        "theta": 0,
+        "mapId": 1
+    },
+    {
+        "pointName": "ortool_4",
+        "pointType": "Location",
+        "xCoordinate": 114,
+        "yCoordinate": 80,
+        "theta": 0,
+        "mapId": 1
+    },
+    {
+        "pointName": "ortool_5",
+        "pointType": "Location",
+        "xCoordinate": 570,
+        "yCoordinate": 160,
+        "theta": 0,
+        "mapId": 1
+    },
+    {
+        "pointName": "ortool_6",
+        "pointType": "Location",
+        "xCoordinate": 798,
+        "yCoordinate": 160,
+        "theta": 0,
+        "mapId": 1
+    },
+    {
+        "pointName": "ortool_7",
+        "pointType": "Location",
+        "xCoordinate": 342,
+        "yCoordinate": 240,
+        "theta": 0,
+        "mapId": 1
+    },
+    {
+        "pointName": "ortool_8",
+        "pointType": "Location",
+        "xCoordinate": 684,
+        "yCoordinate": 240,
+        "theta": 0,
+        "mapId": 1
+    },
+    {
+        "pointName": "ortool_9",
+        "pointType": "Location",
+        "xCoordinate": 570,
+        "yCoordinate": 400,
+        "theta": 0,
+        "mapId": 1
+    },
+    {
+        "pointName": "ortool_10",
+        "pointType": "Location",
+        "xCoordinate": 912,
+        "yCoordinate": 400,
+        "theta": 0,
+        "mapId": 1
+    },
+    {
+        "pointName": "ortool_11",
+        "pointType": "Location",
+        "xCoordinate": 114,
+        "yCoordinate": 480,
+        "theta": 0,
+        "mapId": 1
+    },
+    {
+        "pointName": "ortool_12",
+        "pointType": "Location",
+        "xCoordinate": 228,
+        "yCoordinate": 480,
+        "theta": 0,
+        "mapId": 1
+    },
+    {
+        "pointName": "ortool_13",
+        "pointType": "Location",
+        "xCoordinate": 342,
+        "yCoordinate": 560,
+        "theta": 0,
+        "mapId": 1
+    },
+    {
+        "pointName": "ortool_14",
+        "pointType": "Location",
+        "xCoordinate": 684,
+        "yCoordinate": 560,
+        "theta": 0,
+        "mapId": 1
+    },
+    {
+        "pointName": "ortool_15",
+        "pointType": "Location",
+        "xCoordinate": 0,
+        "yCoordinate": 640,
+        "theta": 0,
+        "mapId": 1
+    },
+    {
+        "pointName": "ortool_16",
+        "pointType": "Location",
+        "xCoordinate": 798,
+        "yCoordinate": 640,
+        "theta": 0,
+        "mapId": 1
+    }
+]

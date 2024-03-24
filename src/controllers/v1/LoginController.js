@@ -21,7 +21,7 @@ class LoginController {
                     return res.render('login', {
                         message: 'Unauthorized! Login again'
                     });
-                } else return res.redirect('/v1/dashboard/data');
+                } else return res.redirect('/v1/dashboard/device-list');
             });
         }
     }
@@ -125,7 +125,7 @@ class LoginController {
                     console.log(authorities);
                     res.send({
                         accessToken,
-                        url: '/v1/dashboard/data'
+                        url: '/v1/dashboard/device-list'
                     });
                     // res.cookie('access_token', accessToken, {
                     //     /*add several attributes to make this cookie more secure.*/
@@ -167,7 +167,7 @@ class LoginController {
         req.session.destroy();
         return res.status(200).send({
             result: 'redirect',
-            url: '/home'
+            url: '/v1/home'
         });
 
         // Get userId from access_token to prepare delete refreshtoken

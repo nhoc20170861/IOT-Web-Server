@@ -51,7 +51,7 @@ input:checked + .slider:before {
             <div class="box3">
                 <h2>TIMER</h2>
                 <label class="switch">
-                    <input type="checkbox" />
+                    <input id="switch_timer" type="checkbox" />
                     <span class="slider round"></span>
                 </label>
             </div>
@@ -64,7 +64,7 @@ input:checked + .slider:before {
                     <input type="time" name="timeField"
                         value="00:00">
             </div>
-            <div class="box3">
+            {{!-- <div class="box3">
                 <label for="start">Mode</label>
                     <label>ON</label>
                 <label class="switch">
@@ -76,7 +76,7 @@ input:checked + .slider:before {
                     <input type="checkbox" />
                     <span class="slider round"></span>
                 </label>
-            </div>
+            </div> --}}
         </div>
 </div>
  
@@ -90,7 +90,7 @@ input:checked + .slider:before {
             $("#controller").addClass('active');
         }
 
-        $.get("/dashboard/controller/lamp_stutus", {}, async function (response) {
+        $.get("/v1/dashboard/controller/lamp_status", {}, async function (response) {
         console.log(response || "channel list is empty!");
         if (response != "") {
            
@@ -109,7 +109,7 @@ input:checked + .slider:before {
         if (saveModeStatus == true) {mode = 'ON';}
         else {mode = 'OFF';} 
         const userAction = async () => {
-            const response = await fetch('/dashboard/controller/lamp', {
+            const response = await fetch('/v1/dashboard/controller/lamp', {
                 method: 'POST',
                 body: JSON.stringify({lamp_mode: mode}),
                 headers: {

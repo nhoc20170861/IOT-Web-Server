@@ -1,8 +1,6 @@
-$(document).ready(function () {
-    if (!$('#data').hasClass('active')) {
-        $('#data').addClass('active');
-    }
-});
+var currURL = window.location.href;
+var lastSlug = currURL.split('/').pop();
+
 // Using IIFE for Implementing Module Pattern to keep the Local Space for the JS Variables
 (function () {
     // Enable pusher logging - don't include this in production
@@ -73,71 +71,75 @@ $(document).ready(function () {
             }
         ]
     };
-
-    ajax('/getDataSensor/1', 'GET', {}, onFetchTempSuccess);
+    ajax(`/v1/dashboard/fetchDataSensor/${lastSlug}`, 'GET', {}, onFetchTempSuccess);
 
     function onFetchTempSuccess(response) {
         hideEle('loader');
         var respData = JSON.parse(response);
-        console.log(respData);
-        chartConfig.labels = respData.dataPoints.map((dataPoint) => dataPoint.time);
-        //chartConfig.labels.push(respData.humidity);
-        chartConfig.datasets[0].data = respData.dataPoints.map((dataPoint) => dataPoint.value);
-        //chartConfig.datasets[0].data.push(respData.pm2_5);
-        renderWeatherChart(chartConfig);
+        console.log('onFetchTempSuccess ', respData);
+        const { SensorData_device, device_topic } = respData;
+        if (SensorData_device) {
+            chartConfig.labels = SensorData_device.dataPoints.map((dataPoint) => dataPoint.time);
+            chartConfig.datasets[0].data = SensorData_device.dataPoints.map((dataPoint) => dataPoint.value);
+
+            renderWeatherChart(chartConfig);
+        }
+        if (device_topic) {
+            // Subscribe to a topic
+            client.subscribe(device_topic, function (err) {
+                if (!err) {
+                    // Publish a message to a topic
+                    console.log(`Subscribe topic ${device_topic} success`);
+                }
+            });
+        }
     }
 
-    channel = pusher.subscribe('device1-pm2_5-chart');
+    channel = pusher.subscribe(`${lastSlug}-pm2_5-chart`);
+    channel.bind('pusher:subscription_succeeded', function (members) {
+        console.log('successfully subscribed data channel!');
+    });
     channel.bind('new-pm2_5', function (data) {
         var newTempData = data.dataPoint;
         console.log(newTempData);
-        if (weatherChartRef.data.labels.length > 15) {
-            weatherChartRef.data.labels.shift();
-            weatherChartRef.data.datasets[0].data.shift();
+        if (weatherChartRef) {
+            if (weatherChartRef.data.labels.length > 15) {
+                weatherChartRef.data.labels.shift();
+                weatherChartRef.data.datasets[0].data.shift();
+            }
+            weatherChartRef.data.labels.push(newTempData.time);
+            weatherChartRef.data.datasets[0].data.push(newTempData.value);
+            weatherChartRef.update();
         }
-        weatherChartRef.data.labels.push(newTempData.time);
-        weatherChartRef.data.datasets[0].data.push(newTempData.value);
-        weatherChartRef.update();
     });
 
     /* TEMP CODE FOR TESTING */
-    var dummyTime = 1500;
-    setInterval(function () {
-        ajax('/addDataSensor/1', 'GET', {}, () => {});
-    }, 5000);
+    // var dummyTime = 5000;
+    // setInterval(function () {
+    //     ajax(`/v1/dashboard/testDataSensor/${lastSlug}`, 'GET', {}, () => {});
+    // }, dummyTime);
 })();
 const month = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const day = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fir', 'Sat'];
 $(document).ready(function () {
-    /*socket.on("Server-sent-data", function (data) {
-        if (data.humi != 0)  {
-            $("#humi").text(data.humi + " %");
-            $("#humi_log").text(data.time);
-            $("#temp").text(data.temp + " " + String.fromCharCode(176));
-            $("#temp_log").text(data.time);
-            $("#pm2_5").text(data.pm2_5);
-            $("#pm2_5_log").text(data.time);
-            $("#bat").text(data.bat + " %");
-            $("#bat_log").text(data.time);
+    if (!$('#data').hasClass('active')) {
+        $('#data').addClass('active');
+    }
+    socket.on(`Server-sent-${lastSlug}`, function (data) {
+        console.log('🚀 ~ data:', data);
+        if (data.humidity != 0) {
+            //Get time when recieve data
+            let now = new Date(Date.now());
+            let formatted = day[now.getDay()] + ' ' + now.getDate() + ', ' + month[now.getMonth()] + '  ' + now.getHours() + ':' + now.getMinutes() + ':' + now.getSeconds();
+            data.time = formatted;
+            $('#humi').text(data.humidity + ' %');
+            $('#humi_log').text(data.time);
+            $('#temp').text(data.temperature + ' ' + String.fromCharCode(176));
+            $('#temp_log').text(data.time);
+            $('#pm2_5').text(data.pm2_5);
+            $('#pm2_5_log').text(data.time);
+            $('#bat').text(data.battery + ' %');
+            $('#bat_log').text(data.time);
         }
-     })*/
-    setInterval(async () => {
-        await socket.emit('device1-sent-data', '1');
-        await socket.on('Server-sent-device1', function (data) {
-            if (data.humidity != 0) {
-                //Get time when recieve data
-                let now = new Date(Date.now());
-                let formatted = day[now.getDay()] + ' ' + now.getDate() + ', ' + month[now.getMonth()] + '  ' + now.getHours() + ':' + now.getMinutes() + ':' + now.getSeconds();
-                data.time = formatted;
-                $('#humi').text(data.humidity + ' %');
-                $('#humi_log').text(data.time);
-                $('#temp').text(data.temperature + ' ' + String.fromCharCode(176));
-                $('#temp_log').text(data.time);
-                $('#pm2_5').text(data.pm2_5);
-                $('#pm2_5_log').text(data.time);
-                $('#bat').text(data.battery + ' %');
-                $('#bat_log').text(data.time);
-            }
-        });
-    }, 5000);
+    });
 });

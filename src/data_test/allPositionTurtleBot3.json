@@ -1,0 +1,66 @@
+[
+    {
+        "pointName": "point_1",
+        "pointType": "Goal point",
+        "xCoordinate": -4.06,
+        "yCoordinate": 3.5,
+        "theta": 0,
+        "mapId": 2
+    },
+    {
+        "pointName": "point_2",
+        "pointType": "Goal Point",
+        "xCoordinate": -4.05,
+        "yCoordinate": 1.1,
+        "theta": 0,
+        "mapId": 2
+    },
+    {
+        "pointName": "point_3",
+        "pointType": "Goal Point",
+        "xCoordinate": 0.47,
+        "yCoordinate": 0.32,
+        "theta": 0,
+        "mapId": 2
+    },
+    {
+        "pointName": "point_4",
+        "pointType": "Goal Point",
+        "xCoordinate": 4.63,
+        "yCoordinate": 3.7,
+        "theta": 0,
+        "mapId": 2
+    },
+    {
+        "pointName": "point_5",
+        "pointType": "Goal Point",
+        "xCoordinate": 4.55,
+        "yCoordinate": 0.74,
+        "theta": 0,
+        "mapId": 2
+    },
+    {
+        "pointName": "home_1",
+        "pointType": "Home Point",
+        "xCoordinate": -6.62,
+        "yCoordinate": 4,
+        "theta": 0,
+        "mapId": 2
+    },
+    {
+        "pointName": "home_2",
+        "pointType": "Home Point",
+        "xCoordinate": -6.62,
+        "yCoordinate": 3.25,
+        "theta": 0,
+        "mapId": 2
+    },
+    {
+        "pointName": "home_3",
+        "pointType": "Home Point",
+        "xCoordinate": -6.62,
+        "yCoordinate": 2.5,
+        "theta": 0,
+        "mapId": 2
+    }
+]

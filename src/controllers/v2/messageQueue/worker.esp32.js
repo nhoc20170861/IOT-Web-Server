@@ -1,8 +1,8 @@
 import { Worker } from 'bullmq';
-import clientMqtt from '../../configs';
+import clientMqtt from '../../../configs';
 import utilsFunction from './utils.function';
 // import module handle database
-const db = require('../../models');
+const db = require('../../../models');
 const Task = db.Task;
 export const myWorkerEsp = new Worker(
     'taskQueueEsp',

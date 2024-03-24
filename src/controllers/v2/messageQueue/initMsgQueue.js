@@ -1,5 +1,5 @@
 import { Queue, Worker } from 'bullmq';
-import Logging from '../../library/Logging';
+import Logging from '../../../library/Logging';
 import { removeQueueRobot } from './worker.queueRobots';
 const mainQueue = new Queue('taskQueue', {
     connection: {

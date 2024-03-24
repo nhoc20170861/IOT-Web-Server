@@ -1,6 +1,6 @@
 const axios = require('axios');
 import { weatherApi } from '../../configs';
-async function getWeatherData(city) {
+async function fetchWeatherData(city) {
     const url = weatherApi.openWeatherMap.BASE_URL + encodeURIComponent(city) + '&appid=' + weatherApi.openWeatherMap.SECRET_KEY;
 
     try {
@@ -15,4 +15,4 @@ async function getWeatherData(city) {
     }
 }
 
-module.exports = getWeatherData;
+module.exports = fetchWeatherData;

@@ -59,16 +59,4 @@ $(document).ready(function () {
             }
         });
     });
-
-    // setInterval(async () => {
-    //     await socket.emit("Client-sent-data", "Hello world");
-    //     await socket.on("Server-sent-data", function (data) {
-    //         humi = data;
-    //     });
-    //     $("#humi").text(humi);
-    //     var now = new Date(Date.now());
-    //     //var formatted = now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
-    //     $("#time_log").text(now.toLocaleTimeString());
-    //     console.log(now.toUTCString());
-    // }, 5000);
 });

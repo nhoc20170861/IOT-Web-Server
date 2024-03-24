@@ -76,7 +76,7 @@
     function showquiz() {
         const data = new URLSearchParams();
         data.append('page', '1');
-        const url = '/dashboard/showquiz?' + data.toString();
+        const url = '/v1/dashboard/showquiz?' + data.toString();
         location.href = url;
     }
     $(document).ready(function () {
@@ -85,7 +85,7 @@
             const id_device = $("#id_device").val();
             if(!id_device)
                 return $("#alert").text("id device not null");
-            $.post("/dashboard/admin/deleteDevice",
+            $.post("/v1/dashboard/admin/deleteDevice",
                 {
                     command: "delete",
                     id_device
@@ -114,7 +114,7 @@
         });
 
         $("#resetData").click(function () {       
-           $.post("/dashboard/admin/resetDataSensor",
+           $.post("/v1/dashboard/admin/resetDataSensor",
                 {
                     command: "truncate"
                 },
@@ -124,7 +124,7 @@
                 })
         });
         $("#resetQuiz").click(function () {
-            $.post("/dashboard/admin/resetquestion",
+            $.post("/v1/dashboard/admin/resetquestion",
                 {
                     command: "truncate"
                 },
@@ -138,7 +138,7 @@
             console.log(dataString);
             $.ajax({
                 type: "POST",
-                url: "/dashboard/admin/createquestion",
+                url: "/v1/dashboard/admin/createquestion",
                 data: dataString,
                 success: function (response) {
                     // Display message back to the user here
@@ -154,7 +154,7 @@
             console.log(dataString);
             $.ajax({
                 type: "POST",
-                url: "/dashboard/admin/createDevice",
+                url: "/v1/dashboard/admin/createDevice",
                 data: dataString,
                 success: function (response) {
                     // Display message back to the user here
