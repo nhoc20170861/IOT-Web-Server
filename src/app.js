@@ -16,12 +16,9 @@ import Logging from './library/Logging';
 
 // connect db mysql
 import db from './models';
-
-const Device = db.device;
 const Role = db.role;
 const PositionGoal = db.position_goals;
 const Robot = db.robot;
-const DataSensor = db.data_sensor;
 const Map = db.map;
 async function initialDataBase() {
     /**
@@ -53,7 +50,7 @@ async function initialDataBase() {
         const jsonData = JSON.parse(fileContent);
         dataInputs.push(jsonData);
     });
-    console.log('🚀 ~ fileNames.forEach ~ dataInputs:', dataInputs);
+    // console.log('🚀 ~ fileNames.forEach ~ dataInputs:', dataInputs);
     try {
         await Role.bulkCreate(RoleList);
         await Robot.bulkCreate(dataInputs[0]);
@@ -143,7 +140,15 @@ app.get('/autocannon', (req, res) => {
         await db.sequelize.authenticate();
         Logging.info('Database connection is ready.');
         // Đồng bộ hóa model với cơ sở dữ liệu
-        await db.sequelize.sync();
+        await db.sequelize
+            .sync()
+            .then(() => {
+                console.log('Created new table successfully!');
+                initialDataBase();
+            })
+            .catch((error) => {
+                console.error('Unable to create table : ', error);
+            });
 
         // create connection between clientMqtt and server thourgh socket
     } catch (error) {
