@@ -17,7 +17,8 @@ Beside, you install mysql and create corresponding db for authentication and aut
 
 You need install mysql server on your PC, follow this [link](https://www.youtube.com/watch?v=2c2fUOgZMmY&t=335s)
 After that you need create db called "nodejs_login", nodejs application will connect to db with config below (it stored in file .env) :
------- .env ------
+
+```.env
 DATABASE = nodejs_login
 DATABASE_HOST = 127.0.0.1
 DATABASE_USER = root
@@ -26,5 +27,9 @@ ACCESS_TOKEN_SECRET = YOUR_ACCESS_TOKEN_SECRET
 PORT_SERVER = YOUR_PORT_SERVER
 HOST_MQTT = YOUR_HOST_MQTT
 PORT_MQTT = YOUR_PORT_MQTT
+```
 You can create a .env file and change the parameters according to your project.
+
+[Detailed design documents](https://docs.google.com/document/d/e/2PACX-1vQKOUiqUWmfF3QYiizSEnbUTZUcZdbVgzGSDxVaK45vNyU3pBUfHcwLx4bd1q_N1w/pub)
+
 Good luck for you!
